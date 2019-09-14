@@ -1,5 +1,7 @@
 #include "medium.h"
 
+---------------------------------------------------------------------
+
 //2 Add Two Numbers
 You are given two non - empty linked lists representing two non - negative integers.The digits are stored in reverse orderand each of their nodes contain a single digit.Add the two numbersand return it as a linked list.
 
@@ -27,6 +29,8 @@ ListNode* addTwoNumbers(ListNode* l1, ListNode* l2)
     if (carry) cur->next = new ListNode(1);
     return dummy->next;
 }
+
+---------------------------------------------------------------------
 
 //3 Longest Substring Without Repeating Characters
 Given a string, find the length of the longest substring without repeating characters.
@@ -58,6 +62,8 @@ int lengthOfLongestSubstring(string s)
     }
     return res;
 }
+
+---------------------------------------------------------------------
 
 //5 Longest Palindromic Substring
 Given a string s, find the longest palindromic substring in s.You may assume that the maximum length of s is 1000.
@@ -118,6 +124,8 @@ string Manacher(string s)
     return s.substr((resCenter - resLen) / 2, resLen - 1);
 }
 
+---------------------------------------------------------------------
+
 //6 ZigZag Conversion
 The string "PAYPALISHIRING" is written in a zigzag pattern on a given number of rows like this: (you may want to display this pattern in a fixed font for better legibility)
 
@@ -156,6 +164,8 @@ string convert(string s, int numRows) {
     }
     return res;
 }
+
+---------------------------------------------------------------------
 
 //8 String to Integer (atoi)
 Implement atoi which converts a string to an integer.
@@ -216,6 +226,8 @@ int myAtoi(string str) {
     return base * sign;
 }
 
+---------------------------------------------------------------------
+
 //11 Container With Most Water
 Given n non - negative integers a1, a2, ..., an , where each represents a point at coordinate(i, ai).n vertical lines are drawn such that the two endpoints of line i is at(i, ai) and (i, 0).Find two lines, which together with x - axis forms a container, such that the container contains the most water.
 
@@ -237,6 +249,8 @@ int maxArea(vector<int>& height) {
     }
     return res;
 }
+
+---------------------------------------------------------------------
 
 //12 Integer to Roman
 Roman numerals are represented by seven different symbols : I, V, X, L, C, Dand M.
@@ -292,6 +306,104 @@ string intToRoman(int num) {
     }
     return res;
 }
+
+---------------------------------------------------------------------
+
+//15 3Sum
+Given an array nums of n integers, are there elements a, b, c in nums such that a + b + c = 0 ? Find all unique triplets in the array which gives the sum of zero.
+
+Note :
+
+The solution set must not contain duplicate triplets.
+
+Example :
+    Given array nums = [-1, 0, 1, 2, -1, -4],
+    A solution set is :
+    [
+        [-1, 0, 1],
+        [-1, -1, 2]
+    ]
+
+vector<vector<int>> threeSum(vector<int>& nums) {
+    vector<vector<int>> res;
+    sort(nums.begin(), nums.end());
+    if (nums.empty() || nums.back() < 0 || nums.front() > 0) return {};
+    for (int k = 0; k < (int)nums.size() - 2; ++k) {
+        if (nums[k] > 0) break;
+        if (k > 0 && nums[k] == nums[k - 1]) continue;
+        int target = 0 - nums[k], i = k + 1, j = (int)nums.size() - 1;
+        while (i < j) {
+            if (nums[i] + nums[j] == target) {
+                res.push_back({ nums[k], nums[i], nums[j] });
+                while (i < j && nums[i] == nums[i + 1]) ++i;
+                while (i < j && nums[j] == nums[j - 1]) --j;
+                ++i; --j;
+            }
+            else if (nums[i] + nums[j] < target) ++i;
+            else --j;
+        }
+    }
+    return res;
+}
+
+---------------------------------------------------------------------
+
+//16 3Sum Closest
+Given an array nums of n integersand an integer target, find three integers in nums such that the sum is closest to target.Return the sum of the three integers.You may assume that each input would have exactly one solution.
+
+Example:
+Given array nums = [-1, 2, 1, -4], and target = 1.
+The sum that is closest to the target is 2. (-1 + 2 + 1 = 2).
+
+int threeSumClosest(vector<int>& nums, int target) {
+    int closest = nums[0] + nums[1] + nums[2];
+    int diff = abs(closest - target);
+    sort(nums.begin(), nums.end());
+    for (int i = 0; i < nums.size() - 2; ++i) {
+        int left = i + 1, right = nums.size() - 1;
+        while (left < right) {
+            int sum = nums[i] + nums[left] + nums[right];
+            int newDiff = abs(sum - target);
+            if (diff > newDiff) {
+                diff = newDiff;
+                closest = sum;
+            }
+            if (sum < target) ++left;
+            else --right;
+        }
+    }
+    return closest;
+}
+
+//17 Letter Combinations of a Phone Number
+Given a string containing digits from 2 - 9 inclusive, return all possible letter combinations that the number could represent.
+
+A mapping of digit to letters(just like on the telephone buttons) is given below.Note that 1 does not map to any letters.
+
+Example:
+    Input: "23"
+    Output : ["ad", "ae", "af", "bd", "be", "bf", "cd", "ce", "cf"] .
+Note :
+Although the above answer is in lexicographical order, your answer could be in any order you want.
+
+vector<string> letterCombinations(string digits) {
+    if (digits.empty()) return {};
+    vector<string> res{ "" };
+    vector<string> dict{ "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
+    for (int i = 0; i < digits.size(); ++i) {
+        vector<string> t;
+        string str = dict[digits[i] - '0'];
+        for (int j = 0; j < str.size(); ++j) {
+            for (string s : res) t.push_back(s + str[j]);
+        }
+        res = t;
+    }
+    return res;
+}
+
+//18 4Sum
+
+
 //47 Permutations II
 Given a collection of numbers that might contain duplicates, return all possible unique permutations.
 
