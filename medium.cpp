@@ -151,7 +151,8 @@ Example 2 :
     Y A   H R
     P     I
 
-string convert(string s, int numRows) {
+string convert(string s, int numRows)
+{
     if (numRows <= 1) return s;
     string res;
     int size = 2 * numRows - 2, n = s.size();
@@ -210,7 +211,8 @@ Example 5 :
     Explanation : The number "-91283472332" is out of the range of a 32 - bit signed integer.
     Thefore INT_MIN(−231) is returned.
 
-int myAtoi(string str) {
+int myAtoi(string str)
+{
     if (str.empty()) return 0;
     int sign = 1, base = 0, i = 0, n = str.size();
     while (i < n && str[i] == ' ') ++i;
@@ -239,7 +241,8 @@ Example:
     Input: [1, 8, 6, 2, 5, 4, 8, 3, 7]
     Output : 49
 
-int maxArea(vector<int>& height) {
+int maxArea(vector<int>& height)
+{
     int res = 0, i = 0, j = height.size() - 1;
     while (i < j) {
         int h = min(height[i], height[j]);
@@ -294,7 +297,8 @@ Example 5 :
     Output : "MCMXCIV"
     Explanation : M = 1000, CM = 900, XC = 90 and IV = 4.
 
-string intToRoman(int num) {
+string intToRoman(int num)
+{
     string res = "";
     vector<int> val{ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
     vector<string> str{ "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
@@ -324,7 +328,8 @@ Example :
         [-1, -1, 2]
     ]
 
-vector<vector<int>> threeSum(vector<int>& nums) {
+vector<vector<int>> threeSum(vector<int>& nums)
+{
     vector<vector<int>> res;
     sort(nums.begin(), nums.end());
     if (nums.empty() || nums.back() < 0 || nums.front() > 0) return {};
@@ -355,7 +360,8 @@ Example:
 Given array nums = [-1, 2, 1, -4], and target = 1.
 The sum that is closest to the target is 2. (-1 + 2 + 1 = 2).
 
-int threeSumClosest(vector<int>& nums, int target) {
+int threeSumClosest(vector<int>& nums, int target)
+{
     int closest = nums[0] + nums[1] + nums[2];
     int diff = abs(closest - target);
     sort(nums.begin(), nums.end());
@@ -375,6 +381,8 @@ int threeSumClosest(vector<int>& nums, int target) {
     return closest;
 }
 
+---------------------------------------------------------------------
+
 //17 Letter Combinations of a Phone Number
 Given a string containing digits from 2 - 9 inclusive, return all possible letter combinations that the number could represent.
 
@@ -386,7 +394,8 @@ Example:
 Note :
 Although the above answer is in lexicographical order, your answer could be in any order you want.
 
-vector<string> letterCombinations(string digits) {
+vector<string> letterCombinations(string digits)
+{
     if (digits.empty()) return {};
     vector<string> res{ "" };
     vector<string> dict{ "", "", "abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz" };
@@ -401,8 +410,548 @@ vector<string> letterCombinations(string digits) {
     return res;
 }
 
-//18 4Sum
+---------------------------------------------------------------------
 
+//18 4Sum
+Given an array nums of n integersand an integer target, are there elements a, b, c, and d in nums such that a + b + c + d = target ? Find all unique quadruplets in the array which gives the sum of target.
+
+Note :
+The solution set must not contain duplicate quadruplets.
+
+Example :
+    Given array nums = [1, 0, -1, 0, -2, 2], and target = 0.
+    A solution set is :
+    [
+        [-1, 0, 0, 1],
+        [-2, -1, 1, 2],
+        [-2, 0, 0, 2]
+    ]
+
+vector<vector<int>> fourSum(vector<int>& nums, int target)
+{
+    vector<vector<int>> res;
+    int n = nums.size();
+    sort(nums.begin(), nums.end());
+    for (int i = 0; i < n - 3; ++i) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        for (int j = i + 1; j < n - 2; ++j) {
+            if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+            int left = j + 1, right = n - 1;
+            while (left < right) {
+                int sum = nums[i] + nums[j] + nums[left] + nums[right];
+                if (sum == target) {
+                    vector<int> out{ nums[i], nums[j], nums[left], nums[right] };
+                    res.push_back(out);
+                    while (left < right && nums[left] == nums[left + 1]) ++left;
+                    while (left < right && nums[right] == nums[right - 1]) --right;
+                    ++left; --right;
+                }
+                else if (sum < target) ++left;
+                else --right;
+            }
+        }
+    }
+    return res;
+}
+
+---------------------------------------------------------------------
+
+//19 Remove Nth Node From End of List
+Given a linked list, remove the n - th node from the end of listand return its head.
+
+Example:
+    Given linked list : 1->2->3->4->5, and n = 2.
+    After removing the second node from the end, the linked list becomes 1->2->3->5.
+Note :
+Given n will always be valid.
+
+Follow up :
+Could you do this in one pass ?
+
+
+ListNode * removeNthFromEnd(ListNode* head, int n)
+{
+    if (head == NULL || n <= 0) {
+        return head;
+    }
+    ListNode *front = head;
+    for (; front != NULL && n != 0; n--) {
+        front = front->next;
+    }
+    if (front == NULL && n == 0) {
+        return head->next;
+    }
+    else if (front == NULL && n > 0) {
+        return head;
+    }
+    ListNode *back = head;
+    while (front->next != NULL) {
+        front = front->next;
+        back = back->next;
+    }
+    back->next = back->next->next;
+    return head;
+}
+
+---------------------------------------------------------------------
+
+//22 Generate Parentheses
+Given n pairs of parentheses, write a function to generate all combinations of well - formed parentheses.
+
+For example, given n = 3, a solution set is :
+    [
+        "((()))",
+        "(()())",
+        "(())()",
+        "()(())",
+        "()()()"
+    ]
+
+vector<string> generateParenthesis(int n)
+{
+    vector<string> res;
+    if (n <= 0) {
+        return res;
+    }
+
+    set<string> resSet;
+    resSet.insert("()");
+    for (int i = 1; i < n; i++) {
+        set<string> temp;
+        for (set<string>::iterator it = resSet.begin(); it != resSet.end(); it++) {
+            for (int i = 0; i < it->size(); i++) {
+                if ((*it)[i] == '(') {
+                    temp.insert(it->substr(0, i + 1) + "()" + it->substr(i + 1));
+                }
+            }
+            temp.insert("()" + *it);
+        }
+        resSet = temp;
+    }
+    return vector<string>(resSet.begin(), resSet.end());
+}
+
+---------------------------------------------------------------------
+
+//24 Swap Nodes in Pairs
+Given a linked list, swap every two adjacent nodesand return its head.
+
+You may not modify the values in the list's nodes, only nodes itself may be changed.
+
+Example:
+    Given 1->2->3->4, you should return the list as 2->1->4->3.
+
+ListNode * swapPairs(ListNode* head)
+{
+    ListNode* dummy = new ListNode(-1), * pre = dummy;
+    dummy->next = head;
+    while (pre->next && pre->next->next) {
+        ListNode* t = pre->next->next;
+        pre->next->next = t->next;
+        t->next = pre->next;
+        pre->next = t;
+        pre = t->next;
+    }
+    return dummy->next;
+}
+
+---------------------------------------------------------------------
+
+//29 Divide Two Integers
+Given two integers dividendand divisor, divide two integers without using multiplication, divisionand mod operator.
+
+Return the quotient after dividing dividend by divisor.
+
+The integer division should truncate toward zero.
+
+Example 1:
+    Input: dividend = 10, divisor = 3
+    Output : 3
+
+Example 2 :
+    Input : dividend = 7, divisor = -3
+    Output : -2
+
+Note :
+Both dividend and divisor will be 32 - bit signed integers.
+The divisor will never be 0.
+Assume we are dealing with an environment which could only store integers within the 32 - bit signed integer range : [−231, 231 − 1] .For the purpose of this problem, assume that your function returns 231 − 1 when the division result overflows.
+
+int divide(int dividend, int divisor)
+{
+    if (divisor == 0 || (dividend == INT_MIN && divisor == -1)) {
+        return INT_MAX;
+    }
+    int sign = ((dividend > 0) ^ (divisor > 0));
+    long long m = abs((long long)dividend), n = abs((long long)divisor), res = 0;
+    
+    while (m >= n) {
+        long long t = n, p = 1;
+        while (m >= (t << 1)) {
+            t <<= 1;
+            p <<= 1;
+        }
+        res += p;
+        m -= t;
+    }
+    return sign == 1 ? 0 - res : res;
+}
+
+---------------------------------------------------------------------
+
+//31 Next Permutation
+Implement next permutation, which rearranges numbers into the lexicographically next greater permutation of numbers.
+
+If such arrangement is not possible, it must rearrange it as the lowest possible order(ie, sorted in ascending order).
+
+The replacement must be in - place and use only constant extra memory.
+
+Here are some examples.Inputs are in the left - hand columnand its corresponding outputs are in the right - hand column.
+
+1, 2, 3 → 1, 3, 2
+3, 2, 1 → 1, 2, 3
+1, 1, 5 → 1, 5, 1
+
+如果给定数组是降序，则说明是全排列的最后一种情况，则下一个排列就是最初始情况。我们再来看下面一个例子，有如下的一个数组
+1　　2　　7　　4　　3　　1
+下一个排列为：
+1　　3　　1　　2　　4　　7
+
+那么是如何得到的呢，我们通过观察原数组可以发现，如果从末尾往前看，数字逐渐变大，到了2时才减小的，然后我们再从后往前找第一个比2大的数字，是3，那么我们交换2和3，再把此时3后面的所有数字转置一下即可，步骤如下：
+1　　2　　7　　4　　3　　1
+1　　2　　7　　4　　3　　1
+1　　3　　7　　4　　2　　1
+1　　3　　1　　2　　4　　7
+
+void nextPermutation(vector<int>& nums)
+{
+    int n = nums.size(), i = n - 2, j = n - 1;
+    while (i >= 0 && nums[i] >= nums[i + 1]) --i;
+    if (i >= 0) {
+        while (nums[j] <= nums[i]) --j;
+        swap(nums[i], nums[j]);
+    }
+    reverse(nums.begin() + i + 1, nums.end());
+}
+
+---------------------------------------------------------------------
+
+//33 Search in Rotated Sorted Array
+Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
+(i.e., [0, 1, 2, 4, 5, 6, 7] might become[4, 5, 6, 7, 0, 1, 2]).
+You are given a target value to search.If found in the array return its index, otherwise return -1.
+You may assume no duplicate exists in the array.
+Your algorithm's runtime complexity must be in the order of O(log n).
+
+Example 1:
+    Input: nums = [4, 5, 6, 7, 0, 1, 2], target = 0
+    Output : 4
+
+Example 2 :
+    Input : nums = [4, 5, 6, 7, 0, 1, 2], target = 3
+    Output : -1
+
+int search(vector<int>& nums, int target)
+{
+    int left = 0, right = nums.size() - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] == target) {
+            return mid;
+        }
+        if (nums[mid] >= nums[left]) {
+            if (nums[left] <= target && nums[mid] > target) {
+                right = mid - 1;
+            }
+            else {
+                left = mid + 1;
+            }
+        }
+        else {
+            if (nums[mid] < target && nums[right] >= target) {
+                left = mid + 1;
+            }
+            else {
+                right = mid - 1;
+            }
+        }
+    }
+    return -1;
+}
+
+---------------------------------------------------------------------
+
+//34 Find First and Last Position of Element in Sorted Array
+Given an array of integers nums sorted in ascending order, find the startingand ending position of a given target value.
+
+Your algorithm's runtime complexity must be in the order of O(log n).
+
+If the target is not found in the array, return[-1, -1].
+
+Example 1:
+    Input: nums = [5, 7, 7, 8, 8, 10], target = 8
+    Output : [3, 4]
+    
+Example 2 :
+    Input : nums = [5, 7, 7, 8, 8, 10], target = 6
+    Output : [-1, -1]
+
+vector<int> searchRange(vector<int>& nums, int target)
+{
+    vector<int> res(2, -1);
+    int left = 0, right = nums.size();
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] < target) left = mid + 1;
+        else right = mid;
+    }
+    if (right == nums.size() || nums[right] != target) return res;
+    res[0] = right;
+    right = nums.size();
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] <= target) left = mid + 1;
+        else right = mid;
+    }
+    res[1] = right - 1;
+    return res;
+}
+
+---------------------------------------------------------------------
+
+//36 Valid Sudoku
+Determine if a 9x9 Sudoku board is valid.Only the filled cells need to be validated according to the following rules :
+
+Each row must contain the digits 1 - 9 without repetition.
+Each column must contain the digits 1 - 9 without repetition.
+Each of the 9 3x3 sub - boxes of the grid must contain the digits 1 - 9 without repetition.
+
+bool isValidSudoku(vector<vector<char>>& board)
+{
+    vector<vector<bool>> rowFlag(9, vector<bool>(9));
+    vector<vector<bool>> colFlag(9, vector<bool>(9));
+    vector<vector<bool>> cellFlag(9, vector<bool>(9));
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            if (board[i][j] == '.') continue;
+            int c = board[i][j] - '1';
+            if (rowFlag[i][c] || colFlag[c][j] || cellFlag[3 * (i / 3) + j / 3][c]) return false;
+            rowFlag[i][c] = true;
+            colFlag[c][j] = true;
+            cellFlag[3 * (i / 3) + j / 3][c] = true;
+        }
+    }
+    return true;
+}
+
+static const int SHIFT = 3;
+static const int MASK = 0X07;
+#define SET_BIT(arr, i) do{arr[(i) >> SHIFT] |= (1 << ((i) & MASK));}while(0)
+#define CLEAR_BIT(arr, i) do{arr[(i) >> SHIFT] &= ~(1 << ((i) & MASK));}while(0)
+#define IS_IN(arr, i) (arr[(i) >> SHIFT] & (1 << ((i) & MASK)))
+
+bool isValidSudoku2(vector<vector<char>>& board)
+{
+    vector<vector<unsigned char>> rowFlag(9, vector<unsigned char>(2, 0));
+    vector<vector<unsigned char>> colFlag(9, vector<unsigned char>(2, 0));
+    vector<vector<unsigned char>> cellFlag(9, vector<unsigned char>(2, 0));
+    for (int i = 0; i < 9; ++i) {
+        for (int j = 0; j < 9; ++j) {
+            if (board[i][j] == '.') continue;
+            int c = board[i][j] - '1';
+            if (IS_IN(rowFlag[i], c) || IS_IN(colFlag[c], j) || IS_IN(cellFlag[3 * (i / 3) + j / 3], c)) return false;
+            SET_BIT(rowFlag[i], c);
+            SET_BIT(colFlag[c], j);
+            SET_BIT(cellFlag[3 * (i / 3) + j / 3], c);
+        }
+    }
+    return true;
+}
+
+---------------------------------------------------------------------
+//39 Combination Sum
+Given a set of candidate numbers(candidates) (without duplicates) and a target number(target), find all unique combinations in candidates where the candidate numbers sums to target.
+
+The same repeated number may be chosen from candidates unlimited number of times.
+
+Note:
+All numbers(including target) will be positive integers.
+The solution set must not contain duplicate combinations.
+
+Example 1 :
+    Input : candidates = [2, 3, 6, 7], target = 7,
+    A solution set is :
+    [
+        [7],
+        [2, 2, 3]
+    ]
+
+Example 2 :
+    Input : candidates = [2, 3, 5], target = 8,
+    A solution set is :
+    [
+        [2, 2, 2, 2],
+        [2, 3, 3],
+        [3, 5]
+    ]
+
+void combinationSumDFS(vector<int>& candidates, int target, int start, vector<int>& out, vector<vector<int>>& res)
+{
+    if (target < 0) return;
+    for (int i = start; i < candidates.size(); ++i) {
+        out.push_back(candidates[i]);
+        if (target == candidates[i]) {
+            res.push_back(out);
+        }
+        else {
+            combinationSumDFS(candidates, target - candidates[i], i, out, res);
+        }        
+        out.pop_back();
+    }
+}
+
+vector<vector<int>> combinationSum(vector<int>& candidates, int target)
+{
+    vector<vector<int>> res;
+    vector<int> out;
+    sort(candidates.begin(), candidates.end());
+    combinationSumDFS(candidates, target, 0, out, res);
+    return res;
+}
+
+---------------------------------------------------------------------
+
+//40 Combination Sum II
+Given a collection of candidate numbers(candidates) and a target number(target), find all unique combinations in candidates where the candidate numbers sums to target.
+
+Each number in candidates may only be used once in the combination.
+
+Note:
+
+All numbers(including target) will be positive integers.
+The solution set must not contain duplicate combinations.
+
+Example 1 :
+    Input : candidates = [10, 1, 2, 7, 6, 1, 5], target = 8,
+    A solution set is :
+    [
+        [1, 7],
+        [1, 2, 5],
+        [2, 6],
+        [1, 1, 6]
+    ]
+
+Example 2:
+    Input: candidates = [2, 5, 2, 1, 2], target = 5,
+    A solution set is :
+    [
+        [1, 2, 2],
+        [5]
+    ]
+
+void combinationSumDFS(vector<int>& candidates, int target, int start, vector<int>& out, vector<vector<int>>& res)
+{
+    if (target < 0) return;
+    for (int i = start; i < candidates.size(); ++i) {
+        if (i > start && candidates[i] == candidates[i - 1]) {
+            continue;
+        }
+        out.push_back(candidates[i]);
+        if (target == candidates[i]) {
+            res.push_back(out);
+        }
+        else {
+            combinationSumDFS(candidates, target - candidates[i], i + 1, out, res);
+        }
+        out.pop_back();
+    }
+}
+
+vector<vector<int>> combinationSum2(vector<int>& candidates, int target)
+{
+    vector<vector<int>> res;
+    vector<int> out;
+    sort(candidates.begin(), candidates.end());
+    combinationSumDFS(candidates, target, 0, out, res);
+    return res;
+}
+
+---------------------------------------------------------------------
+
+//43 Multiply Strings
+Given two non - negative integers num1and num2 represented as strings, return the product of num1 and num2, also represented as a string.
+
+Example 1:
+    Input: num1 = "2", num2 = "3"
+    Output : "6"
+
+Example 2 :
+    Input : num1 = "123", num2 = "456"
+    Output : "56088"
+
+Note :
+The length of both num1 and num2 is < 110.
+Both num1 and num2 contain only digits 0 - 9.
+Both num1 and num2 do not contain any leading zero, except the number 0 itself.
+You must not use any built - in BigInteger library or convert the inputs to integer directly.
+
+string multiply(string num1, string num2)
+{
+    string res = "";
+    int m = num1.size(), n = num2.size();
+    vector<int> vals(m + n);
+    for (int i = m - 1; i >= 0; --i) {
+        for (int j = n - 1; j >= 0; --j) {
+            int mul = (num1[i] - '0') * (num2[j] - '0');
+            int p1 = i + j, p2 = i + j + 1, sum = mul + vals[p2];
+            vals[p1] += sum / 10;
+            vals[p2] = sum % 10;
+        }
+    }
+    for (int val : vals) {
+        if (!res.empty() || val != 0) res.push_back(val + '0');
+    }
+    return res.empty() ? "0" : res;
+}
+
+---------------------------------------------------------------------
+
+//46 Permutations
+Given a collection of distinct integers, return all possible permutations.
+
+Example:
+    Input: [1, 2, 3]
+    Output :
+    [
+        [1, 2, 3],
+        [1, 3, 2],
+        [2, 1, 3],
+        [2, 3, 1],
+        [3, 1, 2],
+        [3, 2, 1]
+    ]
+
+vector<vector<int>> permute(vector<int>& nums)
+{
+    if (nums.size() == 0) {
+        return { {} };
+    }
+    vector<vector<int>> res{ {} };
+    for (int a : nums) {
+        vector<vector<int>> temp;
+        for (int k = 0; k < res.size(); k++) {
+            for (int i = 0; i <= res[k].size(); ++i) {
+                vector<int> one = res[k];
+                one.insert(one.begin() + i, a);
+                temp.push_back(one);
+            }
+        }
+        res = temp;
+    }
+    return res;
+}
+
+---------------------------------------------------------------------
 
 //47 Permutations II
 Given a collection of numbers that might contain duplicates, return all possible unique permutations.
@@ -416,7 +965,8 @@ Example:
         [2, 1, 1]
     ]
 
-vector<vector<int>> permuteUnique(vector<int>& nums) {
+vector<vector<int>> permuteUnique(vector<int>& nums)
+{
     if (nums.empty()) return { {} };
     set<vector<int>> res;
     int first = nums[0];
@@ -432,9 +982,188 @@ vector<vector<int>> permuteUnique(vector<int>& nums) {
     return vector<vector<int>>(res.begin(), res.end());
 }
 
+---------------------------------------------------------------------
+
+//48 Rotate Image
+You are given an n x n 2D matrix representing an image.
+
+Rotate the image by 90 degrees(clockwise).
+
+Note:
+You have to rotate the image in - place, which means you have to modify the input 2D matrix directly.DO NOT allocate another 2D matrix and do the rotation.
+
+Example 1 :
+    Given input matrix =
+    [
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ] ,
+
+    rotate the input matrix in - place such that it becomes :
+    [
+        [7, 4, 1],
+        [8, 5, 2],
+        [9, 6, 3]
+    ]
+
+Example 2:
+    Given input matrix =
+    [
+        [ 5, 1, 9, 11],
+        [2, 4, 8, 10],
+        [13, 3, 6, 7],
+        [15, 14, 12, 16]
+    ] ,
+
+    rotate the input matrix in - place such that it becomes :
+    [
+        [15, 13, 2, 5],
+        [14, 3, 4, 1],
+        [12, 6, 8, 9],
+        [16, 7, 10, 11]
+    ]
+
+void rotate(vector<vector<int> >& matrix)
+{
+    int n = matrix.size();
+    for (int i = 0; i < n / 2; ++i) {
+        for (int j = i; j < n - 1 - i; ++j) {
+            int tmp = matrix[i][j];
+            matrix[i][j] = matrix[n - 1 - j][i];
+            matrix[n - 1 - j][i] = matrix[n - 1 - i][n - 1 - j];
+            matrix[n - 1 - i][n - 1 - j] = matrix[j][n - 1 - i];
+            matrix[j][n - 1 - i] = tmp;
+        }
+    }
+}
+
+---------------------------------------------------------------------
+
+//49 Group Anagrams
+Given an array of strings, group anagrams together.
+
+Example:
+    Input: ["eat", "tea", "tan", "ate", "nat", "bat"] ,
+    Output :
+    [
+        ["ate", "eat", "tea"],
+        ["nat", "tan"],
+        ["bat"]
+    ]
+
+Note :
+    All inputs will be in lowercase.
+    The order of your output does not matter.
+
+vector<vector<string>> groupAnagrams(vector<string>& strs)
+{
+    vector<vector<string>> res;
+    unordered_map<string, vector<string>> m;
+    for (string str : strs) {
+        string t = str;
+        sort(t.begin(), t.end());
+        m[t].push_back(str);
+    }
+    for (auto a : m) {
+        res.push_back(a.second);
+    }
+    return res;
+}
+
+---------------------------------------------------------------------
+
+//50 Pow(x, n)
+Implement pow(x, n), which calculates x raised to the power n(xn).
+
+Example 1:
+    Input: 2.00000, 10
+    Output : 1024.00000
+
+Example 2 :
+    Input : 2.10000, 3
+    Output : 9.26100
+
+Example 3 :
+    Input : 2.00000, -2
+    Output : 0.25000
+    Explanation : 2 - 2 = 1 / 22 = 1 / 4 = 0.25
+
+Note :
+    -100.0 < x < 100.0
+    n is a 32 - bit signed integer, within the range [−231, 231 − 1]
+
+double myPowHelp(double x, long long n)
+{
+    if (n == 0) {
+        return 1;
+    }
+    
+    double half = myPowHelp(x, n / 2);
+    double res = half * half;
+    if (n % 2 == 1) {
+        res *= x;
+    }
+    return res;
+}
+
+double myPow(double x, int n)
+{
+    if (n == 0) {
+        return 1;
+    }
+    return n > 0 ? myPowHelp(x, n) : 1 / myPowHelp(x, 0 - (long long)n);
+}
+
+---------------------------------------------------------------------
+
+//54 Spiral Matrix
+Given a matrix of m x n elements(m rows, n columns), return all elements of the matrix in spiral order.
+
+Example 1:
+    Input:
+    [
+        [ 1, 2, 3 ],
+        [4, 5, 6],
+        [7, 8, 9]
+    ]
+    Output : [1, 2, 3, 6, 9, 8, 7, 4, 5]
+
+Example 2 :
+    Input :
+    [
+        [1, 2, 3, 4],
+        [5, 6, 7, 8],
+        [9, 10, 11, 12]
+    ]
+    Output : [1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7]
+
+vector<int> spiralOrder(vector<vector<int>>& matrix)
+{
+    if (matrix.empty() || matrix[0].empty()) return {};
+    int m = matrix.size(), n = matrix[0].size();
+    vector<int> res;
+    int up = 0, down = m - 1, left = 0, right = n - 1;
+    while (true) {
+        for (int j = left; j <= right; ++j) res.push_back(matrix[up][j]);
+        if (++up > down) break;
+        for (int i = up; i <= down; ++i) res.push_back(matrix[i][right]);
+        if (--right < left) break;
+        for (int j = right; j >= left; --j) res.push_back(matrix[down][j]);
+        if (--down < up) break;
+        for (int i = down; i >= up; --i) res.push_back(matrix[i][left]);
+        if (++left > right) break;
+    }
+    return res;
+}
+
+---------------------------------------------------------------------
+
 //55 Jump Game
 Given an array of non - negative integers, you are initially positioned at the first index of the array.
+
 Each element in the array represents your maximum jump length at that position.
+
 Determine if you are able to reach the last index.
 
 Example 1:
@@ -450,30 +1179,34 @@ Example 2 :
 
 贪心算法
 
-bool canJump(vector<int>& nums) {
-    int reach = 0;
-    int n = nums.size();
+bool canJump(vector<int>& nums)
+{
+    int reach = 0, n = nums.size();
     for (int i = 0; i < n; i++) {
         if (reach < i || reach >= n - 1) {
             break;
         }
-        reach = i + nums[i] > reach ? i + nums[i] : reach;
+        reach = max(reach, i + nums[i]);
     }
     return reach >= n - 1;
 }
+
+---------------------------------------------------------------------
 
 //56 Merge Intervals
 Given a collection of intervals, merge all overlapping intervals.
 
 Example 1:
-    Input: [[1,3],[2,6],[8,10],[15,18]]
-    Output: [[1,6],[8,10],[15,18]]
-    Explanation: Since intervals [1,3] and [2,6] overlaps, merge them into [1,6].
+    Input: [[1, 3], [2, 6], [8, 10], [15, 18]]
+    Output : [[1, 6], [8, 10], [15, 18]]
+    Explanation : Since intervals[1, 3] and [2, 6] overlaps, merge them into[1, 6].
 
-Example 2:
-    Input: [[1,4],[4,5]]
-    Output: [[1,5]]
-    Explanation: Intervals [1,4] and [4,5] are considered overlapping.
+Example 2 :
+    Input : [[1, 4], [4, 5]]
+    Output : [[1, 5]]
+    Explanation : Intervals[1, 4] and [4, 5] are considered overlapping.
+
+NOTE : input types have been changed on April 15, 2019. Please reset to default code definition to get new method signature.
 
 static bool myCompare(const vector<int>& a, const vector<int>& b)
 {
@@ -482,7 +1215,7 @@ static bool myCompare(const vector<int>& a, const vector<int>& b)
 
 vector<vector<int>> merge(vector<vector<int>>& intervals) {
     if (intervals.size() == 0 || intervals[0].size() == 0) {
-        return { {} };
+        return {};
     }
     int m = intervals.size();
     int n = intervals[0].size();
@@ -502,11 +1235,13 @@ vector<vector<int>> merge(vector<vector<int>>& intervals) {
     return res;
 }
 
+---------------------------------------------------------------------
+
 //59 Spiral Matrix II
 Given a positive integer n, generate a square matrix filled with elements from 1 to n2 in spiral order.
 
 Example:
-Input: 3
+    Input: 3
     Output :
     [
         [ 1, 2, 3 ],
@@ -530,6 +1265,8 @@ vector<vector<int>> generateMatrix(int n) {
     return res;
 }
 
+---------------------------------------------------------------------
+
 //60 Permutation Sequence
 The set[1, 2, 3, ..., n] contains a total of n!unique permutations.
 
@@ -548,10 +1285,50 @@ Note:
 Given n will be between 1 and 9 inclusive.
 Given k will be between 1 and n!inclusive.
 Example 1 :
-
     Input : n = 3, k = 3
     Output : "213"
-    Example 2 :
 
+Example 2 :
     Input : n = 4, k = 9
     Output : "2314"
+
+
+
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
