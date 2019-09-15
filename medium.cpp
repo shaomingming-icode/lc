@@ -1292,19 +1292,557 @@ Example 2 :
     Input : n = 4, k = 9
     Output : "2314"
 
+string getPermutation(int n, int k) {
+    string res;
+    string num = "123456789";
+    vector<int> f(n, 1);
+    for (int i = 1; i < n; ++i) f[i] = f[i - 1] * i;
+    --k;
+    for (int i = n; i >= 1; --i) {
+        int j = k / f[i - 1];
+        k %= f[i - 1];
+        res.push_back(num[j]);
+        num.erase(j, 1);
+    }
+    return res;
+}
 
+---------------------------------------------------------------------
+
+//61 Rotate List
+Given a linked list, rotate the list to the right by k places, where k is non - negative.
+
+Example 1:
+    Input: 1->2->3->4->5->NULL, k = 2
+    Output : 4->5->1->2->3->NULL
+Explanation :
+    rotate 1 steps to the right : 5->1->2->3->4->NULL
+    rotate 2 steps to the right : 4->5->1->2->3->NULL
+
+Example 2 :
+    Input : 0->1->2->NULL, k = 4
+    Output : 2->0->1->NULL
+Explanation :
+    rotate 1 steps to the right : 2->0->1->NULL
+    rotate 2 steps to the right : 1->2->0->NULL
+    rotate 3 steps to the right : 0->1->2->NULL
+    rotate 4 steps to the right : 2->0->1->NULL
+
+ListNode* rotateRight(ListNode* head, int k) {
+    if (!head) return NULL;
+    int n = 1;
+    ListNode* cur = head;
+    while (cur->next) {
+        ++n;
+        cur = cur->next;
+    }
+    cur->next = head;
+    int m = n - k % n;
+    for (int i = 0; i < m; ++i) {
+        cur = cur->next;
+    }
+    ListNode* newhead = cur->next;
+    cur->next = NULL;
+    return newhead;
+}
 
 ---------------------------------------------------------------------
+
+//62 Unique Paths
+A robot is located at the top - left corner of a m x n grid(marked 'Start' in the diagram below).
+
+The robot can only move either down or right at any point in time.The robot is trying to reach the bottom - right corner of the grid(marked 'Finish' in the diagram below).
+
+How many possible unique paths are there ?
+
+Above is a 7 x 3 grid.How many possible unique paths are there ?
+
+Note : m and n will be at most 100.
+
+Example 1 :
+    Input : m = 3, n = 2
+    Output : 3
+Explanation :
+    From the top - left corner, there are a total of 3 ways to reach the bottom - right corner :
+    1. Right->Right->Down
+    2. Right->Down->Right
+    3. Down->Right->Right
+
+Example 2 :
+    Input : m = 7, n = 3
+    Output : 28
+
+int uniquePaths(int m, int n) {
+    vector<int> dp(n, 1);
+    for (int i = 1; i < m; ++i) {
+        for (int j = 1; j < n; ++j) {
+            dp[j] += dp[j - 1];
+        }
+    }
+    return dp[n - 1];
+}
+
 ---------------------------------------------------------------------
+
+//62 Unique Paths II
+A robot is located at the top - left corner of a m x n grid(marked 'Start' in the diagram below).
+
+The robot can only move either down or right at any point in time.The robot is trying to reach the bottom - right corner of the grid(marked 'Finish' in the diagram below).
+
+Now consider if some obstacles are added to the grids.How many unique paths would there be ?
+
+An obstacleand empty space is marked as 1 and 0 respectively in the grid.
+
+Note : m and n will be at most 100.
+
+Example 1 :
+    Input :
+    [
+        [0, 0, 0],
+        [0, 1, 0],
+        [0, 0, 0]
+    ]
+    Output : 2
+Explanation :
+    There is one obstacle in the middle of the 3x3 grid above.
+    There are two ways to reach the bottom - right corner :
+    1. Right->Right->Down->Down
+    2. Down->Down->Right->Right
+
+int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
+    if (obstacleGrid.empty() || obstacleGrid[0].empty() || obstacleGrid[0][0] == 1) return 0;
+    int m = obstacleGrid.size(), n = obstacleGrid[0].size();
+    vector<long> dp(n, 0);
+    dp[0] = 1;
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (obstacleGrid[i][j] == 1) dp[j] = 0;
+            else if (j > 0) dp[j] += dp[j - 1];
+        }
+    }
+    return dp[n - 1];
+}
+
 ---------------------------------------------------------------------
+
+//64 Minimum Path Sum
+Given a m x n grid filled with non - negative numbers, find a path from top left to bottom right which minimizes the sum of all numbers along its path.
+
+Note: You can only move either down or right at any point in time.
+
+Example :
+    Input :
+    [
+        [1, 3, 1],
+        [1, 5, 1],
+        [4, 2, 1]
+    ]
+    Output : 7
+Explanation : Because the path 1→3→1→1→1 minimizes the sum.
+
+m*n空间复杂度
+int minPathSum(vector<vector<int>>& grid) {
+    if (grid.empty() || grid[0].empty()) return 0;
+    int m = grid.size(), n = grid[0].size();
+    vector<vector<int>> dp(m, vector<int>(n));
+    dp[0][0] = grid[0][0];
+    for (int i = 1; i < m; ++i) dp[i][0] = grid[i][0] + dp[i - 1][0];
+    for (int j = 1; j < n; ++j) dp[0][j] = grid[0][j] + dp[0][j - 1];
+    for (int i = 1; i < m; ++i) {
+        for (int j = 1; j < n; ++j) {
+            dp[i][j] = grid[i][j] + min(dp[i - 1][j], dp[i][j - 1]);
+        }
+    }
+    return dp[m - 1][n - 1];
+}
+
+n空间复杂度
+int minPathSum(vector<vector<int>>& grid) {
+    if (grid.empty() || grid[0].empty()) return 0;
+    int m = grid.size(), n = grid[0].size();
+    vector<int> dp(n, INT_MAX);
+    dp[0] = 0;
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (j == 0) dp[j] += grid[i][j];
+            else dp[j] = grid[i][j] + min(dp[j], dp[j - 1]);
+        }
+    }
+    return dp[n - 1];
+}
+
+//71 Simplify Path
+Given an absolute path for a file(Unix - style), simplify it.Or in other words, convert it to the canonical path.
+
+In a UNIX - style file system, a period.refers to the current directory.Furthermore, a double period ..moves the directory up a level.For more information, see: Absolute path vs relative path in Linux / Unix
+
+Note that the returned canonical path must always begin with a slash / , and there must be only a single slash / between two directory names.The last directory name(if it exists) must not end with a trailing / .Also, the canonical path must be the shortest string representing the absolute path.
+
+Example 1:
+    Input: "/home/"
+    Output : "/home"
+    Explanation : Note that there is no trailing slash after the last directory name.
+
+Example 2 :
+    Input : "/../"
+    Output : "/"
+    Explanation : Going one level up from the root directory is a no - op, as the root level is the highest level you can go.
+
+Example 3 :
+    Input : "/home//foo/"
+    Output : "/home/foo"
+Explanation : In the canonical path, multiple consecutive slashes are replaced by a single one.
+
+Example 4 :
+    Input : "/a/./b/../../c/"
+    Output : "/c"
+
+Example 5 :
+    Input : "/a/../../b/../c//.//"
+    Output : "/c"
+
+Example 6 :
+    Input : "/a//b////c/d//././/.."
+    Output : "/a/b/c"
+
+string simplifyPath(string path) {
+    vector<string> v;
+    char* cstr = new char[path.length() + 1];
+    strcpy(cstr, path.c_str());
+    char* pch = strtok(cstr, "/");
+    while (pch != NULL) {
+        string p = string(pch);
+        if (p == "..") {
+            if (!v.empty()) v.pop_back();
+        }
+        else if (p != ".") {
+            v.push_back(p);
+        }
+        pch = strtok(NULL, "/");
+    }
+    if (v.empty()) return "/";
+    string res;
+    for (int i = 0; i < v.size(); ++i) {
+        res += '/' + v[i];
+    }
+    return res;
+}
+
+string simplifyPath(string path) {
+    string res, t;
+    stringstream ss(path);
+    vector<string> v;
+    while (getline(ss, t, '/')) {
+        if (t == "" || t == ".") continue;
+        if (t == ".." && !v.empty()) v.pop_back();
+        else if (t != "..") v.push_back(t);
+    }
+    for (string s : v) res += "/" + s;
+    return res.empty() ? "/" : res;
+}
+
 ---------------------------------------------------------------------
+
+//73 Set Matrix Zeroes
+Given a m x n matrix, if an element is 0, set its entire rowand column to 0. Do it in - place.
+
+Example 1:
+    Input:
+    [
+        [1, 1, 1],
+        [1, 0, 1],
+        [1, 1, 1]
+    ]
+    Output :
+    [
+        [1, 0, 1],
+        [0, 0, 0],
+        [1, 0, 1]
+    ]
+
+Example 2:
+    Input:
+    [
+        [0, 1, 2, 0],
+        [3, 4, 5, 2],
+        [1, 3, 1, 5]
+    ]
+    Output :
+    [
+        [0, 0, 0, 0],
+        [0, 4, 5, 0],
+        [0, 3, 1, 0]
+    ]
+Follow up :
+    A straight forward solution using O(mn) space is probably a bad idea.
+    A simple improvement uses O(m + n) space, but still not the best solution.
+    Could you devise a constant space solution ?
+
+void setZeroes(vector<vector<int> >& matrix) {
+    if (matrix.empty() || matrix[0].empty()) return;
+    int m = matrix.size(), n = matrix[0].size();
+    bool rowZero = false, colZero = false;
+    for (int i = 0; i < m; ++i) {
+        if (matrix[i][0] == 0) colZero = true;
+    }
+    for (int i = 0; i < n; ++i) {
+        if (matrix[0][i] == 0) rowZero = true;
+    }
+    for (int i = 1; i < m; ++i) {
+        for (int j = 1; j < n; ++j) {
+            if (matrix[i][j] == 0) {
+                matrix[0][j] = 0;
+                matrix[i][0] = 0;
+            }
+        }
+    }
+    for (int i = 1; i < m; ++i) {
+        for (int j = 1; j < n; ++j) {
+            if (matrix[0][j] == 0 || matrix[i][0] == 0) {
+                matrix[i][j] = 0;
+            }
+        }
+    }
+    if (rowZero) {
+        for (int i = 0; i < n; ++i) matrix[0][i] = 0;
+    }
+    if (colZero) {
+        for (int i = 0; i < m; ++i) matrix[i][0] = 0;
+    }
+}
+
 ---------------------------------------------------------------------
+
+//74 Search a 2D Matrix
+Write an efficient algorithm that searches for a value in an m x n matrix.This matrix has the following properties :
+
+Integers in each row are sorted from left to right.
+The first integer of each row is greater than the last integer of the previous row.
+
+Example 1 :
+    Input :
+    matrix = [
+        [1, 3, 5, 7],
+        [10, 11, 16, 20],
+        [23, 30, 34, 50]
+    ]
+    target = 3
+    Output: true
+
+Example 2 :
+    Input :
+    matrix = [
+        [1, 3, 5, 7],
+            [10, 11, 16, 20],
+            [23, 30, 34, 50]
+    ]
+    target = 13
+    Output: false
+
+bool searchMatrix(vector<vector<int>>& matrix, int target) {
+    if (matrix.empty() || matrix[0].empty()) return false;
+    int left = 0, right = matrix.size();
+    while (left < right) {
+        int mid = (left + right) / 2;
+        if (matrix[mid][0] == target) return true;
+        if (matrix[mid][0] <= target) left = mid + 1;
+        else right = mid;
+    }
+    int tmp = (right > 0) ? (right - 1) : right;
+    left = 0;
+    right = matrix[tmp].size();
+    while (left < right) {
+        int mid = (left + right) / 2;
+        if (matrix[tmp][mid] == target) return true;
+        if (matrix[tmp][mid] < target) left = mid + 1;
+        else right = mid;
+    }
+    return false;
+}
+         
 ---------------------------------------------------------------------
+
+//75 Sort Colors
+Given an array with n objects colored red, white or blue, sort them in - place so that objects of the same color are adjacent, with the colors in the order red, whiteand blue.
+
+Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.
+
+Note: You are not suppose to use the library's sort function for this problem.
+
+Example :
+    Input : [2, 0, 2, 1, 1, 0]
+    Output : [0, 0, 1, 1, 2, 2]
+
+Follow up :
+A rather straight forward solution is a two - pass algorithm using counting sort.
+First, iterate the array counting number of 0's, 1's, and 2's, then overwrite array with total number of 0's, then 1's and followed by 2's.
+Could you come up with a one - pass algorithm using only constant space ?
+
+void sortColors(vector<int>& nums) {
+    vector<int> colors(3);
+    for (int num : nums) ++colors[num];
+    for (int i = 0, cur = 0; i < 3; ++i) {
+        for (int j = 0; j < colors[i]; ++j) {
+            nums[cur++] = i;
+        }
+    }
+}
+
 ---------------------------------------------------------------------
+
+//77 Combinations
+Given two integers nand k, return all possible combinations of k numbers out of 1 ... n.
+
+Example:
+    Input: n = 4, k = 2
+    Output :
+    [
+        [2, 4],
+        [3, 4],
+        [2, 3],
+        [1, 2],
+        [1, 3],
+        [1, 4],
+    ]
+
+vector<vector<int>> combine(int n, int k) {
+    vector<vector<int>> res;
+    vector<int> out(k, 0);
+    int i = 0;
+    while (i >= 0) {
+        ++out[i];
+        if (out[i] > n) --i;
+        else if (i == k - 1) res.push_back(out);
+        else {
+            ++i;
+            out[i] = out[i - 1];
+        }
+    }
+    return res;
+}
+
 ---------------------------------------------------------------------
+
+//78 Subsets
+Given a set of distinct integers, nums, return all possible subsets(the power set).
+
+Note: The solution set must not contain duplicate subsets.
+
+Example :
+    Input : nums = [1, 2, 3]
+    Output :
+    [
+        [3],
+        [1],
+        [2],
+        [1, 2, 3],
+        [1, 3],
+        [2, 3],
+        [1, 2],
+        []
+    ]
+
+vector<vector<int> > subsets(vector<int>& nums) {
+    vector<vector<int> > res(1);
+    sort(nums.begin(), nums.end());
+    for (int i = 0; i < nums.size(); ++i) {
+        int size = res.size();
+        for (int j = 0; j < size; ++j) {
+            res.push_back(res[j]);
+            res.back().push_back(nums[i]);
+        }
+    }
+    return res;
+}
+
 ---------------------------------------------------------------------
+
+//79 Word Search
+Given a 2D board and a word, find if the word exists in the grid.
+
+The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring.The same letter cell may not be used more than once.
+
+Example:
+    board =
+    [
+        ['A', 'B', 'C', 'E'],
+        ['S', 'F', 'C', 'S'],
+        ['A', 'D', 'E', 'E']
+    ]
+
+    Given word = "ABCCED", return true.
+    Given word = "SEE", return true.
+    Given word = "ABCB", return false.
+
+bool search(vector<vector<char>>& board, string word, int idx, int i, int j) {
+    if (idx == word.size()) return true;
+    int m = board.size(), n = board[0].size();
+    if (i < 0 || j < 0 || i >= m || j >= n || board[i][j] != word[idx]) return false;
+    char c = board[i][j];
+    board[i][j] = '#';
+    bool res = search(board, word, idx + 1, i - 1, j)
+        || search(board, word, idx + 1, i + 1, j)
+        || search(board, word, idx + 1, i, j - 1)
+        || search(board, word, idx + 1, i, j + 1);
+    board[i][j] = c;
+    return res;
+}
+
+bool exist(vector<vector<char>>& board, string word) {
+    if (board.empty() || board[0].empty()) return false;
+    int m = board.size(), n = board[0].size();
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (search(board, word, 0, i, j)) return true;
+        }
+    }
+    return false;
+}
+
 ---------------------------------------------------------------------
----------------------------------------------------------------------
+
+//80 Remove Duplicates from Sorted Array II
+Given a sorted array nums, remove the duplicates in - place such that duplicates appeared at most twiceand return the new length.
+
+Do not allocate extra space for another array, you must do this by modifying the input array in - place with O(1) extra memory.
+
+Example 1:
+    Given nums = [1, 1, 1, 2, 2, 3],
+    Your function should return length = 5, with the first five elements of nums being 1, 1, 2, 2 and 3 respectively.
+    It doesn't matter what you leave beyond the returned length.
+
+Example 2:
+    Given nums = [0, 0, 1, 1, 1, 1, 2, 3, 3],
+    Your function should return length = 7, with the first seven elements of nums being modified to 0, 0, 1, 1, 2, 3 and 3 respectively.
+    It doesn't matter what values are set beyond the returned length.
+
+Clarification:
+
+Confused why the returned value is an integer but your answer is an array ?
+
+Note that the input array is passed in by reference, which means modification to the input array will be known to the caller as well.
+
+Internally you can think of this :
+
+    // nums is passed in by reference. (i.e., without making a copy)
+    int len = removeDuplicates(nums);
+
+    // any modification to nums in your function would be known by the caller.
+    // using the length returned by your function, it prints the first len elements.
+    for (int i = 0; i < len; i++) {
+        print(nums[i]);
+    }
+
+int removeDuplicates(vector<int>& nums) {
+    int i = 0;
+    for (int num : nums) {
+        if (i < 2 || num > nums[i - 2]) {
+            nums[i++] = num;
+        }
+    }
+    return i;
+}
+
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
