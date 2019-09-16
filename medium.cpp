@@ -1844,13 +1844,284 @@ int removeDuplicates(vector<int>& nums) {
 }
 
 ---------------------------------------------------------------------
+
+//81 Search in Rotated Sorted Array II
+Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
+
+(i.e., [0, 0, 1, 2, 2, 5, 6] might become[2, 5, 6, 0, 0, 1, 2]).
+
+You are given a target value to search.If found in the array return true, otherwise return false.
+
+Example 1:
+    Input: nums = [2, 5, 6, 0, 0, 1, 2], target = 0
+    Output : true
+
+Example 2 :
+    Input : nums = [2, 5, 6, 0, 0, 1, 2], target = 3
+    Output : false
+
+Follow up :
+    This is a follow up problem to Search in Rotated Sorted Array, where nums may contain duplicates.
+    Would this affect the run - time complexity ? How and why ?
+
+bool search(vector<int>& nums, int target) {
+    int n = nums.size(), left = 0, right = n - 1;
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        if (nums[mid] == target) return true;
+        if (nums[mid] < nums[right]) {
+            if (nums[mid] < target && nums[right] >= target) left = mid + 1;
+            else right = mid - 1;
+        }
+        else if (nums[mid] > nums[right]) {
+            if (nums[left] <= target && nums[mid] > target) right = mid - 1;
+            else left = mid + 1;
+        }
+        else --right;
+    }
+    return false;
+}
+
 ---------------------------------------------------------------------
+
+//82 Remove Duplicates from Sorted List II
+Given a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list.
+
+Example 1:
+    Input: 1->2->3->3->4->4->5
+    Output : 1->2->5
+
+Example 2 :
+    Input : 1->1->1->2->3
+    Output : 2->3
+
+ListNode* deleteDuplicates(ListNode* head) {
+    if (!head || !head->next) return head;
+    ListNode *dummy = new ListNode(-1), *pre = dummy;
+    dummy->next = head;
+    while (pre->next) {
+        ListNode *cur = pre->next;
+        while (cur->next && cur->next->val == cur->val) {
+            cur = cur->next;
+        }
+        if (cur != pre->next) pre->next = cur->next;
+        else pre = pre->next;
+    }
+    return dummy->next;
+}
+
 ---------------------------------------------------------------------
+
+86. Partition List
+Given a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
+
+You should preserve the original relative order of the nodes in each of the two partitions.
+
+Example:
+    Input: head = 1->4->3->2->5->2, x = 3
+    Output : 1->2->2->4->3->5
+
+ListNode* partition(ListNode* head, int x) {
+    ListNode* dummy = new ListNode(-1);
+    dummy->next = head;
+    ListNode* pre = dummy, * cur = head;;
+    while (pre->next && pre->next->val < x) pre = pre->next;
+    cur = pre;
+    while (cur->next) {
+        if (cur->next->val < x) {
+            ListNode* tmp = cur->next;
+            cur->next = tmp->next;
+            tmp->next = pre->next;
+            pre->next = tmp;
+            pre = pre->next;
+        }
+        else {
+            cur = cur->next;
+        }
+    }
+    return dummy->next;
+}
+
+小于给定值的节点取出组成一个新的链表
+
+ListNode* partition(ListNode* head, int x) {
+    if (!head) return head;
+    ListNode* dummy = new ListNode(-1);
+    ListNode* newDummy = new ListNode(-1);
+    dummy->next = head;
+    ListNode* cur = dummy, * p = newDummy;
+    while (cur->next) {
+        if (cur->next->val < x) {
+            p->next = cur->next;
+            p = p->next;
+            cur->next = cur->next->next;
+            p->next = NULL;
+        }
+        else {
+            cur = cur->next;
+        }
+    }
+    p->next = dummy->next;
+    return newDummy->next;
+}
+
 ---------------------------------------------------------------------
+
+//89 Gray Code
+The gray code is a binary numeral system where two successive values differ in only one bit.
+
+Given a non - negative integer n representing the total number of bits in the code, print the sequence of gray code.A gray code sequence must begin with 0.
+
+Example 1:
+    Input: 2
+    Output : [0, 1, 3, 2]
+
+Explanation :
+    00 - 0
+    01 - 1
+    11 - 3
+    10 - 2
+
+For a given n, a gray code sequence may not be uniquely defined.
+For example, [0, 2, 3, 1] is also a valid gray code sequence.
+
+    00 - 0
+    10 - 2
+    11 - 3
+    01 - 1
+
+Example 2:
+    Input: 0
+    Output : [0]
+
+Explanation : We define the gray code sequence to begin with 0.
+    A gray code sequence of n has size = 2的n次方, which for n = 0 the size is 2的0次方 = 1.
+    Therefore, for n = 0 the gray code sequence is[0].
+
+n位元的格雷码可以从n - 1位元的格雷码以上下镜射后，在左边加上新位元的方式得到
+vector<int> grayCode(int n) {
+    vector<int> res{ 0 };
+    for (int i = 0; i < n; ++i) {
+        int size = res.size();
+        for (int j = size - 1; j >= 0; --j) {
+            res.push_back(res[j] | (1 << i));
+        }
+    }
+    return res;
+}
+
 ---------------------------------------------------------------------
+
+//90 Subsets II
+Given a collection of integers that might contain duplicates, nums, return all possible subsets(the power set).
+
+Note: The solution set must not contain duplicate subsets.
+
+Example :
+    Input : [1, 2, 2]
+    Output :
+    [
+        [2],
+        [1],
+        [1, 2, 2],
+        [2, 2],
+        [1, 2],
+        []
+    ]
+
+和78题相似，只不过这里集合元素可能重复
+用 last 来记录上一个处理的数字，然后判定当前的数字和上面的是否相同，若不同，则循环还是从0到当前子集的个数，若相同，则新子集个数减去之前循环时子集的个数当做起点来循环
+
+vector<vector<int>> subsetsWithDup(vector<int>& S) {
+    if (S.empty()) return {};
+    vector<vector<int>> res(1);
+    sort(S.begin(), S.end());
+    int size = 1, last = S[0];
+    for (int i = 0; i < S.size(); ++i) {
+        if (last != S[i]) {
+            last = S[i];
+            size = res.size();
+        }
+        int newSize = res.size();
+        for (int j = newSize - size; j < newSize; ++j) {
+            res.push_back(res[j]);
+            res.back().push_back(S[i]);
+        }
+    }
+    return res;
+}
+
 ---------------------------------------------------------------------
+
+//91 Decode Ways
+A message containing letters from A - Z is being encoded to numbers using the following mapping :
+
+'A' -> 1
+'B' -> 2
+...
+'Z' -> 26
+Given a non - empty string containing only digits, determine the total number of ways to decode it.
+
+Example 1:
+    Input: "12"
+    Output : 2
+Explanation : It could be decoded as "AB" (1 2) or "L" (12).
+
+Example 2 :
+    Input : "226"
+    Output : 3
+Explanation : It could be decoded as "BZ" (2 26), "VF" (22 6), or "BBF" (2 2 6).
+
+int numDecodings(string s) {
+    if (s.empty() || s[0] == '0') return 0;
+    vector<int> dp(s.size() + 1, 0);
+    dp[0] = 1;
+    for (int i = 1; i < dp.size(); ++i) {
+        dp[i] = (s[i - 1] == '0') ? 0 : dp[i - 1];
+        if (i > 1 && (s[i - 2] == '1' || (s[i - 2] == '2' && s[i - 1] <= '6'))) {
+            dp[i] += dp[i - 2];
+        }
+    }
+    return dp.back();
+}
+
 ---------------------------------------------------------------------
+
+//92 Reverse Linked List II
+Reverse a linked list from position m to n.Do it in one - pass.
+
+Note: 1 ≤ m ≤ n ≤ length of list.
+
+Example :
+    Input : 1->2->3->4->5->NULL, m = 2, n = 4
+    Output : 1->4->3->2->5->NULL
+
+m之后的依次加到前边
+ListNode* reverseBetween(ListNode* head, int m, int n) {
+    ListNode* dummy = new ListNode(-1), * pre = dummy;
+    dummy->next = head;
+    for (int i = 0; i < m - 1; ++i) pre = pre->next;
+    ListNode* cur = pre->next;
+    for (int i = m; i < n; ++i) {
+        ListNode* t = cur->next;
+        cur->next = t->next;
+        t->next = pre->next;
+        pre->next = t;
+    }
+    return dummy->next;
+}
+
 ---------------------------------------------------------------------
+
+//93 Restore IP Addresses
+Given a string containing only digits, restore it by returning all possible valid IP address combinations.
+
+Example:
+    Input: "25525511135"
+    Output : ["255.255.11.135", "255.255.111.35"]
+
+
+
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
