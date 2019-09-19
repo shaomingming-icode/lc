@@ -2,7 +2,7 @@
 
 ---------------------------------------------------------------------
 
-//2 Add Two Numbers
+//2 Add Two Numbers 两数相加
 You are given two non - empty linked lists representing two non - negative integers.The digits are stored in reverse orderand each of their nodes contain a single digit.Add the two numbersand return it as a linked list.
 
 You may assume the two numbers do not contain any leading zero, except the number 0 itself.
@@ -32,7 +32,7 @@ ListNode* addTwoNumbers(ListNode* l1, ListNode* l2)
 
 ---------------------------------------------------------------------
 
-//3 Longest Substring Without Repeating Characters
+//3 Longest Substring Without Repeating Characters 最长无重复字符的子串
 Given a string, find the length of the longest substring without repeating characters.
 
 Example 1:
@@ -65,7 +65,7 @@ int lengthOfLongestSubstring(string s)
 
 ---------------------------------------------------------------------
 
-//5 Longest Palindromic Substring
+//5 Longest Palindromic Substring 最长回文子串
 Given a string s, find the longest palindromic substring in s.You may assume that the maximum length of s is 1000.
 
 Example 1:
@@ -126,7 +126,7 @@ string Manacher(string s)
 
 ---------------------------------------------------------------------
 
-//6 ZigZag Conversion
+//6 ZigZag Conversion 之字型转换字符串
 The string "PAYPALISHIRING" is written in a zigzag pattern on a given number of rows like this: (you may want to display this pattern in a fixed font for better legibility)
 
 P   A   H   N
@@ -168,7 +168,7 @@ string convert(string s, int numRows)
 
 ---------------------------------------------------------------------
 
-//8 String to Integer (atoi)
+//8 String to Integer (atoi) 字符串转为整数
 Implement atoi which converts a string to an integer.
 
 The function first discards as many whitespace characters as necessary until the first non - whitespace character is found.Then, starting from this character, takes an optional initial plus or minus sign followed by as many numerical digits as possible, and interprets them as a numerical value.
@@ -230,7 +230,7 @@ int myAtoi(string str)
 
 ---------------------------------------------------------------------
 
-//11 Container With Most Water
+//11 Container With Most Water 装最多水的容器
 Given n non - negative integers a1, a2, ..., an , where each represents a point at coordinate(i, ai).n vertical lines are drawn such that the two endpoints of line i is at(i, ai) and (i, 0).Find two lines, which together with x - axis forms a container, such that the container contains the most water.
 
 Note: You may not slant the containerand n is at least 2.
@@ -255,7 +255,7 @@ int maxArea(vector<int>& height)
 
 ---------------------------------------------------------------------
 
-//12 Integer to Roman
+//12 Integer to Roman 整数转化成罗马数字
 Roman numerals are represented by seven different symbols : I, V, X, L, C, Dand M.
 
     Symbol       Value
@@ -313,7 +313,7 @@ string intToRoman(int num)
 
 ---------------------------------------------------------------------
 
-//15 3Sum
+//15 3Sum 三数之和
 Given an array nums of n integers, are there elements a, b, c in nums such that a + b + c = 0 ? Find all unique triplets in the array which gives the sum of zero.
 
 Note :
@@ -353,7 +353,7 @@ vector<vector<int>> threeSum(vector<int>& nums)
 
 ---------------------------------------------------------------------
 
-//16 3Sum Closest
+//16 3Sum Closest 最近三数之和
 Given an array nums of n integersand an integer target, find three integers in nums such that the sum is closest to target.Return the sum of the three integers.You may assume that each input would have exactly one solution.
 
 Example:
@@ -383,7 +383,7 @@ int threeSumClosest(vector<int>& nums, int target)
 
 ---------------------------------------------------------------------
 
-//17 Letter Combinations of a Phone Number
+//17 Letter Combinations of a Phone Number 电话号码的字母组合
 Given a string containing digits from 2 - 9 inclusive, return all possible letter combinations that the number could represent.
 
 A mapping of digit to letters(just like on the telephone buttons) is given below.Note that 1 does not map to any letters.
@@ -412,7 +412,7 @@ vector<string> letterCombinations(string digits)
 
 ---------------------------------------------------------------------
 
-//18 4Sum
+//18 4Sum 四数之和
 Given an array nums of n integersand an integer target, are there elements a, b, c, and d in nums such that a + b + c + d = target ? Find all unique quadruplets in the array which gives the sum of target.
 
 Note :
@@ -456,7 +456,7 @@ vector<vector<int>> fourSum(vector<int>& nums, int target)
 
 ---------------------------------------------------------------------
 
-//19 Remove Nth Node From End of List
+//19 Remove Nth Node From End of List 移除链表倒数第N个节点
 Given a linked list, remove the n - th node from the end of listand return its head.
 
 Example:
@@ -495,7 +495,7 @@ ListNode * removeNthFromEnd(ListNode* head, int n)
 
 ---------------------------------------------------------------------
 
-//22 Generate Parentheses
+//22 Generate Parentheses 生成括号
 Given n pairs of parentheses, write a function to generate all combinations of well - formed parentheses.
 
 For example, given n = 3, a solution set is :
@@ -533,7 +533,7 @@ vector<string> generateParenthesis(int n)
 
 ---------------------------------------------------------------------
 
-//24 Swap Nodes in Pairs
+//24 Swap Nodes in Pairs 成对交换节点
 Given a linked list, swap every two adjacent nodesand return its head.
 
 You may not modify the values in the list's nodes, only nodes itself may be changed.
@@ -557,7 +557,7 @@ ListNode * swapPairs(ListNode* head)
 
 ---------------------------------------------------------------------
 
-//29 Divide Two Integers
+//29 Divide Two Integers 两数相除
 Given two integers dividendand divisor, divide two integers without using multiplication, divisionand mod operator.
 
 Return the quotient after dividing dividend by divisor.
@@ -599,7 +599,7 @@ int divide(int dividend, int divisor)
 
 ---------------------------------------------------------------------
 
-//31 Next Permutation
+//31 Next Permutation 下一个排列
 Implement next permutation, which rearranges numbers into the lexicographically next greater permutation of numbers.
 
 If such arrangement is not possible, it must rearrange it as the lowest possible order(ie, sorted in ascending order).
@@ -636,7 +636,7 @@ void nextPermutation(vector<int>& nums)
 
 ---------------------------------------------------------------------
 
-//33 Search in Rotated Sorted Array
+//33 Search in Rotated Sorted Array 在旋转有序数组中搜索
 Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
 (i.e., [0, 1, 2, 4, 5, 6, 7] might become[4, 5, 6, 7, 0, 1, 2]).
 You are given a target value to search.If found in the array return its index, otherwise return -1.
@@ -681,7 +681,7 @@ int search(vector<int>& nums, int target)
 
 ---------------------------------------------------------------------
 
-//34 Find First and Last Position of Element in Sorted Array
+//34 Find First and Last Position of Element in Sorted Array 在有序数组中查找元素的第一个和最后一个位置
 Given an array of integers nums sorted in ascending order, find the startingand ending position of a given target value.
 
 Your algorithm's runtime complexity must be in the order of O(log n).
@@ -719,7 +719,7 @@ vector<int> searchRange(vector<int>& nums, int target)
 
 ---------------------------------------------------------------------
 
-//36 Valid Sudoku
+//36 Valid Sudoku 验证数独
 Determine if a 9x9 Sudoku board is valid.Only the filled cells need to be validated according to the following rules :
 
 Each row must contain the digits 1 - 9 without repetition.
@@ -769,7 +769,8 @@ bool isValidSudoku2(vector<vector<char>>& board)
 }
 
 ---------------------------------------------------------------------
-//39 Combination Sum
+
+//39 Combination Sum 组合之和
 Given a set of candidate numbers(candidates) (without duplicates) and a target number(target), find all unique combinations in candidates where the candidate numbers sums to target.
 
 The same repeated number may be chosen from candidates unlimited number of times.
@@ -821,7 +822,7 @@ vector<vector<int>> combinationSum(vector<int>& candidates, int target)
 
 ---------------------------------------------------------------------
 
-//40 Combination Sum II
+//40 Combination Sum II 组合之和之二
 Given a collection of candidate numbers(candidates) and a target number(target), find all unique combinations in candidates where the candidate numbers sums to target.
 
 Each number in candidates may only be used once in the combination.
@@ -878,7 +879,7 @@ vector<vector<int>> combinationSum2(vector<int>& candidates, int target)
 
 ---------------------------------------------------------------------
 
-//43 Multiply Strings
+//43 Multiply Strings 字符串相乘
 Given two non - negative integers num1and num2 represented as strings, return the product of num1 and num2, also represented as a string.
 
 Example 1:
@@ -916,7 +917,7 @@ string multiply(string num1, string num2)
 
 ---------------------------------------------------------------------
 
-//46 Permutations
+//46 Permutations 全排列
 Given a collection of distinct integers, return all possible permutations.
 
 Example:
@@ -953,7 +954,7 @@ vector<vector<int>> permute(vector<int>& nums)
 
 ---------------------------------------------------------------------
 
-//47 Permutations II
+//47 Permutations II 全排列之二
 Given a collection of numbers that might contain duplicates, return all possible unique permutations.
 
 Example:
@@ -984,7 +985,7 @@ vector<vector<int>> permuteUnique(vector<int>& nums)
 
 ---------------------------------------------------------------------
 
-//48 Rotate Image
+//48 Rotate Image 旋转图像
 You are given an n x n 2D matrix representing an image.
 
 Rotate the image by 90 degrees(clockwise).
@@ -1040,7 +1041,7 @@ void rotate(vector<vector<int> >& matrix)
 
 ---------------------------------------------------------------------
 
-//49 Group Anagrams
+//49 Group Anagrams 群组错位词
 Given an array of strings, group anagrams together.
 
 Example:
@@ -1073,7 +1074,7 @@ vector<vector<string>> groupAnagrams(vector<string>& strs)
 
 ---------------------------------------------------------------------
 
-//50 Pow(x, n)
+//50 Pow(x, n) 求x的n次方
 Implement pow(x, n), which calculates x raised to the power n(xn).
 
 Example 1:
@@ -1117,7 +1118,7 @@ double myPow(double x, int n)
 
 ---------------------------------------------------------------------
 
-//54 Spiral Matrix
+//54 Spiral Matrix 螺旋矩阵
 Given a matrix of m x n elements(m rows, n columns), return all elements of the matrix in spiral order.
 
 Example 1:
@@ -1159,7 +1160,7 @@ vector<int> spiralOrder(vector<vector<int>>& matrix)
 
 ---------------------------------------------------------------------
 
-//55 Jump Game
+//55 Jump Game 跳跃游戏
 Given an array of non - negative integers, you are initially positioned at the first index of the array.
 
 Each element in the array represents your maximum jump length at that position.
@@ -1193,7 +1194,7 @@ bool canJump(vector<int>& nums)
 
 ---------------------------------------------------------------------
 
-//56 Merge Intervals
+//56 Merge Intervals 合并区间
 Given a collection of intervals, merge all overlapping intervals.
 
 Example 1:
@@ -1237,7 +1238,7 @@ vector<vector<int>> merge(vector<vector<int>>& intervals) {
 
 ---------------------------------------------------------------------
 
-//59 Spiral Matrix II
+//59 Spiral Matrix II 螺旋矩阵之二
 Given a positive integer n, generate a square matrix filled with elements from 1 to n2 in spiral order.
 
 Example:
@@ -1267,7 +1268,7 @@ vector<vector<int>> generateMatrix(int n) {
 
 ---------------------------------------------------------------------
 
-//60 Permutation Sequence
+//60 Permutation Sequence 序列排序
 The set[1, 2, 3, ..., n] contains a total of n!unique permutations.
 
 By listingand labeling all of the permutations in order, we get the following sequence for n = 3:
@@ -1309,7 +1310,7 @@ string getPermutation(int n, int k) {
 
 ---------------------------------------------------------------------
 
-//61 Rotate List
+//61 Rotate List 旋转链表
 Given a linked list, rotate the list to the right by k places, where k is non - negative.
 
 Example 1:
@@ -1348,7 +1349,7 @@ ListNode* rotateRight(ListNode* head, int k) {
 
 ---------------------------------------------------------------------
 
-//62 Unique Paths
+//62 Unique Paths 不同的路径
 A robot is located at the top - left corner of a m x n grid(marked 'Start' in the diagram below).
 
 The robot can only move either down or right at any point in time.The robot is trying to reach the bottom - right corner of the grid(marked 'Finish' in the diagram below).
@@ -1384,7 +1385,7 @@ int uniquePaths(int m, int n) {
 
 ---------------------------------------------------------------------
 
-//62 Unique Paths II
+//63 Unique Paths II 不同的路径之二
 A robot is located at the top - left corner of a m x n grid(marked 'Start' in the diagram below).
 
 The robot can only move either down or right at any point in time.The robot is trying to reach the bottom - right corner of the grid(marked 'Finish' in the diagram below).
@@ -1425,7 +1426,7 @@ int uniquePathsWithObstacles(vector<vector<int>>& obstacleGrid) {
 
 ---------------------------------------------------------------------
 
-//64 Minimum Path Sum
+//64 Minimum Path Sum 最小路径和
 Given a m x n grid filled with non - negative numbers, find a path from top left to bottom right which minimizes the sum of all numbers along its path.
 
 Note: You can only move either down or right at any point in time.
@@ -1471,7 +1472,9 @@ int minPathSum(vector<vector<int>>& grid) {
     return dp[n - 1];
 }
 
-//71 Simplify Path
+---------------------------------------------------------------------
+
+//71 Simplify Path 简化路径
 Given an absolute path for a file(Unix - style), simplify it.Or in other words, convert it to the canonical path.
 
 In a UNIX - style file system, a period.refers to the current directory.Furthermore, a double period ..moves the directory up a level.For more information, see: Absolute path vs relative path in Linux / Unix
@@ -1543,7 +1546,7 @@ string simplifyPath(string path) {
 
 ---------------------------------------------------------------------
 
-//73 Set Matrix Zeroes
+//73 Set Matrix Zeroes 矩阵赋零
 Given a m x n matrix, if an element is 0, set its entire rowand column to 0. Do it in - place.
 
 Example 1:
@@ -1613,7 +1616,7 @@ void setZeroes(vector<vector<int> >& matrix) {
 
 ---------------------------------------------------------------------
 
-//74 Search a 2D Matrix
+//74 Search a 2D Matrix 搜索一个二维矩阵
 Write an efficient algorithm that searches for a value in an m x n matrix.This matrix has the following properties :
 
 Integers in each row are sorted from left to right.
@@ -1662,7 +1665,7 @@ bool searchMatrix(vector<vector<int>>& matrix, int target) {
          
 ---------------------------------------------------------------------
 
-//75 Sort Colors
+//75 Sort Colors 颜色排序
 Given an array with n objects colored red, white or blue, sort them in - place so that objects of the same color are adjacent, with the colors in the order red, whiteand blue.
 
 Here, we will use the integers 0, 1, and 2 to represent the color red, white, and blue respectively.
@@ -1690,7 +1693,7 @@ void sortColors(vector<int>& nums) {
 
 ---------------------------------------------------------------------
 
-//77 Combinations
+//77 Combinations 组合项
 Given two integers nand k, return all possible combinations of k numbers out of 1 ... n.
 
 Example:
@@ -1723,7 +1726,7 @@ vector<vector<int>> combine(int n, int k) {
 
 ---------------------------------------------------------------------
 
-//78 Subsets
+//78 Subsets 子集合
 Given a set of distinct integers, nums, return all possible subsets(the power set).
 
 Note: The solution set must not contain duplicate subsets.
@@ -1757,7 +1760,7 @@ vector<vector<int> > subsets(vector<int>& nums) {
 
 ---------------------------------------------------------------------
 
-//79 Word Search
+//79 Word Search 词语搜索
 Given a 2D board and a word, find if the word exists in the grid.
 
 The word can be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring.The same letter cell may not be used more than once.
@@ -1801,7 +1804,7 @@ bool exist(vector<vector<char>>& board, string word) {
 
 ---------------------------------------------------------------------
 
-//80 Remove Duplicates from Sorted Array II
+//80 Remove Duplicates from Sorted Array II 有序数组中去除重复项之二
 Given a sorted array nums, remove the duplicates in - place such that duplicates appeared at most twiceand return the new length.
 
 Do not allocate extra space for another array, you must do this by modifying the input array in - place with O(1) extra memory.
@@ -1845,7 +1848,7 @@ int removeDuplicates(vector<int>& nums) {
 
 ---------------------------------------------------------------------
 
-//81 Search in Rotated Sorted Array II
+//81 Search in Rotated Sorted Array II 在旋转有序数组中搜索之二
 Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
 
 (i.e., [0, 0, 1, 2, 2, 5, 6] might become[2, 5, 6, 0, 0, 1, 2]).
@@ -1884,7 +1887,7 @@ bool search(vector<int>& nums, int target) {
 
 ---------------------------------------------------------------------
 
-//82 Remove Duplicates from Sorted List II
+//82 Remove Duplicates from Sorted List II 移除有序链表中的重复项之二
 Given a sorted linked list, delete all nodes that have duplicate numbers, leaving only distinct numbers from the original list.
 
 Example 1:
@@ -1912,7 +1915,7 @@ ListNode* deleteDuplicates(ListNode* head) {
 
 ---------------------------------------------------------------------
 
-86. Partition List
+//86 Partition List 划分链表
 Given a linked list and a value x, partition it such that all nodes less than x come before nodes greater than or equal to x.
 
 You should preserve the original relative order of the nodes in each of the two partitions.
@@ -1967,7 +1970,7 @@ ListNode* partition(ListNode* head, int x) {
 
 ---------------------------------------------------------------------
 
-//89 Gray Code
+//89 Gray Code 格雷码
 The gray code is a binary numeral system where two successive values differ in only one bit.
 
 Given a non - negative integer n representing the total number of bits in the code, print the sequence of gray code.A gray code sequence must begin with 0.
@@ -2012,7 +2015,7 @@ vector<int> grayCode(int n) {
 
 ---------------------------------------------------------------------
 
-//90 Subsets II
+//90 Subsets II 子集合之二
 Given a collection of integers that might contain duplicates, nums, return all possible subsets(the power set).
 
 Note: The solution set must not contain duplicate subsets.
@@ -2053,7 +2056,7 @@ vector<vector<int>> subsetsWithDup(vector<int>& S) {
 
 ---------------------------------------------------------------------
 
-//91 Decode Ways
+//91 Decode Ways 解码方法
 A message containing letters from A - Z is being encoded to numbers using the following mapping :
 
 'A' -> 1
@@ -2087,7 +2090,7 @@ int numDecodings(string s) {
 
 ---------------------------------------------------------------------
 
-//92 Reverse Linked List II
+//92 Reverse Linked List II 倒置链表之二
 Reverse a linked list from position m to n.Do it in one - pass.
 
 Note: 1 ≤ m ≤ n ≤ length of list.
@@ -2113,7 +2116,7 @@ ListNode* reverseBetween(ListNode* head, int m, int n) {
 
 ---------------------------------------------------------------------
 
-//93 Restore IP Addresses
+//93 Restore IP Addresses 复原IP地址
 Given a string containing only digits, restore it by returning all possible valid IP address combinations.
 
 Example:
@@ -2150,7 +2153,7 @@ bool isValid(string s) {
 
 ---------------------------------------------------------------------
 
-//94 Binary Tree Inorder Traversal
+//94 Binary Tree Inorder Traversal 二叉树的中序遍历
 Given a binary tree, return the inorder traversal of its nodes' values.
 
 Example:
@@ -2196,7 +2199,7 @@ vector<int> inorderTraversal(TreeNode *root) {
 
 ---------------------------------------------------------------------
 
-//95 Unique Binary Search Trees II
+//95 Unique Binary Search Trees II 独一无二的二叉搜索树之二
 Given an integer n, generate all structurally unique BST's (binary search trees) that store values 1 ... n.
 
 Example:
@@ -2247,7 +2250,7 @@ vector<TreeNode*> helper(int start, int end, vector<vector<vector<TreeNode*>>>& 
 
 ---------------------------------------------------------------------
 
-//96 Unique Binary Search Trees
+//96 Unique Binary Search Trees 独一无二的二叉搜索树
 Given n, how many structurally unique BST's (binary search trees) that store values 1 ... n?
 
 Example:
@@ -2282,7 +2285,7 @@ int numTrees(int n) {
 
 ---------------------------------------------------------------------
 
-//98 Validate Binary Search Tree
+//98 Validate Binary Search Tree 验证二叉搜索树
 Given a binary tree, determine if it is a valid binary search tree (BST).
 
 Assume a BST is defined as follows:
@@ -2323,7 +2326,7 @@ bool isValidBST(TreeNode* root, long mn, long mx) {
 
 ---------------------------------------------------------------------
 
-//102 Binary Tree Level Order Traversal
+//102 Binary Tree Level Order Traversal 二叉树层序遍历
 Given a binary tree, return the level order traversal of its nodes' values. (ie, from left to right, level by level).
 
 For example:
@@ -2359,7 +2362,7 @@ vector<vector<int>> levelOrder(TreeNode* root) {
 
 ---------------------------------------------------------------------
 
-//103 Binary Tree Zigzag Level Order Traversal
+//103 Binary Tree Zigzag Level Order Traversal 二叉树的之字形层序遍历
 Given a binary tree, return the zigzag level order traversal of its nodes' values. (ie, from left to right, then right to left for the next level and alternate between).
 
 For example:
@@ -2398,7 +2401,7 @@ vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
 
 ---------------------------------------------------------------------
 
-//105 Construct Binary Tree from Preorder and Inorder Traversal
+//105 Construct Binary Tree from Preorder and Inorder Traversal 由先序和中序遍历建立二叉树
 Given preorder and inorder traversal of a tree, construct the binary tree.
 
 Note:
@@ -2435,7 +2438,7 @@ TreeNode *buildTree(vector<int> &preorder, int pLeft, int pRight, vector<int> &i
 
 ---------------------------------------------------------------------
 
-//106 Construct Binary Tree from Inorder and Postorder Traversal
+//106 Construct Binary Tree from Inorder and Postorder Traversal 由中序和后序遍历建立二叉树
 Given inorder and postorder traversal of a tree, construct the binary tree.
 
 Note:
@@ -2505,7 +2508,7 @@ TreeNode *buildTree(vector<int> &inorder, int iLeft, int iRight, vector<int> &po
    
 ---------------------------------------------------------------------
 
-//109 Convert Sorted List to Binary Search Tree
+//109 Convert Sorted List to Binary Search Tree 将有序链表转为二叉搜索树
 Given a singly linked list where elements are sorted in ascending order, convert it to a height balanced BST.
 
 For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
@@ -2542,7 +2545,7 @@ TreeNode *sortedListToBST(ListNode* head) {
 
 ---------------------------------------------------------------------
 
-//113 Path Sum II
+//113 Path Sum II 二叉树路径之和之二
 Given a binary tree and a sum, find all root-to-leaf paths where each path's sum equals the given sum.
 
 Note: A leaf is a node with no children.
@@ -2583,7 +2586,7 @@ void helper(TreeNode* node, int sum, vector<int>& out, vector<vector<int>>& res)
 
 ---------------------------------------------------------------------
 
-//114 Flatten Binary Tree to Linked List
+//114 Flatten Binary Tree to Linked List 将二叉树展开成链表
 Given a binary tree, flatten it to a linked list in-place.
 
 For example, given the following tree:
@@ -2653,7 +2656,7 @@ void flatten(TreeNode *root) {
 	
 ---------------------------------------------------------------------
 
-//116 Populating Next Right Pointers in Each Node
+//116 Populating Next Right Pointers in Each Node 每个节点的右向指针
 
 You are given a perfect binary tree where all leaves are on the same level, and every parent has two children. The binary tree has the following definition:
 
@@ -2716,7 +2719,7 @@ Node* connect(Node* root) {
 
 ---------------------------------------------------------------------
 
-//117 Populating Next Right Pointers in Each Node II
+//117 Populating Next Right Pointers in Each Node II 每个节点的右向指针之二
 Given a binary tree
 
 struct Node {
@@ -2799,7 +2802,7 @@ Node* connect(Node* root) {
 
 ---------------------------------------------------------------------
 
-//120 Triangle
+//120 Triangle 三角形
 Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
 
 For example, given the following triangle
@@ -2846,7 +2849,7 @@ int minimumTotal(vector<vector<int>>& triangle) {
 
 ---------------------------------------------------------------------
 
-//127 Word Ladder
+//127 Word Ladder 词语阶梯
 Given two words (beginWord and endWord), and a dictionary's word list, find the length of shortest transformation sequence from beginWord to endWord, such that:
 
 Only one letter can be changed at a time.
@@ -2878,7 +2881,30 @@ Example 2:
 
 Explanation: The endWord "cog" is not in wordList, therefore no possible transformation.
 
-
+int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+	unordered_set<string> wordSet(wordList.begin(), wordList.end());
+	if (!wordSet.count(endWord)) return 0;
+	queue<string> q{{beginWord}};
+	int res = 0;
+	while (!q.empty()) {
+		for (int k = q.size(); k > 0; --k) {
+			string word = q.front(); q.pop();
+			if (word == endWord) return res + 1;
+			for (int i = 0; i < word.size(); ++i) {
+				string newWord = word;
+				for (char ch = 'a'; ch <= 'z'; ++ch) {
+					newWord[i] = ch;
+					if (wordSet.count(newWord) && newWord != word) {
+						q.push(newWord);
+						wordSet.erase(newWord);
+					}
+				}
+			}
+		}
+		++res;
+	}
+	return 0;
+}
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
