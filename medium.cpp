@@ -2504,12 +2504,381 @@ TreeNode *buildTree(vector<int> &inorder, int iLeft, int iRight, vector<int> &po
 从上面可以看出，对于先序遍历都为1 2 3的五棵二叉树，它们的中序遍历都不相同，而它们的后序遍历却有相同的，所以只有和中序遍历一起才能唯一的确定一棵二叉树
    
 ---------------------------------------------------------------------
+
+//109 Convert Sorted List to Binary Search Tree
+Given a singly linked list where elements are sorted in ascending order, convert it to a height balanced BST.
+
+For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
+
+Example:
+	Given the sorted linked list: [-10,-3,0,5,9],
+
+	One possible answer is: [0,-3,9,-10,null,5], which represents the following height balanced BST:
+
+		  0
+		 / \
+	   -3   9
+	   /   /
+	 -10  5
+
+找到中点后，要以中点的值建立一个数的根节点，然后需要把原链表断开，分为前后两个链表，都不能包含原中节点，然后再分别对这两个链表递归调用原函数，分别连上左右子节点即可
+
+TreeNode *sortedListToBST(ListNode* head) {
+	if (!head) return NULL;
+	if (!head->next) return new TreeNode(head->val);
+	ListNode *slow = head, *fast = head, *last = slow;
+	while (fast->next && fast->next->next) {
+		last = slow;
+		slow = slow->next;
+		fast = fast->next->next;
+	}
+	fast = slow->next;
+	last->next = NULL;
+	TreeNode *cur = new TreeNode(slow->val);
+	if (head != slow) cur->left = sortedListToBST(head);
+	cur->right = sortedListToBST(fast);
+	return cur;
+}
+
 ---------------------------------------------------------------------
+
+//113 Path Sum II
+Given a binary tree and a sum, find all root-to-leaf paths where each path's sum equals the given sum.
+
+Note: A leaf is a node with no children.
+
+Example:
+	Given the below binary tree and sum = 22,
+
+		  5
+		 / \
+		4   8
+	   /   / \
+	  11  13  4
+	 /  \    / \
+	7    2  5   1
+	Return:
+	[
+	   [5,4,11,2],
+	   [5,8,4,5]
+	]
+
+vector<vector<int> > pathSum(TreeNode *root, int sum) {	
+	vector<vector<int>> res;
+	vector<int> out;
+	helper(root, sum, out, res);
+	return res;
+}
+
+void helper(TreeNode* node, int sum, vector<int>& out, vector<vector<int>>& res) {
+	if (!node) return;
+	out.push_back(node->val);
+	if (sum == node->val && !node->left && !node->right) {
+		res.push_back(out);
+	}
+	helper(node->left, sum - node->val, out, res);
+	helper(node->right, sum - node->val, out, res);
+	out.pop_back();
+}
+
 ---------------------------------------------------------------------
+
+//114 Flatten Binary Tree to Linked List
+Given a binary tree, flatten it to a linked list in-place.
+
+For example, given the following tree:
+		1
+	   / \
+	  2   5
+	 / \   \
+	3   4   6
+	The flattened tree should look like:
+	1
+	 \
+	  2
+	   \
+		3
+		 \
+		  4
+		   \
+			5
+			 \
+			  6
+
+从根节点开始出发，先检测其左子结点是否存在，如存在则将根节点和其右子节点断开，将左子结点及其后面所有结构一起连到原右子节点的位置，把原右子节点连到元左子结点最后面的右子节点之后
+
+void flatten(TreeNode *root) {
+	TreeNode *cur = root;
+	while (cur) {
+		if (cur->left) {
+			TreeNode *p = cur->left;
+			while (p->right) p = p->right;
+			p->right = cur->right;
+			cur->right = cur->left;
+			cur->left = NULL;
+		}
+		cur = cur->right;
+	}
+}
+
+void flatten(TreeNode* root) {
+	if (!root) return;
+	stack<TreeNode*> s;
+	s.push(root);
+	while (!s.empty()) {
+		TreeNode *t = s.top(); s.pop();
+		if (t->left) {
+			TreeNode *r = t->left;
+			while (r->right) r = r->right;
+			r->right = t->right;
+			t->right = t->left;
+			t->left = NULL;
+		}
+		if (t->right) s.push(t->right);
+	}
+}
+
+树的遍历有递归和非递归两种方法
+
+void flatten(TreeNode *root) {
+	if (!root) return;
+	if (root->left) flatten(root->left);
+	if (root->right) flatten(root->right);
+	TreeNode *tmp = root->right;
+	root->right = root->left;
+	root->left = NULL;
+	while (root->right) root = root->right;
+	root->right = tmp;
+}
+	
 ---------------------------------------------------------------------
+
+//116 Populating Next Right Pointers in Each Node
+
+You are given a perfect binary tree where all leaves are on the same level, and every parent has two children. The binary tree has the following definition:
+
+struct Node {
+  int val;
+  Node *left;
+  Node *right;
+  Node *next;
+}
+Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to NULL.
+
+Initially, all next pointers are set to NULL.
+
+实际上是树的层序遍历的应用
+
+递归
+Node* connect(Node* root) {
+	if (!root) return NULL;
+	if (root->left) root->left->next = root->right;
+	if (root->right) root->right->next = root->next? root->next->left : NULL;
+	connect(root->left);
+	connect(root->right);
+	return root;
+}
+
+非递归
+Node* connect(Node* root) {
+	if (!root) return NULL;
+	queue<Node*> q;
+	q.push(root);
+	while (!q.empty()) {
+		int size = q.size();
+		for (int i = 0; i < size; ++i) {
+			Node *t = q.front(); q.pop();
+			if (i < size - 1) {
+				t->next = q.front();
+			}
+			if (t->left) q.push(t->left);
+			if (t->right) q.push(t->right);
+		}
+	}
+	return root;
+}
+
+两个指针 start 和 cur，其中 start 标记每一层的起始节点，cur 用来遍历该层的节点
+Node* connect(Node* root) {
+	if (!root) return NULL;
+	Node *start = root, *cur = NULL;
+	while (start->left) {
+		cur = start;
+		while (cur) {
+			cur->left->next = cur->right;
+			if (cur->next) cur->right->next = cur->next->left;
+			cur = cur->next;
+		}
+		start = start->left;
+	}
+	return root;
+}
+
 ---------------------------------------------------------------------
+
+//117 Populating Next Right Pointers in Each Node II
+Given a binary tree
+
+struct Node {
+  int val;
+  Node *left;
+  Node *right;
+  Node *next;
+}
+Populate each next pointer to point to its next right node. If there is no next right node, the next pointer should be set to NULL.
+
+Initially, all next pointers are set to NULL.
+
+Note:
+
+You may only use constant extra space.
+Recursive approach is fine, implicit stack space does not count as extra space for this problem.
+
+递归
+Node* connect(Node* root) {
+	if (!root) return NULL;
+	Node *p = root->next;
+	while (p) {
+		if (p->left) {
+			p = p->left;
+			break;
+		}
+		if (p->right) {
+			p = p->right;
+			break;
+		}
+		p = p->next;
+	}
+	if (root->right) root->right->next = p; 
+	if (root->left) root->left->next = root->right ? root->right : p; 
+	connect(root->right);
+	connect(root->left);
+	return root;
+}
+
+迭代 非常量空间
+Node* connect(Node* root) {
+	if (!root) return NULL;
+	queue<Node*> q;
+	q.push(root);
+	while (!q.empty()) {
+		int len = q.size();
+		for (int i = 0; i < len; ++i) {
+			Node *t = q.front(); q.pop();
+			if (i < len - 1) t->next = q.front();
+			if (t->left) q.push(t->left);
+			if (t->right) q.push(t->right);
+		}
+	}
+	return root;
+}
+
+迭代 常量空间
+建立一个dummy结点来指向每层的首结点的前一个结点
+指针cur用来遍历这一层
+Node* connect(Node* root) {
+	Node *dummy = new Node(0, NULL, NULL, NULL), *cur = dummy, *head = root;
+	while (root) {
+		if (root->left) {
+			cur->next = root->left;
+			cur = cur->next;
+		}
+		if (root->right) {
+			cur->next = root->right;
+			cur = cur->next;
+		}
+		root = root->next;
+		if (!root) {
+			cur = dummy;
+			root = dummy->next;
+			dummy->next = NULL;
+		}
+	}
+	return head;
+}
+
 ---------------------------------------------------------------------
+
+//120 Triangle
+Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
+
+For example, given the following triangle
+	[
+		 [2],
+		[3,4],
+	   [6,5,7],
+	  [4,1,8,3]
+	]
+The minimum path sum from top to bottom is 11 (i.e., 2 + 3 + 5 + 1 = 11).
+
+Note:
+
+Bonus point if you are able to do this using only O(n) extra space, where n is the total number of rows in the triangle.
+
+修改原数组的DP方法
+int minimumTotal(vector<vector<int>>& triangle) {
+	for (int i = 1; i < triangle.size(); ++i) {
+		for (int j = 0; j < triangle[i].size(); ++j) {
+			if (j == 0) {
+				triangle[i][j] += triangle[i - 1][j];
+			}
+			else if (j == triangle[i].size() - 1) {
+				triangle[i][j] += triangle[i - 1][j - 1];
+			}
+			else {
+				triangle[i][j] += min(triangle[i - 1][j - 1], triangle[i - 1][j]);
+			}
+		}
+	}
+	return *min_element(triangle.back().begin(), triangle.back().end());
+}
+
+复制三角形最后一行，作为用来更新的一位数组
+int minimumTotal(vector<vector<int>>& triangle) {
+	vector<int> dp(triangle.back());
+	for (int i = (int)triangle.size() - 2; i >= 0; --i) {
+		for (int j = 0; j <= i; ++j) {
+			dp[j] = min(dp[j], dp[j + 1]) + triangle[i][j];
+		}
+	}
+	return dp[0];
+}
+
 ---------------------------------------------------------------------
+
+//127 Word Ladder
+Given two words (beginWord and endWord), and a dictionary's word list, find the length of shortest transformation sequence from beginWord to endWord, such that:
+
+Only one letter can be changed at a time.
+Each transformed word must exist in the word list. Note that beginWord is not a transformed word.
+Note:
+
+Return 0 if there is no such transformation sequence.
+All words have the same length.
+All words contain only lowercase alphabetic characters.
+You may assume no duplicates in the word list.
+You may assume beginWord and endWord are non-empty and are not the same.
+Example 1:
+	Input:
+	beginWord = "hit",
+	endWord = "cog",
+	wordList = ["hot","dot","dog","lot","log","cog"]
+
+	Output: 5
+
+Explanation: As one shortest transformation is "hit" -> "hot" -> "dot" -> "dog" -> "cog",
+return its length 5.
+Example 2:
+	Input:
+	beginWord = "hit"
+	endWord = "cog"
+	wordList = ["hot","dot","dog","lot","log"]
+
+	Output: 0
+
+Explanation: The endWord "cog" is not in wordList, therefore no possible transformation.
+
+
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
