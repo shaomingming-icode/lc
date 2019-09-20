@@ -2124,31 +2124,31 @@ Example:
     Output : ["255.255.11.135", "255.255.111.35"]
 
 两个经验，一是只要遇到字符串的子序列或配准问题首先考虑动态规划DP，二是只要遇到需要求出所有可能情况首先考虑用递归。这道题并非是求字符串的子序列或配准问题，更符合第二种情况，所以我们要用递归来解
-	
+    
 vector<string> restoreIpAddresses(string s) {
-	vector<string> res;
-	restore(s, 4, "", res);
-	return res;
+    vector<string> res;
+    restore(s, 4, "", res);
+    return res;
 }
 
 void restore(string s, int k, string out, vector<string> &res) {
-	if (k == 0) {
-		if (s.empty()) res.push_back(out);
-	}
-	else {
-		for (int i = 1; i <= 3; ++i) {
-			if (s.size() >= i && isValid(s.substr(0, i))) {
-				if (k == 1) restore(s.substr(i), k - 1, out + s.substr(0, i), res);
-				else restore(s.substr(i), k - 1, out + s.substr(0, i) + ".", res);
-			}
-		}
-	}
+    if (k == 0) {
+        if (s.empty()) res.push_back(out);
+    }
+    else {
+        for (int i = 1; i <= 3; ++i) {
+            if (s.size() >= i && isValid(s.substr(0, i))) {
+                if (k == 1) restore(s.substr(i), k - 1, out + s.substr(0, i), res);
+                else restore(s.substr(i), k - 1, out + s.substr(0, i) + ".", res);
+            }
+        }
+    }
 }
 
 bool isValid(string s) {
-	if (s.empty() || s.size() > 3 || (s.size() > 1 && s[0] == '0')) return false;
-	int res = atoi(s.c_str());
-	return res <= 255 && res >= 0;
+    if (s.empty() || s.size() > 3 || (s.size() > 1 && s[0] == '0')) return false;
+    int res = atoi(s.c_str());
+    return res <= 255 && res >= 0;
 }
 
 ---------------------------------------------------------------------
@@ -2157,44 +2157,44 @@ bool isValid(string s) {
 Given a binary tree, return the inorder traversal of its nodes' values.
 
 Example:
-	Input: [1,null,2,3]
-	   1
-		\
-		 2
-		/
-	   3
-	Output: [1,3,2]
+    Input: [1,null,2,3]
+       1
+        \
+         2
+        /
+       3
+    Output: [1,3,2]
 Follow up: Recursive solution is trivial, could you do it iteratively?
 
 递归
 vector<int> inorderTraversal(TreeNode *root) {
-	vector<int> res;
-	inorder(root, res);
-	return res;
+    vector<int> res;
+    inorder(root, res);
+    return res;
 }
 
 void inorder(TreeNode *root, vector<int> &res) {
-	if (!root) return;
-	if (root->left) inorder(root->left, res);
-	res.push_back(root->val);
-	if (root->right) inorder(root->right, res);
+    if (!root) return;
+    if (root->left) inorder(root->left, res);
+    res.push_back(root->val);
+    if (root->right) inorder(root->right, res);
 }
 
 迭代
 vector<int> inorderTraversal(TreeNode *root) {
-	vector<int> res;
-	stack<TreeNode*> s;
-	TreeNode *p = root;
-	while (p || !s.empty()) {
-		while (p) {
-			s.push(p);
-			p = p->left;
-		}
-		p = s.top(); s.pop();
-		res.push_back(p->val);
-		p = p->right;
-	}
-	return res;
+    vector<int> res;
+    stack<TreeNode*> s;
+    TreeNode *p = root;
+    while (p || !s.empty()) {
+        while (p) {
+            s.push(p);
+            p = p->left;
+        }
+        p = s.top(); s.pop();
+        res.push_back(p->val);
+        p = p->right;
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -2203,16 +2203,16 @@ vector<int> inorderTraversal(TreeNode *root) {
 Given an integer n, generate all structurally unique BST's (binary search trees) that store values 1 ... n.
 
 Example:
-	Input: 3
-	Output:
-	[
-	  [1,null,3,2],
-	  [3,2,null,1],
-	  [3,1,null,null,2],
-	  [2,1,3],
-	  [1,null,2,null,3]
-	]
-	
+    Input: 3
+    Output:
+    [
+      [1,null,3,2],
+      [3,2,null,1],
+      [3,1,null,null,2],
+      [2,1,3],
+      [1,null,2,null,3]
+    ]
+    
 Explanation:
 The above output corresponds to the 5 unique BST's shown below:
 
@@ -2225,27 +2225,27 @@ The above output corresponds to the 5 unique BST's shown below:
 动态规划：memo[i][j] 表示在区间 [i, j] 范围内可以生成的所有 BST 的根结点，所以 memo 必须是一个三维数组，这样在递归函数中，我们就可以去 memo 中查找当前的区间是否已经计算过了，是的话，直接返回 memo 中的数组，否则就按之前的方法去计算，最后计算好了之后要更新 memo 数组
 
 vector<TreeNode*> generateTrees(int n) {
-	if (n == 0) return {};
-	vector<vector<vector<TreeNode*>>> memo(n, vector<vector<TreeNode*>>(n));
-	return helper(1, n, memo);
+    if (n == 0) return {};
+    vector<vector<vector<TreeNode*>>> memo(n, vector<vector<TreeNode*>>(n));
+    return helper(1, n, memo);
 }
 
 vector<TreeNode*> helper(int start, int end, vector<vector<vector<TreeNode*>>>& memo) {
-	if (start > end) return {nullptr};
-	if (!memo[start - 1][end - 1].empty()) return memo[start - 1][end - 1];
-	vector<TreeNode*> res;
-	for (int i = start; i <= end; ++i) {
-		auto left = helper(start, i - 1, memo), right = helper(i + 1, end, memo);
-		for (auto a : left) {
-			for (auto b : right) {
-				TreeNode *node = new TreeNode(i);
-				node->left = a;
-				node->right = b;
-				res.push_back(node);
-			}
-		}
-	}
-	return memo[start - 1][end - 1] = res;
+    if (start > end) return {nullptr};
+    if (!memo[start - 1][end - 1].empty()) return memo[start - 1][end - 1];
+    vector<TreeNode*> res;
+    for (int i = start; i <= end; ++i) {
+        auto left = helper(start, i - 1, memo), right = helper(i + 1, end, memo);
+        for (auto a : left) {
+            for (auto b : right) {
+                TreeNode *node = new TreeNode(i);
+                node->left = a;
+                node->right = b;
+                res.push_back(node);
+            }
+        }
+    }
+    return memo[start - 1][end - 1] = res;
 }
 
 ---------------------------------------------------------------------
@@ -2254,16 +2254,16 @@ vector<TreeNode*> helper(int start, int end, vector<vector<vector<TreeNode*>>>& 
 Given n, how many structurally unique BST's (binary search trees) that store values 1 ... n?
 
 Example:
-	Input: 3
-	Output: 5
+    Input: 3
+    Output: 5
 
 Explanation:
-	Given n = 3, there are a total of 5 unique BST's:
-	   1         3     3      2      1
-		\       /     /      / \      \
-		 3     2     1      1   3      2
-		/     /       \                 \
-	   2     1         2                 3
+    Given n = 3, there are a total of 5 unique BST's:
+       1         3     3      2      1
+        \       /     /      / \      \
+         3     2     1      1   3      2
+        /     /       \                 \
+       2     1         2                 3
 
 dp[2] = dp[0] * dp[1]　　　(1为根的情况，则左子树一定不存在，右子树可以有一个数字)
 　　　+ dp[1] * dp[0]　　  (2为根的情况，则左子树可以有一个数字，右子树一定不存在)
@@ -2273,14 +2273,14 @@ dp[3] = dp[0] * dp[2]　　　(1为根的情况，则左子树一定不存在，
 　　  + dp[2] * dp[0]　　  (3为根的情况，则左子树可以有两个数字，右子树一定不存在)
 
 int numTrees(int n) {
-	vector<int> dp(n + 1);
-	dp[0] = dp[1] = 1;
-	for (int i = 2; i <= n; ++i) {
-		for (int j = 0; j < i; ++j) {
-			dp[i] += dp[j] * dp[i - j - 1];
-		}
-	}
-	return dp[n];
+    vector<int> dp(n + 1);
+    dp[0] = dp[1] = 1;
+    for (int i = 2; i <= n; ++i) {
+        for (int j = 0; j < i; ++j) {
+            dp[i] += dp[j] * dp[i - j - 1];
+        }
+    }
+    return dp[n];
 }
 
 ---------------------------------------------------------------------
@@ -2296,32 +2296,32 @@ Both the left and right subtrees must also be binary search trees.
  
 
 Example 1:
-	  2
-	 / \
+      2
+     / \
     1   3
-	Input: [2,1,3]
-	Output: true
-	
+    Input: [2,1,3]
+    Output: true
+    
 Example 2:
       5
-	 / \
-	1   4
-	   / \
-	  3   6
-	Input: [5,1,4,null,null,3,6]
-	Output: false
+     / \
+    1   4
+       / \
+      3   6
+    Input: [5,1,4,null,null,3,6]
+    Output: false
 Explanation: The root node's value is 5 but its right child's value is 4.
 
 用long代替int就是为了包括int的边界条件
 
 bool isValidBST(TreeNode* root) {
-	return isValidBST(root, LONG_MIN, LONG_MAX);
+    return isValidBST(root, LONG_MIN, LONG_MAX);
 }
 
 bool isValidBST(TreeNode* root, long mn, long mx) {
-	if (!root) return true;
-	if (root->val <= mn || root->val >= mx) return false;
-	return isValidBST(root->left, mn, root->val) && isValidBST(root->right, root->val, mx);
+    if (!root) return true;
+    if (root->val <= mn || root->val >= mx) return false;
+    return isValidBST(root->left, mn, root->val) && isValidBST(root->right, root->val, mx);
 }
 
 ---------------------------------------------------------------------
@@ -2330,34 +2330,34 @@ bool isValidBST(TreeNode* root, long mn, long mx) {
 Given a binary tree, return the level order traversal of its nodes' values. (ie, from left to right, level by level).
 
 For example:
-	Given binary tree [3,9,20,null,null,15,7],
-		3
-	   / \
-	  9  20
-		/  \
-	   15   7
-	return its level order traversal as:
-	[
-	  [3],
-	  [9,20],
-	  [15,7]
-	]
+    Given binary tree [3,9,20,null,null,15,7],
+        3
+       / \
+      9  20
+        /  \
+       15   7
+    return its level order traversal as:
+    [
+      [3],
+      [9,20],
+      [15,7]
+    ]
 
 vector<vector<int>> levelOrder(TreeNode* root) {
-	if (!root) return {};
-	vector<vector<int>> res;
-	queue<TreeNode*> q{{root}};
-	while (!q.empty()) {
-		vector<int> oneLevel;
-		for (int i = q.size(); i > 0; --i) {
-			TreeNode *t = q.front(); q.pop();
-			oneLevel.push_back(t->val);
-			if (t->left) q.push(t->left);
-			if (t->right) q.push(t->right);
-		}
-		res.push_back(oneLevel);
-	}
-	return res;
+    if (!root) return {};
+    vector<vector<int>> res;
+    queue<TreeNode*> q{{root}};
+    while (!q.empty()) {
+        vector<int> oneLevel;
+        for (int i = q.size(); i > 0; --i) {
+            TreeNode *t = q.front(); q.pop();
+            oneLevel.push_back(t->val);
+            if (t->left) q.push(t->left);
+            if (t->right) q.push(t->right);
+        }
+        res.push_back(oneLevel);
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -2367,36 +2367,36 @@ Given a binary tree, return the zigzag level order traversal of its nodes' value
 
 For example:
 Given binary tree [3,9,20,null,null,15,7],
-		3
-	   / \
-	  9  20
-		/  \
-	   15   7
-	return its zigzag level order traversal as:
-	[
-	  [3],
-	  [20,9],
-	  [15,7]
-	]
+        3
+       / \
+      9  20
+        /  \
+       15   7
+    return its zigzag level order traversal as:
+    [
+      [3],
+      [20,9],
+      [15,7]
+    ]
 
 vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
-	if (!root) return {};
-	vector<vector<int>> res;
-	queue<TreeNode*> q{{root}};
-	int cnt = 0;
-	while (!q.empty()) {
-		vector<int> oneLevel;
-		for (int i = q.size(); i > 0; --i) {
-			TreeNode *t = q.front(); q.pop();
-			oneLevel.push_back(t->val);
-			if (t->left) q.push(t->left);
-			if (t->right) q.push(t->right);
-		}
-		if (cnt % 2 == 1) reverse(oneLevel.begin(), oneLevel.end());
-		res.push_back(oneLevel);
-		++cnt;
-	}
-	return res;
+    if (!root) return {};
+    vector<vector<int>> res;
+    queue<TreeNode*> q{{root}};
+    int cnt = 0;
+    while (!q.empty()) {
+        vector<int> oneLevel;
+        for (int i = q.size(); i > 0; --i) {
+            TreeNode *t = q.front(); q.pop();
+            oneLevel.push_back(t->val);
+            if (t->left) q.push(t->left);
+            if (t->right) q.push(t->right);
+        }
+        if (cnt % 2 == 1) reverse(oneLevel.begin(), oneLevel.end());
+        res.push_back(oneLevel);
+        ++cnt;
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -2409,31 +2409,31 @@ You may assume that duplicates do not exist in the tree.
 
 For example, given
 
-	preorder = [3,9,20,15,7]
-	inorder = [9,3,15,20,7]
+    preorder = [3,9,20,15,7]
+    inorder = [9,3,15,20,7]
 Return the following binary tree:
-		3
-	   / \
-	  9  20
-		/  \
-	   15   7
+        3
+       / \
+      9  20
+        /  \
+       15   7
 
 由于先序的顺序的第一个肯定是根，所以原二叉树的根节点可以知道，题目中给了一个很关键的条件就是树中没有相同元素，有了这个条件我们就可以在中序遍历中也定位出根节点的位置，并以根节点的位置将中序遍历拆分为左右两个部分，分别对其递归调用原函数
 
 TreeNode *buildTree(vector<int> &preorder, vector<int> &inorder) {
-	return buildTree(preorder, 0, preorder.size() - 1, inorder, 0, inorder.size() - 1);
+    return buildTree(preorder, 0, preorder.size() - 1, inorder, 0, inorder.size() - 1);
 }
 
 TreeNode *buildTree(vector<int> &preorder, int pLeft, int pRight, vector<int> &inorder, int iLeft, int iRight) {
-	if (pLeft > pRight || iLeft > iRight) return NULL;
-	int i = 0;
-	for (i = iLeft; i <= iRight; ++i) {
-		if (preorder[pLeft] == inorder[i]) break;
-	}
-	TreeNode *cur = new TreeNode(preorder[pLeft]);
-	cur->left = buildTree(preorder, pLeft + 1, pLeft + i - iLeft, inorder, iLeft, i - 1);
-	cur->right = buildTree(preorder, pLeft + i - iLeft + 1, pRight, inorder, i + 1, iRight);
-	return cur;
+    if (pLeft > pRight || iLeft > iRight) return NULL;
+    int i = 0;
+    for (i = iLeft; i <= iRight; ++i) {
+        if (preorder[pLeft] == inorder[i]) break;
+    }
+    TreeNode *cur = new TreeNode(preorder[pLeft]);
+    cur->left = buildTree(preorder, pLeft + 1, pLeft + i - iLeft, inorder, iLeft, i - 1);
+    cur->right = buildTree(preorder, pLeft + i - iLeft + 1, pRight, inorder, i + 1, iRight);
+    return cur;
 }
 
 ---------------------------------------------------------------------
@@ -2445,46 +2445,46 @@ Note:
 You may assume that duplicates do not exist in the tree.
 
 For example, given
-	inorder = [9,3,15,20,7]
-	postorder = [9,15,7,20,3]
+    inorder = [9,3,15,20,7]
+    postorder = [9,15,7,20,3]
 Return the following binary tree:
 
-		3
-	   / \
-	  9  20
-		/  \
-	   15   7
+        3
+       / \
+      9  20
+        /  \
+       15   7
 
 由于后序的顺序的最后一个肯定是根，所以原二叉树的根节点可以知道，题目中给了一个很关键的条件就是树中没有相同元素，有了这个条件我们就可以在中序遍历中也定位出根节点的位置，并以根节点的位置将中序遍历拆分为左右两个部分，分别对其递归调用原函数
 
 TreeNode *buildTree(vector<int> &inorder, vector<int> &postorder) {
-	return buildTree(inorder, 0, inorder.size() - 1, postorder, 0, postorder.size() - 1);
+    return buildTree(inorder, 0, inorder.size() - 1, postorder, 0, postorder.size() - 1);
 }
 
 TreeNode *buildTree(vector<int> &inorder, int iLeft, int iRight, vector<int> &postorder, int pLeft, int pRight) {
-	if (iLeft > iRight || pLeft > pRight) return NULL;
-	TreeNode *cur = new TreeNode(postorder[pRight]);
-	int i = 0;
-	for (i = iLeft; i < inorder.size(); ++i) {
-		if (inorder[i] == cur->val) break;
-	}
-	cur->left = buildTree(inorder, iLeft, i - 1, postorder, pLeft, pLeft + i - iLeft - 1);
-	cur->right = buildTree(inorder, i + 1, iRight, postorder, pLeft + i - iLeft, pRight - 1);
-	return cur;
+    if (iLeft > iRight || pLeft > pRight) return NULL;
+    TreeNode *cur = new TreeNode(postorder[pRight]);
+    int i = 0;
+    for (i = iLeft; i < inorder.size(); ++i) {
+        if (inorder[i] == cur->val) break;
+    }
+    cur->left = buildTree(inorder, iLeft, i - 1, postorder, pLeft, pLeft + i - iLeft - 1);
+    cur->right = buildTree(inorder, i + 1, iRight, postorder, pLeft + i - iLeft, pRight - 1);
+    return cur;
 }
 
 为什么不能由先序和后序遍历建立二叉树呢，这是因为先序和后序遍历不能唯一的确定一个二叉树，比如下面五棵树：
-	　1　　　　　preorder:　　  1　　2　　3
-	 / \　　　　 inorder:　　   2　　1　　3
-	2    3　　   postorder:　　 2　　3　　1
+    　1　　　　　preorder:　　  1　　2　　3
+     / \　　　　 inorder:　　   2　　1　　3
+    2    3　　   postorder:　　 2　　3　　1
 
  
 
-	    1   　　 preorder:　　  1　　2　　3
-	   / 　　　　inorder:　　   3　　2　　1
-	  2 　　     postorder: 　　3　　2　　1
-	 /
-	3
+        1   　　 preorder:　　  1　　2　　3
+       / 　　　　inorder:　　   3　　2　　1
+      2 　　     postorder: 　　3　　2　　1
+     /
+    3
 
       1　　　　  preorder:　　  1　　2　　3
      / 　　　　  inorder:　　   2　　3　　1
@@ -2492,11 +2492,11 @@ TreeNode *buildTree(vector<int> &inorder, int iLeft, int iRight, vector<int> &po
      \
       3
 
-	1　　　　    preorder:　　  1　　2　　3
-	 \ 　　　    inorder:　　   1　　3　　2
-	  2 　　　　 postorder:　　 3　　2　　1
-	 /
-	3
+    1　　　　    preorder:　　  1　　2　　3
+     \ 　　　    inorder:　　   1　　3　　2
+      2 　　　　 postorder:　　 3　　2　　1
+     /
+    3
 
     1　　　      preorder:　　  1　　2　　3
      \ 　　　　　inorder:　　   1　　2　　3
@@ -2514,33 +2514,33 @@ Given a singly linked list where elements are sorted in ascending order, convert
 For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of every node never differ by more than 1.
 
 Example:
-	Given the sorted linked list: [-10,-3,0,5,9],
+    Given the sorted linked list: [-10,-3,0,5,9],
 
-	One possible answer is: [0,-3,9,-10,null,5], which represents the following height balanced BST:
+    One possible answer is: [0,-3,9,-10,null,5], which represents the following height balanced BST:
 
-		  0
-		 / \
-	   -3   9
-	   /   /
-	 -10  5
+          0
+         / \
+       -3   9
+       /   /
+     -10  5
 
 找到中点后，要以中点的值建立一个数的根节点，然后需要把原链表断开，分为前后两个链表，都不能包含原中节点，然后再分别对这两个链表递归调用原函数，分别连上左右子节点即可
 
 TreeNode *sortedListToBST(ListNode* head) {
-	if (!head) return NULL;
-	if (!head->next) return new TreeNode(head->val);
-	ListNode *slow = head, *fast = head, *last = slow;
-	while (fast->next && fast->next->next) {
-		last = slow;
-		slow = slow->next;
-		fast = fast->next->next;
-	}
-	fast = slow->next;
-	last->next = NULL;
-	TreeNode *cur = new TreeNode(slow->val);
-	if (head != slow) cur->left = sortedListToBST(head);
-	cur->right = sortedListToBST(fast);
-	return cur;
+    if (!head) return NULL;
+    if (!head->next) return new TreeNode(head->val);
+    ListNode *slow = head, *fast = head, *last = slow;
+    while (fast->next && fast->next->next) {
+        last = slow;
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    fast = slow->next;
+    last->next = NULL;
+    TreeNode *cur = new TreeNode(slow->val);
+    if (head != slow) cur->left = sortedListToBST(head);
+    cur->right = sortedListToBST(fast);
+    return cur;
 }
 
 ---------------------------------------------------------------------
@@ -2551,37 +2551,37 @@ Given a binary tree and a sum, find all root-to-leaf paths where each path's sum
 Note: A leaf is a node with no children.
 
 Example:
-	Given the below binary tree and sum = 22,
+    Given the below binary tree and sum = 22,
 
-		  5
-		 / \
-		4   8
-	   /   / \
-	  11  13  4
-	 /  \    / \
-	7    2  5   1
-	Return:
-	[
-	   [5,4,11,2],
-	   [5,8,4,5]
-	]
+          5
+         / \
+        4   8
+       /   / \
+      11  13  4
+     /  \    / \
+    7    2  5   1
+    Return:
+    [
+       [5,4,11,2],
+       [5,8,4,5]
+    ]
 
-vector<vector<int> > pathSum(TreeNode *root, int sum) {	
-	vector<vector<int>> res;
-	vector<int> out;
-	helper(root, sum, out, res);
-	return res;
+vector<vector<int> > pathSum(TreeNode *root, int sum) {    
+    vector<vector<int>> res;
+    vector<int> out;
+    helper(root, sum, out, res);
+    return res;
 }
 
 void helper(TreeNode* node, int sum, vector<int>& out, vector<vector<int>>& res) {
-	if (!node) return;
-	out.push_back(node->val);
-	if (sum == node->val && !node->left && !node->right) {
-		res.push_back(out);
-	}
-	helper(node->left, sum - node->val, out, res);
-	helper(node->right, sum - node->val, out, res);
-	out.pop_back();
+    if (!node) return;
+    out.push_back(node->val);
+    if (sum == node->val && !node->left && !node->right) {
+        res.push_back(out);
+    }
+    helper(node->left, sum - node->val, out, res);
+    helper(node->right, sum - node->val, out, res);
+    out.pop_back();
 }
 
 ---------------------------------------------------------------------
@@ -2590,70 +2590,70 @@ void helper(TreeNode* node, int sum, vector<int>& out, vector<vector<int>>& res)
 Given a binary tree, flatten it to a linked list in-place.
 
 For example, given the following tree:
-		1
-	   / \
-	  2   5
-	 / \   \
-	3   4   6
-	The flattened tree should look like:
-	1
-	 \
-	  2
-	   \
-		3
-		 \
-		  4
-		   \
-			5
-			 \
-			  6
+        1
+       / \
+      2   5
+     / \   \
+    3   4   6
+    The flattened tree should look like:
+    1
+     \
+      2
+       \
+        3
+         \
+          4
+           \
+            5
+             \
+              6
 
 从根节点开始出发，先检测其左子结点是否存在，如存在则将根节点和其右子节点断开，将左子结点及其后面所有结构一起连到原右子节点的位置，把原右子节点连到元左子结点最后面的右子节点之后
 
 void flatten(TreeNode *root) {
-	TreeNode *cur = root;
-	while (cur) {
-		if (cur->left) {
-			TreeNode *p = cur->left;
-			while (p->right) p = p->right;
-			p->right = cur->right;
-			cur->right = cur->left;
-			cur->left = NULL;
-		}
-		cur = cur->right;
-	}
+    TreeNode *cur = root;
+    while (cur) {
+        if (cur->left) {
+            TreeNode *p = cur->left;
+            while (p->right) p = p->right;
+            p->right = cur->right;
+            cur->right = cur->left;
+            cur->left = NULL;
+        }
+        cur = cur->right;
+    }
 }
 
 void flatten(TreeNode* root) {
-	if (!root) return;
-	stack<TreeNode*> s;
-	s.push(root);
-	while (!s.empty()) {
-		TreeNode *t = s.top(); s.pop();
-		if (t->left) {
-			TreeNode *r = t->left;
-			while (r->right) r = r->right;
-			r->right = t->right;
-			t->right = t->left;
-			t->left = NULL;
-		}
-		if (t->right) s.push(t->right);
-	}
+    if (!root) return;
+    stack<TreeNode*> s;
+    s.push(root);
+    while (!s.empty()) {
+        TreeNode *t = s.top(); s.pop();
+        if (t->left) {
+            TreeNode *r = t->left;
+            while (r->right) r = r->right;
+            r->right = t->right;
+            t->right = t->left;
+            t->left = NULL;
+        }
+        if (t->right) s.push(t->right);
+    }
 }
 
 树的遍历有递归和非递归两种方法
 
 void flatten(TreeNode *root) {
-	if (!root) return;
-	if (root->left) flatten(root->left);
-	if (root->right) flatten(root->right);
-	TreeNode *tmp = root->right;
-	root->right = root->left;
-	root->left = NULL;
-	while (root->right) root = root->right;
-	root->right = tmp;
+    if (!root) return;
+    if (root->left) flatten(root->left);
+    if (root->right) flatten(root->right);
+    TreeNode *tmp = root->right;
+    root->right = root->left;
+    root->left = NULL;
+    while (root->right) root = root->right;
+    root->right = tmp;
 }
-	
+    
 ---------------------------------------------------------------------
 
 //116 Populating Next Right Pointers in Each Node 每个节点的右向指针
@@ -2674,47 +2674,47 @@ Initially, all next pointers are set to NULL.
 
 递归
 Node* connect(Node* root) {
-	if (!root) return NULL;
-	if (root->left) root->left->next = root->right;
-	if (root->right) root->right->next = root->next? root->next->left : NULL;
-	connect(root->left);
-	connect(root->right);
-	return root;
+    if (!root) return NULL;
+    if (root->left) root->left->next = root->right;
+    if (root->right) root->right->next = root->next? root->next->left : NULL;
+    connect(root->left);
+    connect(root->right);
+    return root;
 }
 
 非递归
 Node* connect(Node* root) {
-	if (!root) return NULL;
-	queue<Node*> q;
-	q.push(root);
-	while (!q.empty()) {
-		int size = q.size();
-		for (int i = 0; i < size; ++i) {
-			Node *t = q.front(); q.pop();
-			if (i < size - 1) {
-				t->next = q.front();
-			}
-			if (t->left) q.push(t->left);
-			if (t->right) q.push(t->right);
-		}
-	}
-	return root;
+    if (!root) return NULL;
+    queue<Node*> q;
+    q.push(root);
+    while (!q.empty()) {
+        int size = q.size();
+        for (int i = 0; i < size; ++i) {
+            Node *t = q.front(); q.pop();
+            if (i < size - 1) {
+                t->next = q.front();
+            }
+            if (t->left) q.push(t->left);
+            if (t->right) q.push(t->right);
+        }
+    }
+    return root;
 }
 
 两个指针 start 和 cur，其中 start 标记每一层的起始节点，cur 用来遍历该层的节点
 Node* connect(Node* root) {
-	if (!root) return NULL;
-	Node *start = root, *cur = NULL;
-	while (start->left) {
-		cur = start;
-		while (cur) {
-			cur->left->next = cur->right;
-			if (cur->next) cur->right->next = cur->next->left;
-			cur = cur->next;
-		}
-		start = start->left;
-	}
-	return root;
+    if (!root) return NULL;
+    Node *start = root, *cur = NULL;
+    while (start->left) {
+        cur = start;
+        while (cur) {
+            cur->left->next = cur->right;
+            if (cur->next) cur->right->next = cur->next->left;
+            cur = cur->next;
+        }
+        start = start->left;
+    }
+    return root;
 }
 
 ---------------------------------------------------------------------
@@ -2739,65 +2739,65 @@ Recursive approach is fine, implicit stack space does not count as extra space f
 
 递归
 Node* connect(Node* root) {
-	if (!root) return NULL;
-	Node *p = root->next;
-	while (p) {
-		if (p->left) {
-			p = p->left;
-			break;
-		}
-		if (p->right) {
-			p = p->right;
-			break;
-		}
-		p = p->next;
-	}
-	if (root->right) root->right->next = p; 
-	if (root->left) root->left->next = root->right ? root->right : p; 
-	connect(root->right);
-	connect(root->left);
-	return root;
+    if (!root) return NULL;
+    Node *p = root->next;
+    while (p) {
+        if (p->left) {
+            p = p->left;
+            break;
+        }
+        if (p->right) {
+            p = p->right;
+            break;
+        }
+        p = p->next;
+    }
+    if (root->right) root->right->next = p; 
+    if (root->left) root->left->next = root->right ? root->right : p; 
+    connect(root->right);
+    connect(root->left);
+    return root;
 }
 
 迭代 非常量空间
 Node* connect(Node* root) {
-	if (!root) return NULL;
-	queue<Node*> q;
-	q.push(root);
-	while (!q.empty()) {
-		int len = q.size();
-		for (int i = 0; i < len; ++i) {
-			Node *t = q.front(); q.pop();
-			if (i < len - 1) t->next = q.front();
-			if (t->left) q.push(t->left);
-			if (t->right) q.push(t->right);
-		}
-	}
-	return root;
+    if (!root) return NULL;
+    queue<Node*> q;
+    q.push(root);
+    while (!q.empty()) {
+        int len = q.size();
+        for (int i = 0; i < len; ++i) {
+            Node *t = q.front(); q.pop();
+            if (i < len - 1) t->next = q.front();
+            if (t->left) q.push(t->left);
+            if (t->right) q.push(t->right);
+        }
+    }
+    return root;
 }
 
 迭代 常量空间
 建立一个dummy结点来指向每层的首结点的前一个结点
 指针cur用来遍历这一层
 Node* connect(Node* root) {
-	Node *dummy = new Node(0, NULL, NULL, NULL), *cur = dummy, *head = root;
-	while (root) {
-		if (root->left) {
-			cur->next = root->left;
-			cur = cur->next;
-		}
-		if (root->right) {
-			cur->next = root->right;
-			cur = cur->next;
-		}
-		root = root->next;
-		if (!root) {
-			cur = dummy;
-			root = dummy->next;
-			dummy->next = NULL;
-		}
-	}
-	return head;
+    Node *dummy = new Node(0, NULL, NULL, NULL), *cur = dummy, *head = root;
+    while (root) {
+        if (root->left) {
+            cur->next = root->left;
+            cur = cur->next;
+        }
+        if (root->right) {
+            cur->next = root->right;
+            cur = cur->next;
+        }
+        root = root->next;
+        if (!root) {
+            cur = dummy;
+            root = dummy->next;
+            dummy->next = NULL;
+        }
+    }
+    return head;
 }
 
 ---------------------------------------------------------------------
@@ -2806,12 +2806,12 @@ Node* connect(Node* root) {
 Given a triangle, find the minimum path sum from top to bottom. Each step you may move to adjacent numbers on the row below.
 
 For example, given the following triangle
-	[
-		 [2],
-		[3,4],
-	   [6,5,7],
-	  [4,1,8,3]
-	]
+    [
+         [2],
+        [3,4],
+       [6,5,7],
+      [4,1,8,3]
+    ]
 The minimum path sum from top to bottom is 11 (i.e., 2 + 3 + 5 + 1 = 11).
 
 Note:
@@ -2820,31 +2820,31 @@ Bonus point if you are able to do this using only O(n) extra space, where n is t
 
 修改原数组的DP方法
 int minimumTotal(vector<vector<int>>& triangle) {
-	for (int i = 1; i < triangle.size(); ++i) {
-		for (int j = 0; j < triangle[i].size(); ++j) {
-			if (j == 0) {
-				triangle[i][j] += triangle[i - 1][j];
-			}
-			else if (j == triangle[i].size() - 1) {
-				triangle[i][j] += triangle[i - 1][j - 1];
-			}
-			else {
-				triangle[i][j] += min(triangle[i - 1][j - 1], triangle[i - 1][j]);
-			}
-		}
-	}
-	return *min_element(triangle.back().begin(), triangle.back().end());
+    for (int i = 1; i < triangle.size(); ++i) {
+        for (int j = 0; j < triangle[i].size(); ++j) {
+            if (j == 0) {
+                triangle[i][j] += triangle[i - 1][j];
+            }
+            else if (j == triangle[i].size() - 1) {
+                triangle[i][j] += triangle[i - 1][j - 1];
+            }
+            else {
+                triangle[i][j] += min(triangle[i - 1][j - 1], triangle[i - 1][j]);
+            }
+        }
+    }
+    return *min_element(triangle.back().begin(), triangle.back().end());
 }
 
 复制三角形最后一行，作为用来更新的一位数组
 int minimumTotal(vector<vector<int>>& triangle) {
-	vector<int> dp(triangle.back());
-	for (int i = (int)triangle.size() - 2; i >= 0; --i) {
-		for (int j = 0; j <= i; ++j) {
-			dp[j] = min(dp[j], dp[j + 1]) + triangle[i][j];
-		}
-	}
-	return dp[0];
+    vector<int> dp(triangle.back());
+    for (int i = (int)triangle.size() - 2; i >= 0; --i) {
+        for (int j = 0; j <= i; ++j) {
+            dp[j] = min(dp[j], dp[j + 1]) + triangle[i][j];
+        }
+    }
+    return dp[0];
 }
 
 ---------------------------------------------------------------------
@@ -2862,50 +2862,87 @@ All words contain only lowercase alphabetic characters.
 You may assume no duplicates in the word list.
 You may assume beginWord and endWord are non-empty and are not the same.
 Example 1:
-	Input:
-	beginWord = "hit",
-	endWord = "cog",
-	wordList = ["hot","dot","dog","lot","log","cog"]
+    Input:
+    beginWord = "hit",
+    endWord = "cog",
+    wordList = ["hot","dot","dog","lot","log","cog"]
 
-	Output: 5
+    Output: 5
 
 Explanation: As one shortest transformation is "hit" -> "hot" -> "dot" -> "dog" -> "cog",
 return its length 5.
 Example 2:
-	Input:
-	beginWord = "hit"
-	endWord = "cog"
-	wordList = ["hot","dot","dog","lot","log"]
+    Input:
+    beginWord = "hit"
+    endWord = "cog"
+    wordList = ["hot","dot","dog","lot","log"]
 
-	Output: 0
+    Output: 0
 
 Explanation: The endWord "cog" is not in wordList, therefore no possible transformation.
 
 int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
-	unordered_set<string> wordSet(wordList.begin(), wordList.end());
-	if (!wordSet.count(endWord)) return 0;
-	queue<string> q{{beginWord}};
-	int res = 0;
-	while (!q.empty()) {
-		for (int k = q.size(); k > 0; --k) {
-			string word = q.front(); q.pop();
-			if (word == endWord) return res + 1;
-			for (int i = 0; i < word.size(); ++i) {
-				string newWord = word;
-				for (char ch = 'a'; ch <= 'z'; ++ch) {
-					newWord[i] = ch;
-					if (wordSet.count(newWord) && newWord != word) {
-						q.push(newWord);
-						wordSet.erase(newWord);
-					}
-				}
-			}
-		}
-		++res;
-	}
-	return 0;
+    unordered_set<string> wordSet(wordList.begin(), wordList.end());
+    if (!wordSet.count(endWord)) return 0;
+    queue<string> q{{beginWord}};
+    int res = 0;
+    while (!q.empty()) {
+        for (int k = q.size(); k > 0; --k) {
+            string word = q.front(); q.pop();
+            if (word == endWord) return res + 1;
+            for (int i = 0; i < word.size(); ++i) {
+                string newWord = word;
+                for (char ch = 'a'; ch <= 'z'; ++ch) {
+                    newWord[i] = ch;
+                    if (wordSet.count(newWord) && newWord != word) {
+                        q.push(newWord);
+                        wordSet.erase(newWord);
+                    }
+                }
+            }
+        }
+        ++res;
+    }
+    return 0;
 }
+
 ---------------------------------------------------------------------
+
+//129 Sum Root to Leaf Numbers 求根到叶节点数字之和
+Given a binary tree containing digits from 0-9 only, each root-to-leaf path could represent a number.
+
+An example is the root-to-leaf path 1->2->3 which represents the number 123.
+
+Find the total sum of all root-to-leaf numbers.
+
+Note: A leaf is a node with no children.
+
+Example:
+    Input: [1,2,3]
+        1
+       / \
+      2   3
+    Output: 25
+Explanation:
+    The root-to-leaf path 1->2 represents the number 12.
+    The root-to-leaf path 1->3 represents the number 13.
+    Therefore, sum = 12 + 13 = 25.
+
+Example 2:
+    Input: [4,9,0,5,1]
+        4
+       / \
+      9   0
+     / \
+    5   1
+    Output: 1026
+Explanation:
+    The root-to-leaf path 4->9->5 represents the number 495.
+    The root-to-leaf path 4->9->1 represents the number 491.
+    The root-to-leaf path 4->0 represents the number 40.
+    Therefore, sum = 495 + 491 + 40 = 1026.
+
+
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
