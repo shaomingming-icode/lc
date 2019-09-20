@@ -2942,8 +2942,844 @@ Explanation:
     The root-to-leaf path 4->0 represents the number 40.
     Therefore, sum = 495 + 491 + 40 = 1026.
 
+递归 容易理解
+int sumNumbers(TreeNode* root) {
+    int sum = 0;
+    sumNumbersDFS(root, 0, &sum);
+    return sum;
+}
+
+void sumNumbersDFS(TreeNode* root, int tempSum, int *sum) {
+    if (!root) return;
+    tempSum = tempSum * 10 + root->val;
+    if (!root->left && !root->right) {
+        *sum += tempSum;
+    }
+    sumNumbersDFS(root->left, tempSum, sum);
+    sumNumbersDFS(root->right, tempSum, sum);
+}
+
+迭代 使用栈来实现深度优先搜索
+int sumNumbers(TreeNode* root) {
+    if (!root) return 0;
+    int res = 0;
+    stack<TreeNode*> st{{root}};
+    while (!st.empty()) {
+        TreeNode *t = st.top(); st.pop();
+        if (!t->left && !t->right) {
+            res += t->val;
+        }
+        if (t->right) {
+            t->right->val += t->val * 10;
+            st.push(t->right);
+        }
+        if (t->left) {
+            t->left->val += t->val * 10;
+            st.push(t->left);
+        }
+    }
+    return res;
+}
 
 ---------------------------------------------------------------------
+
+//130 Surrounded Regions 包围区域
+Given a 2D board containing 'X' and 'O' (the letter O), capture all regions surrounded by 'X'.
+
+A region is captured by flipping all 'O's into 'X's in that surrounded region.
+
+Example:
+    X X X X
+    X O O X
+    X X O X
+    X O X X
+After running your function, the board should be:
+    X X X X
+    X X X X
+    X X X X
+    X O X X
+Explanation:
+    Surrounded regions shouldn’t be on the border, which means that any 'O' on the border of the board are not flipped to 'X'. Any 'O' that is not on the border and it is not connected to an 'O' on the border will be flipped to 'X'. Two cells are connected if they are adjacent cells connected horizontally or vertically.
+
+
+void solve(vector<vector<char> >& board) {
+    for (int i = 0; i < board.size(); ++i) {
+        for (int j = 0; j < board[i].size(); ++j) {
+            if ((i == 0 || i == board.size() - 1 || j == 0 || j == board[i].size() - 1) && board[i][j] == 'O')
+                solveDFS(board, i, j);
+        }
+    }
+    for (int i = 0; i < board.size(); ++i) {
+        for (int j = 0; j < board[i].size(); ++j) {
+            if (board[i][j] == 'O') board[i][j] = 'X';
+            if (board[i][j] == '$') board[i][j] = 'O';
+        }
+    }
+}
+
+void solveDFS(vector<vector<char> > &board, int i, int j) {
+    if (board[i][j] == 'O') {
+        board[i][j] = '$';
+        if (i > 0 && board[i - 1][j] == 'O') 
+            solveDFS(board, i - 1, j);
+        if (j < board[i].size() - 1 && board[i][j + 1] == 'O') 
+            solveDFS(board, i, j + 1);
+        if (i < board.size() - 1 && board[i + 1][j] == 'O') 
+            solveDFS(board, i + 1, j);
+        if (j > 0 && board[i][j - 1] == 'O') 
+            solveDFS(board, i, j - 1);
+    }
+}
+
 ---------------------------------------------------------------------
+
+//131 Palindrome Partitioning 分割回文串
+Given a string s, partition s such that every substring of the partition is a palindrome.
+
+Return all possible palindrome partitioning of s.
+
+Example:
+Input: "aab"
+Output:
+    [
+      ["aa","b"],
+      ["a","a","b"]
+    ]
+
+深度优先搜索
+由于不知道该如何切割，所以我们要遍历所有的切割情况，即一个字符，两个字符，三个字符，等等
+vector<vector<string>> partition(string s) {
+    vector<vector<string>> res;
+    vector<string> out;
+    helper(s, 0, out, res);
+    return res;
+}
+
+void helper(string s, int start, vector<string>& out, vector<vector<string>>& res) {
+    if (start == s.size()) { res.push_back(out); return; }
+    for (int i = start; i < s.size(); ++i) {
+        if (!isPalindrome(s, start, i)) continue;
+        out.push_back(s.substr(start, i - start + 1));
+        helper(s, i + 1, out, res);
+        out.pop_back();
+    }
+}
+
+bool isPalindrome(string s, int start, int end) {
+    while (start < end) {
+        if (s[start] != s[end]) return false;
+        ++start; --end;
+    }
+    return true;
+}
+
 ---------------------------------------------------------------------
+
+//133 Clone Graph 克隆无向图
+Given a reference of a node in a connected undirected graph, return a deep copy (clone) of the graph. Each node in the graph contains a val (int) and a list (List[Node]) of its neighbors.
+
+Example:
+    Input:
+    {"$id":"1","neighbors":[{"$id":"2","neighbors":[{"$ref":"1"},{"$id":"3","neighbors":[{"$ref":"2"},{"$id":"4","neighbors":[{"$ref":"3"},{"$ref":"1"}],"val":4}],"val":3}],"val":2},{"$ref":"4"}],"val":1}
+
+Explanation:
+    Node 1's value is 1, and it has two neighbors: Node 2 and 4.
+    Node 2's value is 2, and it has two neighbors: Node 1 and 3.
+    Node 3's value is 3, and it has two neighbors: Node 2 and 4.
+    Node 4's value is 4, and it has two neighbors: Node 1 and 3.
+ 
+Note:
+The number of nodes will be between 1 and 100.
+The undirected graph is a simple graph, which means no repeated edges and no self-loops in the graph.
+Since the graph is undirected, if node p has node q as neighbor, then node q must have node p as neighbor too.
+You must return the copy of the given node as a reference to the cloned graph.
+
+对于图的遍历的两大基本方法是深度优先搜索 DFS 和广度优先搜索 BFS
+
+DFS
+Node* cloneGraph(Node* node) {
+    unordered_map<Node*, Node*> m;
+    return helper(node, m);
+}
+
+Node* helper(Node* node, unordered_map<Node*, Node*>& m) {
+    if (!node) return NULL;
+    if (m.count(node)) return m[node];
+    Node *clone = new Node(node->val);
+    m[node] = clone;
+    for (Node *neighbor : node->neighbors) {
+        clone->neighbors.push_back(helper(neighbor, m));
+    }
+    return clone;
+}
+
+BFS
+Node* cloneGraph(Node* node) {
+    if (!node) return NULL;
+    unordered_map<Node*, Node*> m;
+    queue<Node*> q{{node}};
+    Node *clone = new Node(node->val);
+    m[node] = clone;
+    while (!q.empty()) {
+        Node *t = q.front(); q.pop();
+        for (Node *neighbor : t->neighbors) {
+            if (!m.count(neighbor)) {
+                m[neighbor] = new Node(neighbor->val);
+                q.push(neighbor);
+            }
+            m[t]->neighbors.push_back(m[neighbor]);
+        }
+    }
+    return clone;
+}
+
 ---------------------------------------------------------------------
+
+//134 Gas Station 加油站问题
+There are N gas stations along a circular route, where the amount of gas at station i is gas[i].
+
+You have a car with an unlimited gas tank and it costs cost[i] of gas to travel from station i to its next station (i+1). You begin the journey with an empty tank at one of the gas stations.
+
+Return the starting gas station's index if you can travel around the circuit once in the clockwise direction, otherwise return -1.
+
+Note:
+If there exists a solution, it is guaranteed to be unique.
+Both input arrays are non-empty and have the same length.
+Each element in the input arrays is a non-negative integer.
+
+Example 1:
+    Input: 
+    gas  = [1,2,3,4,5]
+    cost = [3,4,5,1,2]
+
+    Output: 3
+
+Explanation:
+    Start at station 3 (index 3) and fill up with 4 unit of gas. Your tank = 0 + 4 = 4
+    Travel to station 4. Your tank = 4 - 1 + 5 = 8
+    Travel to station 0. Your tank = 8 - 2 + 1 = 7
+    Travel to station 1. Your tank = 7 - 3 + 2 = 6
+    Travel to station 2. Your tank = 6 - 4 + 3 = 5
+    Travel to station 3. The cost is 5. Your gas is just enough to travel back to station 3.
+    Therefore, return 3 as the starting index.
+    
+Example 2:
+    Input: 
+    gas  = [2,3,4]
+    cost = [3,4,3]
+
+    Output: -1
+    
+Explanation:
+You can't start at station 0 or 1, as there is not enough gas to travel to the next station.
+Let's start at station 2 and fill up with 4 unit of gas. Your tank = 0 + 4 = 4
+Travel to station 0. Your tank = 4 - 3 + 2 = 3
+Travel to station 1. Your tank = 3 - 3 + 3 = 3
+You cannot travel back to station 2, as it requires 4 unit of gas but you only have 3.
+Therefore, you can't travel around the circuit once no matter where you start.
+
+int canCompleteCircuit(vector<int>& gas, vector<int>& cost) {
+    int total = 0, sum = 0, start = 0;
+    for (int i = 0; i < gas.size(); ++i) {
+        total += gas[i] - cost[i];
+        sum += gas[i] - cost[i];
+        if (sum < 0) {
+            start = i + 1;
+            sum = 0;
+        }
+    }
+    return (total < 0) ? -1 : start;
+}
+
+---------------------------------------------------------------------
+
+//137 Single Number II 单独的数字之二
+Given a non-empty array of integers, every element appears three times except for one, which appears exactly once. Find that single one.
+
+Note:
+
+Your algorithm should have a linear runtime complexity. Could you implement it without using extra memory?
+
+Example 1:
+
+Input: [2,2,3,2]
+Output: 3
+Example 2:
+
+Input: [0,1,0,1,0,1,99]
+Output: 99
+
+如果某一位上为1的话，那么如果该整数出现了三次，对3取余为0，最终剩下来的那个数就是单独的数字
+
+int singleNumber(vector<int>& nums) {
+	int res = 0;
+	for (int i = 0; i < 32; ++i) {
+		int sum = 0;
+		for (int j = 0; j < nums.size(); ++j) {
+			sum += (nums[j] >> i) & 1;
+		}
+		res |= (sum % 3) << i;
+	}
+	return res;
+}
+
+---------------------------------------------------------------------
+
+//138 Copy List with Random Pointer 拷贝带有随机指针的链表
+A linked list is given such that each node contains an additional random pointer which could point to any node in the list or null.
+
+Return a deep copy of the list.
+
+Example 1:
+	Input:
+	{"$id":"1","next":{"$id":"2","next":null,"random":{"$ref":"2"},"val":2},"random":{"$ref":"2"},"val":1}
+
+Explanation:
+Node 1's value is 1, both of its next and random pointer points to Node 2.
+Node 2's value is 2, its next pointer points to null and its random pointer points to itself.
+
+Node* copyRandomList(Node* head) {
+	if (!head) return nullptr;
+	Node *res = new Node(head->val, nullptr, nullptr);
+	Node *node = res, *cur = head->next;
+	unordered_map<Node*, Node*> m;
+	m[head] = res;
+	while (cur) {
+		Node *t = new Node(cur->val, nullptr, nullptr);
+		node->next = t;
+		m[cur] = t;
+		node = node->next;
+		cur = cur->next;
+	}
+	node = res; cur = head;
+	while (cur) {
+		node->random = m[cur->random];
+		node = node->next;
+		cur = cur->next;
+	}
+	return res;
+}
+
+Node* copyRandomList(Node* head) {
+	unordered_map<Node*, Node*> m;
+	return helper(head, m);
+}
+
+Node* helper(Node* node, unordered_map<Node*, Node*>& m) {
+	if (!node) return nullptr;
+	if (m.count(node)) return m[node];
+	Node *res = new Node(node->val, nullptr, nullptr);
+	m[node] = res;
+	res->next = helper(node->next, m);
+	res->random = helper(node->random, m);
+	return res;
+}
+
+---------------------------------------------------------------------
+
+//139 Word Break 拆分词句
+Given a non-empty string s and a dictionary wordDict containing a list of non-empty words, determine if s can be segmented into a space-separated sequence of one or more dictionary words.
+
+Note:
+The same word in the dictionary may be reused multiple times in the segmentation.
+You may assume the dictionary does not contain duplicate words.
+
+Example 1:
+	Input: s = "leetcode", wordDict = ["leet", "code"]
+	Output: true
+Explanation: Return true because "leetcode" can be segmented as "leet code".
+
+Example 2:
+	Input: s = "applepenapple", wordDict = ["apple", "pen"]
+	Output: true
+Explanation: Return true because "applepenapple" can be segmented as "apple pen apple".
+             Note that you are allowed to reuse a dictionary word.
+
+Example 3:
+	Input: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+	Output: false
+
+子数组或者子字符串且求极值的题，基本就是DP
+
+
+bool wordBreak(string s, vector<string>& wordDict) {
+	unordered_set<string> wordSet(wordDict.begin(), wordDict.end());
+	vector<bool> dp(s.size() + 1);
+	dp[0] = true;
+	for (int i = 0; i < dp.size(); ++i) {
+		for (int j = 0; j < i; ++j) {
+			if (dp[j] && wordSet.count(s.substr(j, i - j))) {
+				dp[i] = true;
+				break;
+			}
+		}
+	}
+	return dp.back();
+}
+	
+---------------------------------------------------------------------
+
+//142 Linked List Cycle II 单链表中的环之二
+Given a linked list, return the node where the cycle begins. If there is no cycle, return null.
+
+To represent a cycle in the given linked list, we use an integer pos which represents the position (0-indexed) in the linked list where tail connects to. If pos is -1, then there is no cycle in the linked list.
+
+Note: Do not modify the linked list.
+
+Example 1:
+	Input: head = [3,2,0,-4], pos = 1
+	Output: tail connects to node index 1
+Explanation: There is a cycle in the linked list, where tail connects to the second node.
+
+Example 2:
+	Input: head = [1,2], pos = 0
+	Output: tail connects to node index 0
+Explanation: There is a cycle in the linked list, where tail connects to the first node.
+
+Example 3:
+	Input: head = [1], pos = -1
+	Output: no cycle
+Explanation: There is no cycle in the linked list. 
+
+Follow-up:
+Can you solve it without using extra space?
+
+ListNode *detectCycle(ListNode *head) {
+	ListNode *slow = head, *fast = head;
+	while (fast && fast->next) {
+		slow = slow->next;
+		fast = fast->next->next;
+		if (slow == fast) break;
+	}
+	if (!fast || !fast->next) return NULL;
+	slow = head;
+	while (slow != fast) {
+		slow = slow->next;
+		fast = fast->next;
+	}
+	return fast;
+}
+
+---------------------------------------------------------------------
+
+//143 Reorder List 重排链表
+Given a singly linked list L: L0→L1→…→Ln-1→Ln,
+reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
+
+You may not modify the values in the list's nodes, only nodes itself may be changed.
+
+Example 1:
+	Given 1->2->3->4, reorder it to 1->4->2->3.
+Example 2:
+	Given 1->2->3->4->5, reorder it to 1->5->2->4->3.
+
+使用快慢指针来找到链表的中点，并将链表从中点处断开，形成两个独立的链表。
+将第二个链翻转
+将第二个链表的元素间隔地插入第一个链表中
+	
+void reorderList(ListNode *head) {
+	if (!head || !head->next || !head->next->next) return;
+	ListNode *fast = head, *slow = head;
+	while (fast->next && fast->next->next) {
+		slow = slow->next;
+		fast = fast->next->next;
+	}
+	ListNode *mid = slow->next;
+	slow->next = NULL;
+	ListNode *last = mid, *pre = NULL;
+	while (last) {
+		ListNode *next = last->next;
+		last->next = pre;
+		pre = last;
+		last = next;
+	}
+	while (head && pre) {
+		ListNode *next = head->next;
+		head->next = pre;
+		pre = pre->next;
+		head->next->next = next;
+		head = next;
+	}
+}
+
+---------------------------------------------------------------------
+
+//144 Binary Tree Preorder Traversal 二叉树的先序遍历
+Given a binary tree, return the preorder traversal of its nodes' values.
+
+Example:
+	Input: [1,null,2,3]
+	   1
+		\
+		 2
+		/
+	   3
+
+	Output: [1,2,3]
+Follow up: Recursive solution is trivial, could you do it iteratively?
+
+
+把根节点push到栈中
+循环检测栈是否为空，若不空，则取出栈顶元素，保存其值，然后看其右子节点是否存在，若存在则push到栈中。再看其左子节点，若存在，则push到栈中
+
+vector<int> preorderTraversal(TreeNode* root) {
+	if (!root) return {};
+	vector<int> res;
+	stack<TreeNode*> s{{root}};
+	while (!s.empty()) {
+		TreeNode *t = s.top(); s.pop();
+		res.push_back(t->val);
+		if (t->right) s.push(t->right);
+		if (t->left) s.push(t->left);
+	}
+	return res;
+}
+
+---------------------------------------------------------------------
+
+//146 LRU Cache 最近最少使用页面置换缓存器
+Design and implement a data structure for Least Recently Used (LRU) cache. It should support the following operations: get and put.
+
+get(key) - Get the value (will always be positive) of the key if the key exists in the cache, otherwise return -1.
+put(key, value) - Set or insert the value if the key is not already present. When the cache reached its capacity, it should invalidate the least recently used item before inserting a new item.
+
+The cache is initialized with a positive capacity.
+
+Follow up:
+Could you do both operations in O(1) time complexity?
+
+Example:
+	LRUCache cache = new LRUCache( 2 /* capacity */ );
+
+	cache.put(1, 1);
+	cache.put(2, 2);
+	cache.get(1);       // returns 1
+	cache.put(3, 3);    // evicts key 2
+	cache.get(2);       // returns -1 (not found)
+	cache.put(4, 4);    // evicts key 1
+	cache.get(1);       // returns -1 (not found)
+	cache.get(3);       // returns 3
+	cache.get(4);       // returns 4
+
+class LRUCache{
+public:
+    LRUCache(int capacity) {
+        cap = capacity;
+    }
+    
+    int get(int key) {
+        auto it = m.find(key);
+        if (it == m.end()) return -1;
+        l.splice(l.begin(), l, it->second);
+        return it->second->second;
+    }
+    
+    void put(int key, int value) {
+        auto it = m.find(key);
+        if (it != m.end()) l.erase(it->second);
+        l.push_front(make_pair(key, value));
+        m[key] = l.begin();
+        if (m.size() > cap) {
+            int k = l.rbegin()->first;
+            l.pop_back();
+            m.erase(k);
+        }
+    }
+    
+private:
+    int cap;
+    list<pair<int, int>> l;
+    unordered_map<int, list<pair<int, int>>::iterator> m;
+};
+
+---------------------------------------------------------------------
+
+//147 Insertion Sort List 链表插入排序
+Sort a linked list using insertion sort.
+
+A graphical example of insertion sort. The partial sorted list (black) initially contains only the first element in the list.
+With each iteration one element (red) is removed from the input data and inserted in-place into the sorted list
+ 
+Algorithm of Insertion Sort:
+
+Insertion sort iterates, consuming one input element each repetition, and growing a sorted output list.
+At each iteration, insertion sort removes one element from the input data, finds the location it belongs within the sorted list, and inserts it there.
+It repeats until no input elements remain.
+
+Example 1:
+	Input: 4->2->1->3
+	Output: 1->2->3->4
+
+Example 2:
+	Input: -1->5->3->4->0
+	Output: -1->0->3->4->5
+
+ListNode* insertionSortList(ListNode* head) {
+	ListNode *dummy = new ListNode(-1), *cur = dummy;
+	while (head) {
+		ListNode *t = head->next;
+		cur = dummy;
+		while (cur->next && cur->next->val <= head->val) {
+			cur = cur->next;
+		}
+		head->next = cur->next;
+		cur->next = head;
+		head = t;
+	}
+	return dummy->next;
+}
+
+---------------------------------------------------------------------
+
+//148 Sort List 链表排序
+Sort a linked list in O(n log n) time using constant space complexity.
+
+Example 1:
+	Input: 4->2->1->3
+	Output: 1->2->3->4
+	
+Example 2:
+	Input: -1->5->3->4->0
+	Output: -1->0->3->4->5
+
+ListNode* sortList(ListNode* head) {
+	if (!head || !head->next) return head;
+	ListNode *slow = head, *fast = head, *pre = head;
+	while (fast && fast->next) {
+		pre = slow;
+		slow = slow->next;
+		fast = fast->next->next;
+	}
+	pre->next = NULL;
+	return merge(sortList(head), sortList(slow));
+}
+ListNode* merge(ListNode* l1, ListNode* l2) {
+	ListNode *dummy = new ListNode(-1);
+	ListNode *cur = dummy;
+	while (l1 && l2) {
+		if (l1->val < l2->val) {
+			cur->next = l1;
+			l1 = l1->next;
+		} else {
+			cur->next = l2;
+			l2 = l2->next;
+		}
+		cur = cur->next;
+	}
+	if (l1) cur->next = l1;
+	if (l2) cur->next = l2;
+	return dummy->next;
+}
+
+---------------------------------------------------------------------
+
+//150 Evaluate Reverse Polish Notation 计算逆波兰表达式
+Evaluate the value of an arithmetic expression in Reverse Polish Notation.
+
+Valid operators are +, -, *, /. Each operand may be an integer or another expression.
+
+Note:
+
+Division between two integers should truncate toward zero.
+The given RPN expression is always valid. That means the expression would always evaluate to a result and there won't be any divide by zero operation.
+
+Example 1:
+	Input: ["2", "1", "+", "3", "*"]
+	Output: 9
+
+Explanation: ((2 + 1) * 3) = 9
+
+Example 2:
+	Input: ["4", "13", "5", "/", "+"]
+	Output: 6
+
+Explanation: (4 + (13 / 5)) = 6
+
+Example 3:
+	Input: ["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]
+	Output: 22
+
+Explanation: 
+	  ((10 * (6 / ((9 + 3) * -11))) + 17) + 5
+	= ((10 * (6 / (12 * -11))) + 17) + 5
+	= ((10 * (6 / -132)) + 17) + 5
+	= ((10 * 0) + 17) + 5
+	= (0 + 17) + 5
+	= 17 + 5
+	= 22
+
+int evalRPN(vector<string>& tokens) {
+	if (tokens.size() == 1) return stoi(tokens[0]);
+	stack<int> st;
+	for (int i = 0; i < tokens.size(); ++i) {
+		if (tokens[i] != "+" && tokens[i] != "-" && tokens[i] != "*" && tokens[i] != "/") {
+			st.push(stoi(tokens[i]));
+		} else {
+			int num1 = st.top(); st.pop();
+			int num2 = st.top(); st.pop();
+			if (tokens[i] == "+") st.push(num2 + num1);
+			if (tokens[i] == "-") st.push(num2 - num1);
+			if (tokens[i] == "*") st.push(num2 * num1);
+			if (tokens[i] == "/") st.push(num2 / num1);
+		}
+	}
+	return st.top();
+}
+
+---------------------------------------------------------------------
+
+//151 Reverse Words in a String 翻转字符串中的单词
+Given an input string, reverse the string word by word.
+
+Example 1:
+	Input: "the sky is blue"
+	Output: "blue is sky the"
+	
+Example 2:
+	Input: "  hello world!  "
+	Output: "world! hello"
+
+Explanation: Your reversed string should not contain leading or trailing spaces.
+
+Example 3:
+	Input: "a good   example"
+	Output: "example good a"
+	
+Explanation: You need to reduce multiple spaces between two words to a single space in the reversed string.
+
+Note:
+A word is defined as a sequence of non-space characters.
+Input string may contain leading or trailing spaces. However, your reversed string should not contain leading or trailing spaces.
+You need to reduce multiple spaces between two words to a single space in the reversed string.
+ 
+Follow up:
+
+For C programmers, try to solve it in-place in O(1) extra space.
+
+void reverseWords(string &s) {
+	int storeIndex = 0, n = s.size();
+	reverse(s.begin(), s.end());
+	for (int i = 0; i < n; ++i) {
+		if (s[i] != ' ') {
+			if (storeIndex != 0) s[storeIndex++] = ' ';
+			int j = i;
+			while (j < n && s[j] != ' ') s[storeIndex++] = s[j++];
+			reverse(s.begin() + storeIndex - (j - i), s.begin() + storeIndex);
+			i = j;
+		}
+	}
+	s.resize(storeIndex);
+}
+
+---------------------------------------------------------------------
+
+//152 Maximum Product Subarray 求最大子数组乘积
+Given an integer array nums, find the contiguous subarray within an array (containing at least one number) which has the largest product.
+
+Example 1:
+	Input: [2,3,-2,4]
+	Output: 6
+
+Explanation: [2,3] has the largest product 6.
+
+Example 2:
+	Input: [-2,0,-1]
+	Output: 0
+
+Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+---------------------------------------------------------------------
+
+
+
+
+
+
