@@ -3866,42 +3866,402 @@ int findPeakElement(vector<int>& nums) {
 
 ---------------------------------------------------------------------
 
+//163 Missing Ranges 缺失区间
+Given a sorted integer array where the range of elements are [0, 99] inclusive, return its missing ranges.
+For example, given [0, 1, 3, 50, 75], return [“2”, “4->49”, “51->74”, “76->99”]
 
-
----------------------------------------------------------------------
-
-
-
----------------------------------------------------------------------
-
-
-
----------------------------------------------------------------------
-
-
-
----------------------------------------------------------------------
-
-
-
----------------------------------------------------------------------
-
-
+vector<string> findMissingRanges(vector<int>& nums, int lower, int upper) {
+	vector<string> res;
+	int l = lower;
+	for (int i = 0; i <= nums.size(); ++i) {
+		int r = (i < nums.size() && nums[i] <= upper) ? nums[i] : upper + 1;
+		if (l == r) ++l;
+		else if (r > l) {
+			res.push_back(r - l == 1 ? to_string(l) : to_string(l) + "->" + to_string(r - 1));
+			l = r + 1;
+		}
+	}
+	return res;
+}
 
 ---------------------------------------------------------------------
 
+//165 Compare Version Numbers 比较版本号
+Compare two version numbers version1 and version2.
+If version1 > version2 return 1; if version1 < version2 return -1;otherwise return 0.
 
+You may assume that the version strings are non-empty and contain only digits and the . character.
+
+The . character does not represent a decimal point and is used to separate number sequences.
+
+For instance, 2.5 is not "two and a half" or "half way to version three", it is the fifth second-level revision of the second first-level revision.
+
+You may assume the default revision number for each level of a version number to be 0. For example, version number 3.4 has a revision number of 3 and 4 for its first and second level revision number. Its third and fourth level revision number are both 0.
+
+Example 1:
+	Input: version1 = "0.1", version2 = "1.1"
+	Output: -1
+
+Example 2:
+	Input: version1 = "1.0.1", version2 = "1"
+	Output: 1
+
+Example 3:
+	Input: version1 = "7.5.2.4", version2 = "7.5.3"
+	Output: -1
+
+Example 4:
+	Input: version1 = "1.01", version2 = "1.001"
+	Output: 0
+Explanation: Ignoring leading zeroes, both “01” and “001" represent the same number “1”
+
+Example 5:
+	Input: version1 = "1.0", version2 = "1.0.0"
+	Output: 0
+Explanation: The first version number does not have a third level revision number, which means its third level revision number is default to "0"
+
+Note:
+	Version strings are composed of numeric strings separated by dots . and this numeric strings may have leading zeroes.
+	Version strings do not start or end with dots, and they will not be two consecutive dots.
+
+int compareVersion(string version1, string version2) {
+	int n1 = version1.size(), n2 = version2.size();
+	int i = 0, j = 0, d1 = 0, d2 = 0;
+	while (i < n1 || j < n2) {
+		while (i < n1 && version1[i] != '.') {
+			d1 = d1 * 10 + version1[i++] - '0';
+		}
+		while (j < n2 && version2[j] != '.') {
+			d2 = d2 * 10 + version2[j++] - '0';
+		}
+		if (d1 > d2) return 1;
+		else if (d1 < d2) return -1;
+		d1 = d2 = 0;
+		++i; ++j;
+	}
+	return 0;
+}
 
 ---------------------------------------------------------------------
 
+//166 Fraction to Recurring Decimal 分数转循环小数
+Given two integers representing the numerator and denominator of a fraction, return the fraction in string format.
 
+If the fractional part is repeating, enclose the repeating part in parentheses.
+
+Example 1:
+	Input: numerator = 1, denominator = 2
+	Output: "0.5"
+
+Example 2:
+	Input: numerator = 2, denominator = 1
+	Output: "2"
+
+Example 3:
+	Input: numerator = 2, denominator = 3
+	Output: "0.(6)"
+
+string fractionToDecimal(int numerator, int denominator) {
+	int s1 = numerator >= 0 ? 1 : -1;
+	int s2 = denominator >= 0 ? 1 : -1;
+	long long num = abs( (long long)numerator );
+	long long den = abs( (long long)denominator );
+	long long out = num / den;
+	long long rem = num % den;
+	unordered_map<long long, int> m;
+	string res = to_string(out);
+	if (s1 * s2 == -1 && (out > 0 || rem > 0)) res = "-" + res;
+	if (rem == 0) return res;
+	res += ".";
+	string s = "";
+	int pos = 0;
+	while (rem != 0) {
+		if (m.find(rem) != m.end()) {
+			s.insert(m[rem], "(");
+			s += ")";
+			return res + s;
+		}
+		m[rem] = pos;
+		s += to_string((rem * 10) / den);
+		rem = (rem * 10) % den;
+		++pos;
+	}
+	return res + s;
+}
 
 ---------------------------------------------------------------------
 
+//173 Binary Search Tree Iterator 二叉搜索树迭代器
+Implement an iterator over a binary search tree (BST). Your iterator will be initialized with the root node of a BST.
 
+Calling next() will return the next smallest number in the BST.
+
+Example:
+	BSTIterator iterator = new BSTIterator(root);
+	iterator.next();    // return 3
+	iterator.next();    // return 7
+	iterator.hasNext(); // return true
+	iterator.next();    // return 9
+	iterator.hasNext(); // return true
+	iterator.next();    // return 15
+	iterator.hasNext(); // return true
+	iterator.next();    // return 20
+	iterator.hasNext(); // return false 
+
+Note:
+next() and hasNext() should run in average O(1) time and uses O(h) memory, where h is the height of the tree.
+You may assume that next() call will always be valid, that is, there will be at least a next smallest number in the BST when next() is called.
+
+class BSTIterator {
+public:
+    BSTIterator(TreeNode *root) {
+        while (root) {
+            s.push(root);
+            root = root->left;
+        }
+    }
+
+    bool hasNext() {
+        return !s.empty();
+    }
+
+    int next() {
+        TreeNode *n = s.top();
+        s.pop();
+        int res = n->val;
+        if (n->right) {
+            n = n->right;
+            while (n) {
+                s.push(n);
+                n = n->left;
+            }
+        }
+        return res;
+    }
+private:
+    stack<TreeNode*> s;
+};
 
 ---------------------------------------------------------------------
 
+//179 Largest Number 最大数
+Given a list of non negative integers, arrange them such that they form the largest number.
+
+Example 1:
+	Input: [10,2]
+	Output: "210"
+
+Example 2:
+	Input: [3,30,34,5,9]
+	Output: "9534330"
+
+降序
+bool compare(int a, int b) {
+	return to_string(a) + to_string(b) > to_string(b) + to_string(a); 
+}
+
+string largestNumber(vector<int>& nums) {
+	string res;
+	sort(nums.begin(), nums.end(), compare);
+	for (int i = 0; i < nums.size(); ++i) {
+		res += to_string(nums[i]);
+	}
+	return res[0] == '0' ? "0" : res;
+}
+
+---------------------------------------------------------------------
+
+//186 Reverse Words in a String II 翻转字符串中的单词之二
+Given an input string , reverse the string word by word.
+
+Example:
+	Input:  ["t","h","e"," ","s","k","y"," ","i","s"," ","b","l","u","e"]
+	Output: ["b","l","u","e"," ","i","s"," ","s","k","y"," ","t","h","e"]
+
+Note: 
+	A word is defined as a sequence of non-space characters.
+	The input string does not contain leading or trailing spaces.
+	The words are always separated by a single space.
+
+Follow up: Could you do it in-place without allocating extra space?
+
+void reverseWords(vector<char>& str) {
+	int left = 0, n = str.size();
+	for (int i = 0; i <= n; ++i) {
+		if (i == n || str[i] == ' ') {
+			reverse(str, left, i - 1);
+			left = i + 1;
+		}
+	}
+	reverse(str, 0, n - 1);
+}
+
+void reverse(vector<char>& str, int left, int right) {
+	while (left < right) {
+		char t = str[left];
+		str[left] = str[right];
+		str[right] = t;
+		++left; --right;
+	}
+}
+
+---------------------------------------------------------------------
+
+//187 Repeated DNA Sequences 求重复的DNA序列
+All DNA is composed of a series of nucleotides abbreviated as A, C, G, and T, for example: "ACGAATTCCG". When studying DNA, it is sometimes useful to identify repeated sequences within the DNA.
+
+Write a function to find all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.
+
+Example:
+	Input: s = "AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"
+	Output: ["AAAAACCCCC", "CCCCCAAAAA"]
+
+vector<string> findRepeatedDnaSequences(string s) {
+	unordered_set<string> res, st;
+	for (int i = 0; i + 9 < s.size(); ++i) {
+		string t = s.substr(i, 10);
+		if (st.count(t)) res.insert(t);
+		else st.insert(t);
+	}
+	return vector<string>{res.begin(), res.end()};
+}
+
+为了节省空间，将string缩小为int，因为2位bit就能区分A C G T四个字符，十个字母也就20位，所以可以用int代替
+vector<string> findRepeatedDnaSequences(string s) {
+	vector<string> res;
+	unordered_map<int, int> st;  //存储出现过的十个字符
+	unordered_map<int, int> m{{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
+	int cur = 0;
+	for (int i = 0; i < 9; ++i) cur = cur << 2 | m[s[i]];
+	for (int i = 9; i < s.size(); ++i) {
+		cur = ((cur & 0x3ffff) << 2) | (m[s[i]]);
+		if (st.count(cur)) {
+			if (st[cur] == 1) {
+				res.push_back(s.substr(i - 9, 10));
+			}
+			++st[cur];
+		}
+		else st[cur] = 1;
+	}
+	return res;
+}
+	
+---------------------------------------------------------------------
+
+//199 Binary Tree Right Side View 二叉树的右侧视图
+Given a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.
+
+Example:
+	Input: [1,2,3,null,5,null,4]
+	Output: [1, 3, 4]
+	
+Explanation:
+	   1            <---
+	 /   \
+	2     3         <---
+	 \     \
+	  5     4       <---
+
+vector<int> rightSideView(TreeNode *root) {
+	vector<int> res;
+	if (!root) return res;
+	queue<TreeNode*> q;
+	q.push(root);
+	while (!q.empty()) {
+		res.push_back(q.back()->val);
+		int size = q.size();
+		for (int i = 0; i < size; ++i) {
+			TreeNode *node = q.front();
+			q.pop();
+			if (node->left) q.push(node->left);
+			if (node->right) q.push(node->right);
+		}
+	}
+	return res;
+}
+
+---------------------------------------------------------------------
+
+//200 Number of Islands 岛屿的数量
+Given a 2d grid map of '1's (land) and '0's (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+Example 1:
+	Input:
+		11110
+		11010
+		11000
+		00000
+	Output: 1
+
+Example 2:
+	Input:
+		11000
+		11000
+		00100
+		00011
+	Output: 3
+
+DFS
+int numIslands(vector<vector<char>>& grid) {
+	if (grid.empty() || grid[0].empty()) return 0;
+	int m = grid.size(), n = grid[0].size(), res = 0;
+	vector<vector<bool>> visited(m, vector<bool>(n));
+	for (int i = 0; i < m; ++i) {
+		for (int j = 0; j < n; ++j) {
+			if (grid[i][j] == '0' || visited[i][j]) continue;
+			helper(grid, visited, i, j);
+			++res;
+		}
+	}
+	return res;
+}
+
+void helper(vector<vector<char>>& grid, vector<vector<bool>>& visited, int x, int y) {
+	if (x < 0 || x >= grid.size() || y < 0 || y >= grid[0].size() || grid[x][y] == '0' || visited[x][y]) return;
+	visited[x][y] = true;
+	helper(grid, visited, x - 1, y);
+	helper(grid, visited, x + 1, y);
+	helper(grid, visited, x, y - 1);
+	helper(grid, visited, x, y + 1);
+}
+
+递归也可以用队列来替代
+int numIslands(vector<vector<char>>& grid) {
+	if (grid.empty() || grid[0].empty()) return 0;
+	int m = grid.size(), n = grid[0].size(), res = 0;
+	vector<vector<bool>> visited(m, vector<bool>(n));
+	vector<int> dirX{-1, 0, 1, 0}, dirY{0, 1, 0, -1};
+	for (int i = 0; i < m; ++i) {
+		for (int j = 0; j < n; ++j) {
+			if (grid[i][j] == '0' || visited[i][j]) continue;
+			++res;
+			queue<int> q{{i * n + j}};
+			while (!q.empty()) {
+				int t = q.front(); q.pop();
+				for (int k = 0; k < 4; ++k) {
+					int x = t / n + dirX[k], y = t % n + dirY[k];
+					if (x < 0 || x >= m || y < 0 || y >= n || grid[x][y] == '0' || visited[x][y]) continue;
+					visited[x][y] = true;
+					q.push(x * n + y);
+				}
+			}
+		}
+	}
+	return res;
+}
+
+---------------------------------------------------------------------
+
+//201 Bitwise AND of Numbers Range 数字范围位按位与
+Given a range [m, n] where 0 <= m <= n <= 2147483647, return the bitwise AND of all numbers in this range, inclusive.
+
+Example 1:
+	Input: [5,7]
+	Output: 4
+Example 2:
+
+Input: [0,1]
+Output: 0
 
 
 ---------------------------------------------------------------------
