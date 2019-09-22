@@ -3688,21 +3688,181 @@ Example 2:
 
 Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
 
+DP
+要维护两个dp数组，其中f[i]表示子数组[0, i]范围内并且一定包含nums[i]数字的最大子数组乘积，g[i]表示子数组[0, i]范围内并且一定包含nums[i]数字的最小子数组乘积，维护最小的是因为一旦遇到一个负数，最小的会成为最大的
+
+int maxProduct(vector<int>& nums) {
+	int res = nums[0], n = nums.size();
+	vector<int> f(n, 0), g(n, 0);
+	f[0] = nums[0];
+	g[0] = nums[0];
+	for (int i = 1; i < n; ++i) {
+		f[i] = max(max(f[i - 1] * nums[i], g[i - 1] * nums[i]), nums[i]);
+		g[i] = min(min(f[i - 1] * nums[i], g[i - 1] * nums[i]), nums[i]);
+		res = max(res, f[i]);
+	}
+	return res;
+}
+
+可以优化空间，只用2个变量就行
+int maxProduct(vector<int>& nums) {
+	if (nums.empty()) return 0;
+	int res = nums[0], mn = nums[0], mx = nums[0];
+	for (int i = 1; i < nums.size(); ++i) {
+		int tmax = mx, tmin = mn;
+		mx = max(max(nums[i], tmax * nums[i]), tmin * nums[i]);
+		mn = min(min(nums[i], tmax * nums[i]), tmin * nums[i]);
+		res = max(res, mx);
+	}
+	return res;
+}
 
 ---------------------------------------------------------------------
 
+//153 Find Minimum in Rotated Sorted Array 寻找旋转有序数组的最小值
+Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
 
+(i.e.,  [0,1,2,4,5,6,7] might become  [4,5,6,7,0,1,2]).
+
+Find the minimum element.
+
+You may assume no duplicate exists in the array.
+
+Example 1:
+	Input: [3,4,5,1,2] 
+	Output: 1
+
+Example 2:
+	Input: [4,5,6,7,0,1,2]
+	Output: 0
+
+int findMin(vector<int>& nums) {
+	int left = 0, right = (int)nums.size() - 1;
+	while (left < right) {
+		int mid = left + (right - left) / 2;
+		if (nums[mid] > nums[right]) left = mid + 1;
+		else right = mid;
+	}
+	return nums[right];
+}
 
 ---------------------------------------------------------------------
 
+//156 Binary Tree Upside Down 上下翻转二叉树
+Given a binary tree where all the right nodes are either leaf nodes with a sibling (a left node that shares the same parent node) or empty, flip it upside down and turn it into a tree where the original right nodes turned into left leaf nodes. Return the new root.
 
+For example:
+
+Given a binary tree {1,2,3,4,5},
+		1
+	   / \
+	  2   3
+	 / \
+	4   5
+
+return the root of the binary tree [4,5,2,#,#,3,1].
+	   4
+	  / \
+	 5   2
+		/ \
+	   3   1  
+
+二叉树上下颠倒一下，而且限制了右节点要么为空要么一定会有对应的左节点。上下颠倒后原来二叉树的最左子节点变成了根节点，其对应的右节点变成了其左子节点，其父节点变成了其右子节点，相当于顺时针旋转了一下
+
+TreeNode *upsideDownBinaryTree(TreeNode *root) {
+	TreeNode *cur = root, *pre = NULL, *next = NULL, *tmp = NULL;
+	while (cur) {
+		next = cur->left;
+		cur->left = tmp;
+		tmp = cur->right;
+		cur->right = pre;
+		pre = cur;
+		cur = next;
+	}
+	return pre;
+}
 
 ---------------------------------------------------------------------
 
+//161 One Edit Distance 一个编辑距离
+Given two strings s and t, determine if they are both one edit distance apart.
+
+Note: 
+There are 3 possiblities to satisify one edit distance apart:
+
+Insert a character into s to get t
+Delete a character from s to get t
+Replace a character of s to get t
+Example 1:
+
+Input: s = "ab", t = "acb"
+Output: true
+Explanation: We can insert 'c' into s to get t.
+Example 2:
+
+Input: s = "cab", t = "ad"
+Output: false
+Explanation: We cannot get t from s by only one step.
+Example 3:
+
+Input: s = "1203", t = "1213"
+Output: true
+Explanation: We can replace '0' with '1' to get t.
+
+bool isOneEditDistance(string s, string t) {
+	if (s.size() < t.size()) swap(s, t);
+	int m = s.size(), n = t.size(), diff = m - n;
+	if (diff >= 2) return false;
+	else if (diff == 1) {
+		for (int i = 0; i < n; ++i) {
+			if (s[i] != t[i]) {
+				return s.substr(i + 1) == t.substr(i);
+			}
+		}
+		return true;
+	} else {
+		int cnt = 0;
+		for (int i = 0; i < m; ++i) {
+			if (s[i] != t[i]) ++cnt;
+		}
+		return cnt == 1;
+	}
+}
 
 ---------------------------------------------------------------------
 
+//162 Find Peak Element 求数组的局部峰值
+A peak element is an element that is greater than its neighbors.
 
+Given an input array nums, where nums[i] ≠ nums[i+1], find a peak element and return its index.
+
+The array may contain multiple peaks, in that case return the index to any one of the peaks is fine.
+
+You may imagine that nums[-1] = nums[n] = -∞.
+
+Example 1:
+	Input: nums = [1,2,3,1]
+	Output: 2
+Explanation: 3 is a peak element and your function should return the index number 2.
+
+Example 2:
+	Input: nums = [1,2,1,3,5,6,4]
+	Output: 1 or 5 
+Explanation: Your function can return either index number 1 where the peak element is 2, 
+             or index number 5 where the peak element is 6.
+
+Note:
+Your solution should be in logarithmic complexity.
+
+int findPeakElement(vector<int>& nums) {
+	int left = 0, right = nums.size() - 1;
+	while (left < right) {
+		int mid = left + (right - left) / 2;
+		if (nums[mid] < nums[mid + 1]) left = mid + 1;
+		else right = mid;
+	}
+	return right;
+}
 
 ---------------------------------------------------------------------
 
