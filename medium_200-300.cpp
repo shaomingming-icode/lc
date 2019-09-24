@@ -205,7 +205,128 @@ int minSubArrayLen(int s, vector<int>& nums) {
 ---------------------------------------------------------------------
 
 //210 Course Schedule II 课程表II
+There are a total of n courses you have to take, labeled from 0 to n-1.
 
+Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: [0,1]
+
+Given the total number of courses and a list of prerequisite pairs, return the ordering of courses you should take to finish all courses.
+
+There may be multiple correct orders, you just need to return one of them. If it is impossible to finish all courses, return an empty array.
+
+Example 1:
+	Input: 2, [[1,0]] 
+	Output: [0,1]
+Explanation: There are a total of 2 courses to take. To take course 1 you should have finished   
+             course 0. So the correct course order is [0,1] .
+
+Example 2:
+	Input: 4, [[1,0],[2,0],[3,1],[3,2]]
+	Output: [0,1,2,3] or [0,2,1,3]
+Explanation: There are a total of 4 courses to take. To take course 3 you should have finished both     
+             courses 1 and 2. Both courses 1 and 2 should be taken after you finished course 0. 
+             So one correct course order is [0,1,2,3]. Another correct ordering is [0,2,1,3] .
+
+Note:
+The input prerequisites is a graph represented by a list of edges, not adjacency matrices. Read more about how a graph is represented.
+You may assume that there are no duplicate edges in the input prerequisites.
+
+和课程表的题类似，只是从queue中每取出一个数组就将其存在结果中
+vector<int> findOrder(int numCourses, vector<pair<int, int>>& prerequisites) {
+	vector<int> res;
+	vector<vector<int> > graph(numCourses, vector<int>(0));
+	vector<int> in(numCourses, 0);
+	for (auto &a : prerequisites) {
+		graph[a.second].push_back(a.first);
+		++in[a.first];
+	}
+	queue<int> q;
+	for (int i = 0; i < numCourses; ++i) {
+		if (in[i] == 0) q.push(i);
+	}
+	while (!q.empty()) {
+		int t = q.front();
+		res.push_back(t);
+		q.pop();
+		for (auto &a : graph[t]) {
+			--in[a];
+			if (in[a] == 0) q.push(a);
+		}
+	}
+	if (res.size() != numCourses) res.clear();
+	return res;
+}
+	
+---------------------------------------------------------------------
+
+//211 Add and Search Word - Data structure design 添加与搜索单词 - 数据结构设计
+Design a data structure that supports the following two operations:
+void addWord(word)
+bool search(word)
+search(word) can search a literal word or a regular expression string containing only letters a-z or .. A. means it can represent any one letter.
+
+For example:
+	addWord("bad")
+	addWord("dad")
+	addWord("mad")
+	search("pad") -> false
+	search("bad") -> true
+	search(".ad") -> true
+	search("b..") -> true
+
+Note:
+You may assume that all words are consist of lowercase letters a-z.
+
+click to show hint.
+
+You should be familiar with how a Trie works. If not, please work on this problem: Implement Trie (Prefix Tree) first.
+
+class WordDictionary {
+public:
+    struct TrieNode {
+    public:
+        TrieNode *child[26];
+        bool isWord;
+        TrieNode() : isWord(false) {
+            for (auto &a : child) a = NULL;
+        }
+    };
+    
+    WordDictionary() {
+        root = new TrieNode();
+    }
+    
+    // Adds a word into the data structure.
+    void addWord(string word) {
+        TrieNode *p = root;
+        for (auto &a : word) {
+            int i = a - 'a';
+            if (!p->child[i]) p->child[i] = new TrieNode();
+            p = p->child[i];
+        }
+        p->isWord = true;
+    }
+
+    // Returns if the word is in the data structure. A word could
+    // contain the dot character '.' to represent any one letter.
+    bool search(string word) {
+        return searchWord(word, root, 0);
+    }
+    
+    bool searchWord(string &word, TrieNode *p, int i) {
+        if (i == word.size()) return p->isWord;
+        if (word[i] == '.') {
+            for (auto &a : p->child) {
+                if (a && searchWord(word, a, i + 1)) return true;
+            }
+            return false;
+        } else {
+            return p->child[word[i] - 'a'] && searchWord(word, p->child[word[i] - 'a'], i + 1);
+        }
+    }
+    
+private:
+    TrieNode *root;
+};
 ---------------------------------------------------------------------
 
 
@@ -219,13 +340,4 @@ int minSubArrayLen(int s, vector<int>& nums) {
 
 
 ---------------------------------------------------------------------
-
-
-
----------------------------------------------------------------------
-
-
-
-
-
 
