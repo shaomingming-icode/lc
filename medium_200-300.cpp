@@ -280,6 +280,7 @@ click to show hint.
 
 You should be familiar with how a Trie works. If not, please work on this problem: Implement Trie (Prefix Tree) first.
 
+和之前的字典树类似
 class WordDictionary {
 public:
     struct TrieNode {
@@ -327,17 +328,196 @@ public:
 private:
     TrieNode *root;
 };
----------------------------------------------------------------------
-
-
 
 ---------------------------------------------------------------------
 
+//213 House Robber II 打家劫舍II
+You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed. All houses at this place are arranged in a circle. That means the first house is the neighbor of the last one. Meanwhile, adjacent houses have security system connected and it will automatically contact the police if two adjacent houses were broken into on the same night.
 
+Given a list of non-negative integers representing the amount of money of each house, determine the maximum amount of money you can rob tonight without alerting the police.
+
+Example 1:
+
+Input: [2,3,2]
+Output: 3
+Explanation: You cannot rob house 1 (money = 2) and then rob house 3 (money = 2),
+             because they are adjacent houses.
+Example 2:
+
+Input: [1,2,3,1]
+Output: 4
+Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
+             Total amount you can rob = 1 + 3 = 4.
+Credits:
+Special thanks to @Freezen for adding this problem and creating all test cases.
+
+int rob(vector<int>& nums) {
+	if (nums.size() <= 1) return nums.empty() ? 0 : nums[0];
+	return max(rob(nums, 0, nums.size() - 1), rob(nums, 1, nums.size()));
+}
+
+int rob(vector<int> &nums, int left, int right) {
+	if (right - left <= 1) return nums[left];
+	vector<int> dp(right, 0);
+	dp[left] = nums[left];
+	dp[left + 1] = max(nums[left], nums[left + 1]);
+	for (int i = left + 2; i < right; ++i) {
+		dp[i] = max(nums[i] + dp[i - 2], dp[i - 1]);
+	}
+	return dp.back();
+}
+	
+可以使用两个变量来代替整个DP数组
+robEven就是要抢偶数位置的房子，robOdd就是要抢奇数位置的房子
+int rob(vector<int>& nums) {
+	if (nums.size() <= 1) return nums.empty() ? 0 : nums[0];
+	return max(rob(nums, 0, nums.size() - 1), rob(nums, 1, nums.size()));
+}
+
+int rob(vector<int> &nums, int left, int right) {
+	int robEven = 0, robOdd = 0;
+	for (int i = left; i < right; ++i) {
+		if (i % 2 == 0) {
+			robEven = max(robEven + nums[i], robOdd);
+		} else {
+			robOdd = max(robEven, robOdd + nums[i]);
+		}
+	}
+	return max(robEven, robOdd);
+}
 
 ---------------------------------------------------------------------
 
+//215 Kth Largest Element in an Array 数组中第k大的元素
+Find the kth largest element in an unsorted array. Note that it is the kth largest element in the sorted order, not the kth distinct element.
 
+Example 1:
+	Input: [3,2,1,5,6,4] and k = 2
+	Output: 5
+	
+Example 2:
+	Input: [3,2,3,1,2,4,5,5,6] and k = 4
+	Output: 4
+	
+Note: 
+You may assume k is always valid, 1 ≤ k ≤ array's length.
+
+先排序
+int findKthLargest(vector<int>& nums, int k) {
+	sort(nums.begin(), nums.end());
+	return nums[nums.size() - k];
+}
+
+快速排序思想
+int findKthLargest(vector<int>& nums, int k) {
+	int left = 0, right = nums.size() - 1;
+	while (true) {
+		int pos = partition(nums, left, right);
+		if (pos == k - 1) return nums[pos];
+		if (pos > k - 1) right = pos - 1;
+		else left = pos + 1;
+	}
+}
+
+int partition(vector<int>& nums, int left, int right) {
+	int pivot = nums[left], l = left + 1, r = right;
+	while (l <= r) {
+		if (nums[l] < pivot && nums[r] > pivot) {
+			swap(nums[l++], nums[r--]);
+		}
+		if (nums[l] >= pivot) ++l;
+		if (nums[r] <= pivot) --r;
+	}
+	swap(nums[left], nums[r]);
+	return r;
+}
 
 ---------------------------------------------------------------------
 
+//216 Combination Sum III 组合之和之三
+Find all possible combinations of k numbers that add up to a number n, given that only numbers from 1 to 9 can be used and each combination should be a unique set of numbers.
+
+Ensure that numbers within the set are sorted in ascending order.
+
+Example 1:
+	Input: k = 3, n = 7
+	Output:	[[1,2,4]]
+	
+Example 2:
+	Input: k = 3, n = 9
+	Output:	[[1,2,6], [1,3,5], [2,3,4]]
+	
+Credits:
+Special thanks to @mithmatt for adding this problem and creating all test cases.
+
+vector<vector<int> > combinationSum3(int k, int n) {
+	vector<vector<int> > res;
+	vector<int> out;
+	combinationSum3DFS(k, n, 1, out, res);
+	return res;
+}
+
+void combinationSum3DFS(int k, int n, int level, vector<int> &out, vector<vector<int> > &res) {
+	if (n < 0) return;
+	if (n == 0 && out.size() == k) res.push_back(out);
+	for (int i = level; i <= 9; ++i) {
+		out.push_back(i);
+		combinationSum3DFS(k, n - i, i + 1, out, res);
+		out.pop_back();
+	}
+}
+	
+---------------------------------------------------------------------
+
+//220 Contains Duplicate III 包含重复值之三
+Given an array of integers, find out whether there are two distinct indices i and j in the array such that the difference between nums[i] and nums[j] is at most t and the difference between i and j is at most k.
+
+bool containsNearbyAlmostDuplicate(vector<int>& nums, int k, int t) {
+	map<long long, int> m;
+	int j = 0;
+	for (int i = 0; i < nums.size(); ++i) {
+		if (i - j > k) m.erase(nums[j++]);
+		auto a = m.lower_bound((long long)nums[i] - t);
+		if (a != m.end() && abs(a->first - nums[i]) <= t) return true;
+		m[nums[i]] = i;
+	}
+	return false;
+}
+
+---------------------------------------------------------------------
+
+//221 Maximal Square 最大正方形
+Given a 2D binary matrix filled with 0's and 1's, find the largest square containing all 1's and return its area.
+
+For example, given the following matrix:
+	1 0 1 0 0
+	1 0 1 1 1
+	1 1 1 1 1
+	1 0 0 1 0
+	Return 4.
+
+
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
+---------------------------------------------------------------------
