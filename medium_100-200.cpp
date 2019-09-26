@@ -888,15 +888,15 @@ Output: 99
 如果某一位上为1的话，那么如果该整数出现了三次，对3取余为0，最终剩下来的那个数就是单独的数字
 
 int singleNumber(vector<int>& nums) {
-	int res = 0;
-	for (int i = 0; i < 32; ++i) {
-		int sum = 0;
-		for (int j = 0; j < nums.size(); ++j) {
-			sum += (nums[j] >> i) & 1;
-		}
-		res |= (sum % 3) << i;
-	}
-	return res;
+    int res = 0;
+    for (int i = 0; i < 32; ++i) {
+        int sum = 0;
+        for (int j = 0; j < nums.size(); ++j) {
+            sum += (nums[j] >> i) & 1;
+        }
+        res |= (sum % 3) << i;
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -907,48 +907,48 @@ A linked list is given such that each node contains an additional random pointer
 Return a deep copy of the list.
 
 Example 1:
-	Input:
-	{"$id":"1","next":{"$id":"2","next":null,"random":{"$ref":"2"},"val":2},"random":{"$ref":"2"},"val":1}
+    Input:
+    {"$id":"1","next":{"$id":"2","next":null,"random":{"$ref":"2"},"val":2},"random":{"$ref":"2"},"val":1}
 
 Explanation:
 Node 1's value is 1, both of its next and random pointer points to Node 2.
 Node 2's value is 2, its next pointer points to null and its random pointer points to itself.
 
 Node* copyRandomList(Node* head) {
-	if (!head) return nullptr;
-	Node *res = new Node(head->val, nullptr, nullptr);
-	Node *node = res, *cur = head->next;
-	unordered_map<Node*, Node*> m;
-	m[head] = res;
-	while (cur) {
-		Node *t = new Node(cur->val, nullptr, nullptr);
-		node->next = t;
-		m[cur] = t;
-		node = node->next;
-		cur = cur->next;
-	}
-	node = res; cur = head;
-	while (cur) {
-		node->random = m[cur->random];
-		node = node->next;
-		cur = cur->next;
-	}
-	return res;
+    if (!head) return nullptr;
+    Node *res = new Node(head->val, nullptr, nullptr);
+    Node *node = res, *cur = head->next;
+    unordered_map<Node*, Node*> m;
+    m[head] = res;
+    while (cur) {
+        Node *t = new Node(cur->val, nullptr, nullptr);
+        node->next = t;
+        m[cur] = t;
+        node = node->next;
+        cur = cur->next;
+    }
+    node = res; cur = head;
+    while (cur) {
+        node->random = m[cur->random];
+        node = node->next;
+        cur = cur->next;
+    }
+    return res;
 }
 
 Node* copyRandomList(Node* head) {
-	unordered_map<Node*, Node*> m;
-	return helper(head, m);
+    unordered_map<Node*, Node*> m;
+    return helper(head, m);
 }
 
 Node* helper(Node* node, unordered_map<Node*, Node*>& m) {
-	if (!node) return nullptr;
-	if (m.count(node)) return m[node];
-	Node *res = new Node(node->val, nullptr, nullptr);
-	m[node] = res;
-	res->next = helper(node->next, m);
-	res->random = helper(node->random, m);
-	return res;
+    if (!node) return nullptr;
+    if (m.count(node)) return m[node];
+    Node *res = new Node(node->val, nullptr, nullptr);
+    m[node] = res;
+    res->next = helper(node->next, m);
+    res->random = helper(node->random, m);
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -961,38 +961,38 @@ The same word in the dictionary may be reused multiple times in the segmentation
 You may assume the dictionary does not contain duplicate words.
 
 Example 1:
-	Input: s = "leetcode", wordDict = ["leet", "code"]
-	Output: true
+    Input: s = "leetcode", wordDict = ["leet", "code"]
+    Output: true
 Explanation: Return true because "leetcode" can be segmented as "leet code".
 
 Example 2:
-	Input: s = "applepenapple", wordDict = ["apple", "pen"]
-	Output: true
+    Input: s = "applepenapple", wordDict = ["apple", "pen"]
+    Output: true
 Explanation: Return true because "applepenapple" can be segmented as "apple pen apple".
              Note that you are allowed to reuse a dictionary word.
 
 Example 3:
-	Input: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
-	Output: false
+    Input: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+    Output: false
 
 子数组或者子字符串且求极值的题，基本就是DP
 
 
 bool wordBreak(string s, vector<string>& wordDict) {
-	unordered_set<string> wordSet(wordDict.begin(), wordDict.end());
-	vector<bool> dp(s.size() + 1);
-	dp[0] = true;
-	for (int i = 0; i < dp.size(); ++i) {
-		for (int j = 0; j < i; ++j) {
-			if (dp[j] && wordSet.count(s.substr(j, i - j))) {
-				dp[i] = true;
-				break;
-			}
-		}
-	}
-	return dp.back();
+    unordered_set<string> wordSet(wordDict.begin(), wordDict.end());
+    vector<bool> dp(s.size() + 1);
+    dp[0] = true;
+    for (int i = 0; i < dp.size(); ++i) {
+        for (int j = 0; j < i; ++j) {
+            if (dp[j] && wordSet.count(s.substr(j, i - j))) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp.back();
 }
-	
+    
 ---------------------------------------------------------------------
 
 //142 Linked List Cycle II 单链表中的环之二
@@ -1003,37 +1003,37 @@ To represent a cycle in the given linked list, we use an integer pos which repre
 Note: Do not modify the linked list.
 
 Example 1:
-	Input: head = [3,2,0,-4], pos = 1
-	Output: tail connects to node index 1
+    Input: head = [3,2,0,-4], pos = 1
+    Output: tail connects to node index 1
 Explanation: There is a cycle in the linked list, where tail connects to the second node.
 
 Example 2:
-	Input: head = [1,2], pos = 0
-	Output: tail connects to node index 0
+    Input: head = [1,2], pos = 0
+    Output: tail connects to node index 0
 Explanation: There is a cycle in the linked list, where tail connects to the first node.
 
 Example 3:
-	Input: head = [1], pos = -1
-	Output: no cycle
+    Input: head = [1], pos = -1
+    Output: no cycle
 Explanation: There is no cycle in the linked list. 
 
 Follow-up:
 Can you solve it without using extra space?
 
 ListNode *detectCycle(ListNode *head) {
-	ListNode *slow = head, *fast = head;
-	while (fast && fast->next) {
-		slow = slow->next;
-		fast = fast->next->next;
-		if (slow == fast) break;
-	}
-	if (!fast || !fast->next) return NULL;
-	slow = head;
-	while (slow != fast) {
-		slow = slow->next;
-		fast = fast->next;
-	}
-	return fast;
+    ListNode *slow = head, *fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) break;
+    }
+    if (!fast || !fast->next) return NULL;
+    slow = head;
+    while (slow != fast) {
+        slow = slow->next;
+        fast = fast->next;
+    }
+    return fast;
 }
 
 ---------------------------------------------------------------------
@@ -1045,37 +1045,37 @@ reorder it to: L0→Ln→L1→Ln-1→L2→Ln-2→…
 You may not modify the values in the list's nodes, only nodes itself may be changed.
 
 Example 1:
-	Given 1->2->3->4, reorder it to 1->4->2->3.
+    Given 1->2->3->4, reorder it to 1->4->2->3.
 Example 2:
-	Given 1->2->3->4->5, reorder it to 1->5->2->4->3.
+    Given 1->2->3->4->5, reorder it to 1->5->2->4->3.
 
 使用快慢指针来找到链表的中点，并将链表从中点处断开，形成两个独立的链表。
 将第二个链翻转
 将第二个链表的元素间隔地插入第一个链表中
-	
+    
 void reorderList(ListNode *head) {
-	if (!head || !head->next || !head->next->next) return;
-	ListNode *fast = head, *slow = head;
-	while (fast->next && fast->next->next) {
-		slow = slow->next;
-		fast = fast->next->next;
-	}
-	ListNode *mid = slow->next;
-	slow->next = NULL;
-	ListNode *last = mid, *pre = NULL;
-	while (last) {
-		ListNode *next = last->next;
-		last->next = pre;
-		pre = last;
-		last = next;
-	}
-	while (head && pre) {
-		ListNode *next = head->next;
-		head->next = pre;
-		pre = pre->next;
-		head->next->next = next;
-		head = next;
-	}
+    if (!head || !head->next || !head->next->next) return;
+    ListNode *fast = head, *slow = head;
+    while (fast->next && fast->next->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    ListNode *mid = slow->next;
+    slow->next = NULL;
+    ListNode *last = mid, *pre = NULL;
+    while (last) {
+        ListNode *next = last->next;
+        last->next = pre;
+        pre = last;
+        last = next;
+    }
+    while (head && pre) {
+        ListNode *next = head->next;
+        head->next = pre;
+        pre = pre->next;
+        head->next->next = next;
+        head = next;
+    }
 }
 
 ---------------------------------------------------------------------
@@ -1084,14 +1084,14 @@ void reorderList(ListNode *head) {
 Given a binary tree, return the preorder traversal of its nodes' values.
 
 Example:
-	Input: [1,null,2,3]
-	   1
-		\
-		 2
-		/
-	   3
+    Input: [1,null,2,3]
+       1
+        \
+         2
+        /
+       3
 
-	Output: [1,2,3]
+    Output: [1,2,3]
 Follow up: Recursive solution is trivial, could you do it iteratively?
 
 
@@ -1099,16 +1099,16 @@ Follow up: Recursive solution is trivial, could you do it iteratively?
 循环检测栈是否为空，若不空，则取出栈顶元素，保存其值，然后看其右子节点是否存在，若存在则push到栈中。再看其左子节点，若存在，则push到栈中
 
 vector<int> preorderTraversal(TreeNode* root) {
-	if (!root) return {};
-	vector<int> res;
-	stack<TreeNode*> s{{root}};
-	while (!s.empty()) {
-		TreeNode *t = s.top(); s.pop();
-		res.push_back(t->val);
-		if (t->right) s.push(t->right);
-		if (t->left) s.push(t->left);
-	}
-	return res;
+    if (!root) return {};
+    vector<int> res;
+    stack<TreeNode*> s{{root}};
+    while (!s.empty()) {
+        TreeNode *t = s.top(); s.pop();
+        res.push_back(t->val);
+        if (t->right) s.push(t->right);
+        if (t->left) s.push(t->left);
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -1125,17 +1125,17 @@ Follow up:
 Could you do both operations in O(1) time complexity?
 
 Example:
-	LRUCache cache = new LRUCache( 2 /* capacity */ );
+    LRUCache cache = new LRUCache( 2 /* capacity */ );
 
-	cache.put(1, 1);
-	cache.put(2, 2);
-	cache.get(1);       // returns 1
-	cache.put(3, 3);    // evicts key 2
-	cache.get(2);       // returns -1 (not found)
-	cache.put(4, 4);    // evicts key 1
-	cache.get(1);       // returns -1 (not found)
-	cache.get(3);       // returns 3
-	cache.get(4);       // returns 4
+    cache.put(1, 1);
+    cache.put(2, 2);
+    cache.get(1);       // returns 1
+    cache.put(3, 3);    // evicts key 2
+    cache.get(2);       // returns -1 (not found)
+    cache.put(4, 4);    // evicts key 1
+    cache.get(1);       // returns -1 (not found)
+    cache.get(3);       // returns 3
+    cache.get(4);       // returns 4
 
 class LRUCache{
 public:
@@ -1183,26 +1183,26 @@ At each iteration, insertion sort removes one element from the input data, finds
 It repeats until no input elements remain.
 
 Example 1:
-	Input: 4->2->1->3
-	Output: 1->2->3->4
+    Input: 4->2->1->3
+    Output: 1->2->3->4
 
 Example 2:
-	Input: -1->5->3->4->0
-	Output: -1->0->3->4->5
+    Input: -1->5->3->4->0
+    Output: -1->0->3->4->5
 
 ListNode* insertionSortList(ListNode* head) {
-	ListNode *dummy = new ListNode(-1), *cur = dummy;
-	while (head) {
-		ListNode *t = head->next;
-		cur = dummy;
-		while (cur->next && cur->next->val <= head->val) {
-			cur = cur->next;
-		}
-		head->next = cur->next;
-		cur->next = head;
-		head = t;
-	}
-	return dummy->next;
+    ListNode *dummy = new ListNode(-1), *cur = dummy;
+    while (head) {
+        ListNode *t = head->next;
+        cur = dummy;
+        while (cur->next && cur->next->val <= head->val) {
+            cur = cur->next;
+        }
+        head->next = cur->next;
+        cur->next = head;
+        head = t;
+    }
+    return dummy->next;
 }
 
 ---------------------------------------------------------------------
@@ -1211,40 +1211,40 @@ ListNode* insertionSortList(ListNode* head) {
 Sort a linked list in O(n log n) time using constant space complexity.
 
 Example 1:
-	Input: 4->2->1->3
-	Output: 1->2->3->4
-	
+    Input: 4->2->1->3
+    Output: 1->2->3->4
+    
 Example 2:
-	Input: -1->5->3->4->0
-	Output: -1->0->3->4->5
+    Input: -1->5->3->4->0
+    Output: -1->0->3->4->5
 
 ListNode* sortList(ListNode* head) {
-	if (!head || !head->next) return head;
-	ListNode *slow = head, *fast = head, *pre = head;
-	while (fast && fast->next) {
-		pre = slow;
-		slow = slow->next;
-		fast = fast->next->next;
-	}
-	pre->next = NULL;
-	return merge(sortList(head), sortList(slow));
+    if (!head || !head->next) return head;
+    ListNode *slow = head, *fast = head, *pre = head;
+    while (fast && fast->next) {
+        pre = slow;
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    pre->next = NULL;
+    return merge(sortList(head), sortList(slow));
 }
 ListNode* merge(ListNode* l1, ListNode* l2) {
-	ListNode *dummy = new ListNode(-1);
-	ListNode *cur = dummy;
-	while (l1 && l2) {
-		if (l1->val < l2->val) {
-			cur->next = l1;
-			l1 = l1->next;
-		} else {
-			cur->next = l2;
-			l2 = l2->next;
-		}
-		cur = cur->next;
-	}
-	if (l1) cur->next = l1;
-	if (l2) cur->next = l2;
-	return dummy->next;
+    ListNode *dummy = new ListNode(-1);
+    ListNode *cur = dummy;
+    while (l1 && l2) {
+        if (l1->val < l2->val) {
+            cur->next = l1;
+            l1 = l1->next;
+        } else {
+            cur->next = l2;
+            l2 = l2->next;
+        }
+        cur = cur->next;
+    }
+    if (l1) cur->next = l1;
+    if (l2) cur->next = l2;
+    return dummy->next;
 }
 
 ---------------------------------------------------------------------
@@ -1260,46 +1260,46 @@ Division between two integers should truncate toward zero.
 The given RPN expression is always valid. That means the expression would always evaluate to a result and there won't be any divide by zero operation.
 
 Example 1:
-	Input: ["2", "1", "+", "3", "*"]
-	Output: 9
+    Input: ["2", "1", "+", "3", "*"]
+    Output: 9
 
 Explanation: ((2 + 1) * 3) = 9
 
 Example 2:
-	Input: ["4", "13", "5", "/", "+"]
-	Output: 6
+    Input: ["4", "13", "5", "/", "+"]
+    Output: 6
 
 Explanation: (4 + (13 / 5)) = 6
 
 Example 3:
-	Input: ["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]
-	Output: 22
+    Input: ["10", "6", "9", "3", "+", "-11", "*", "/", "*", "17", "+", "5", "+"]
+    Output: 22
 
 Explanation: 
-	  ((10 * (6 / ((9 + 3) * -11))) + 17) + 5
-	= ((10 * (6 / (12 * -11))) + 17) + 5
-	= ((10 * (6 / -132)) + 17) + 5
-	= ((10 * 0) + 17) + 5
-	= (0 + 17) + 5
-	= 17 + 5
-	= 22
+      ((10 * (6 / ((9 + 3) * -11))) + 17) + 5
+    = ((10 * (6 / (12 * -11))) + 17) + 5
+    = ((10 * (6 / -132)) + 17) + 5
+    = ((10 * 0) + 17) + 5
+    = (0 + 17) + 5
+    = 17 + 5
+    = 22
 
 int evalRPN(vector<string>& tokens) {
-	if (tokens.size() == 1) return stoi(tokens[0]);
-	stack<int> st;
-	for (int i = 0; i < tokens.size(); ++i) {
-		if (tokens[i] != "+" && tokens[i] != "-" && tokens[i] != "*" && tokens[i] != "/") {
-			st.push(stoi(tokens[i]));
-		} else {
-			int num1 = st.top(); st.pop();
-			int num2 = st.top(); st.pop();
-			if (tokens[i] == "+") st.push(num2 + num1);
-			if (tokens[i] == "-") st.push(num2 - num1);
-			if (tokens[i] == "*") st.push(num2 * num1);
-			if (tokens[i] == "/") st.push(num2 / num1);
-		}
-	}
-	return st.top();
+    if (tokens.size() == 1) return stoi(tokens[0]);
+    stack<int> st;
+    for (int i = 0; i < tokens.size(); ++i) {
+        if (tokens[i] != "+" && tokens[i] != "-" && tokens[i] != "*" && tokens[i] != "/") {
+            st.push(stoi(tokens[i]));
+        } else {
+            int num1 = st.top(); st.pop();
+            int num2 = st.top(); st.pop();
+            if (tokens[i] == "+") st.push(num2 + num1);
+            if (tokens[i] == "-") st.push(num2 - num1);
+            if (tokens[i] == "*") st.push(num2 * num1);
+            if (tokens[i] == "/") st.push(num2 / num1);
+        }
+    }
+    return st.top();
 }
 
 ---------------------------------------------------------------------
@@ -1308,19 +1308,19 @@ int evalRPN(vector<string>& tokens) {
 Given an input string, reverse the string word by word.
 
 Example 1:
-	Input: "the sky is blue"
-	Output: "blue is sky the"
-	
+    Input: "the sky is blue"
+    Output: "blue is sky the"
+    
 Example 2:
-	Input: "  hello world!  "
-	Output: "world! hello"
+    Input: "  hello world!  "
+    Output: "world! hello"
 
 Explanation: Your reversed string should not contain leading or trailing spaces.
 
 Example 3:
-	Input: "a good   example"
-	Output: "example good a"
-	
+    Input: "a good   example"
+    Output: "example good a"
+    
 Explanation: You need to reduce multiple spaces between two words to a single space in the reversed string.
 
 Note:
@@ -1333,18 +1333,18 @@ Follow up:
 For C programmers, try to solve it in-place in O(1) extra space.
 
 void reverseWords(string &s) {
-	int storeIndex = 0, n = s.size();
-	reverse(s.begin(), s.end());
-	for (int i = 0; i < n; ++i) {
-		if (s[i] != ' ') {
-			if (storeIndex != 0) s[storeIndex++] = ' ';
-			int j = i;
-			while (j < n && s[j] != ' ') s[storeIndex++] = s[j++];
-			reverse(s.begin() + storeIndex - (j - i), s.begin() + storeIndex);
-			i = j;
-		}
-	}
-	s.resize(storeIndex);
+    int storeIndex = 0, n = s.size();
+    reverse(s.begin(), s.end());
+    for (int i = 0; i < n; ++i) {
+        if (s[i] != ' ') {
+            if (storeIndex != 0) s[storeIndex++] = ' ';
+            int j = i;
+            while (j < n && s[j] != ' ') s[storeIndex++] = s[j++];
+            reverse(s.begin() + storeIndex - (j - i), s.begin() + storeIndex);
+            i = j;
+        }
+    }
+    s.resize(storeIndex);
 }
 
 ---------------------------------------------------------------------
@@ -1353,14 +1353,14 @@ void reverseWords(string &s) {
 Given an integer array nums, find the contiguous subarray within an array (containing at least one number) which has the largest product.
 
 Example 1:
-	Input: [2,3,-2,4]
-	Output: 6
+    Input: [2,3,-2,4]
+    Output: 6
 
 Explanation: [2,3] has the largest product 6.
 
 Example 2:
-	Input: [-2,0,-1]
-	Output: 0
+    Input: [-2,0,-1]
+    Output: 0
 
 Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
 
@@ -1368,29 +1368,29 @@ DP
 要维护两个dp数组，其中f[i]表示子数组[0, i]范围内并且一定包含nums[i]数字的最大子数组乘积，g[i]表示子数组[0, i]范围内并且一定包含nums[i]数字的最小子数组乘积，维护最小的是因为一旦遇到一个负数，最小的会成为最大的
 
 int maxProduct(vector<int>& nums) {
-	int res = nums[0], n = nums.size();
-	vector<int> f(n, 0), g(n, 0);
-	f[0] = nums[0];
-	g[0] = nums[0];
-	for (int i = 1; i < n; ++i) {
-		f[i] = max(max(f[i - 1] * nums[i], g[i - 1] * nums[i]), nums[i]);
-		g[i] = min(min(f[i - 1] * nums[i], g[i - 1] * nums[i]), nums[i]);
-		res = max(res, f[i]);
-	}
-	return res;
+    int res = nums[0], n = nums.size();
+    vector<int> f(n, 0), g(n, 0);
+    f[0] = nums[0];
+    g[0] = nums[0];
+    for (int i = 1; i < n; ++i) {
+        f[i] = max(max(f[i - 1] * nums[i], g[i - 1] * nums[i]), nums[i]);
+        g[i] = min(min(f[i - 1] * nums[i], g[i - 1] * nums[i]), nums[i]);
+        res = max(res, f[i]);
+    }
+    return res;
 }
 
 可以优化空间，只用2个变量就行
 int maxProduct(vector<int>& nums) {
-	if (nums.empty()) return 0;
-	int res = nums[0], mn = nums[0], mx = nums[0];
-	for (int i = 1; i < nums.size(); ++i) {
-		int tmax = mx, tmin = mn;
-		mx = max(max(nums[i], tmax * nums[i]), tmin * nums[i]);
-		mn = min(min(nums[i], tmax * nums[i]), tmin * nums[i]);
-		res = max(res, mx);
-	}
-	return res;
+    if (nums.empty()) return 0;
+    int res = nums[0], mn = nums[0], mx = nums[0];
+    for (int i = 1; i < nums.size(); ++i) {
+        int tmax = mx, tmin = mn;
+        mx = max(max(nums[i], tmax * nums[i]), tmin * nums[i]);
+        mn = min(min(nums[i], tmax * nums[i]), tmin * nums[i]);
+        res = max(res, mx);
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -1405,21 +1405,21 @@ Find the minimum element.
 You may assume no duplicate exists in the array.
 
 Example 1:
-	Input: [3,4,5,1,2] 
-	Output: 1
+    Input: [3,4,5,1,2] 
+    Output: 1
 
 Example 2:
-	Input: [4,5,6,7,0,1,2]
-	Output: 0
+    Input: [4,5,6,7,0,1,2]
+    Output: 0
 
 int findMin(vector<int>& nums) {
-	int left = 0, right = (int)nums.size() - 1;
-	while (left < right) {
-		int mid = left + (right - left) / 2;
-		if (nums[mid] > nums[right]) left = mid + 1;
-		else right = mid;
-	}
-	return nums[right];
+    int left = 0, right = (int)nums.size() - 1;
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] > nums[right]) left = mid + 1;
+        else right = mid;
+    }
+    return nums[right];
 }
 
 ---------------------------------------------------------------------
@@ -1430,32 +1430,32 @@ Given a binary tree where all the right nodes are either leaf nodes with a sibli
 For example:
 
 Given a binary tree {1,2,3,4,5},
-		1
-	   / \
-	  2   3
-	 / \
-	4   5
+        1
+       / \
+      2   3
+     / \
+    4   5
 
 return the root of the binary tree [4,5,2,#,#,3,1].
-	   4
-	  / \
-	 5   2
-		/ \
-	   3   1  
+       4
+      / \
+     5   2
+        / \
+       3   1  
 
 二叉树上下颠倒一下，而且限制了右节点要么为空要么一定会有对应的左节点。上下颠倒后原来二叉树的最左子节点变成了根节点，其对应的右节点变成了其左子节点，其父节点变成了其右子节点，相当于顺时针旋转了一下
 
 TreeNode *upsideDownBinaryTree(TreeNode *root) {
-	TreeNode *cur = root, *pre = NULL, *next = NULL, *tmp = NULL;
-	while (cur) {
-		next = cur->left;
-		cur->left = tmp;
-		tmp = cur->right;
-		cur->right = pre;
-		pre = cur;
-		cur = next;
-	}
-	return pre;
+    TreeNode *cur = root, *pre = NULL, *next = NULL, *tmp = NULL;
+    while (cur) {
+        next = cur->left;
+        cur->left = tmp;
+        tmp = cur->right;
+        cur->right = pre;
+        pre = cur;
+        cur = next;
+    }
+    return pre;
 }
 
 ---------------------------------------------------------------------
@@ -1486,23 +1486,23 @@ Output: true
 Explanation: We can replace '0' with '1' to get t.
 
 bool isOneEditDistance(string s, string t) {
-	if (s.size() < t.size()) swap(s, t);
-	int m = s.size(), n = t.size(), diff = m - n;
-	if (diff >= 2) return false;
-	else if (diff == 1) {
-		for (int i = 0; i < n; ++i) {
-			if (s[i] != t[i]) {
-				return s.substr(i + 1) == t.substr(i);
-			}
-		}
-		return true;
-	} else {
-		int cnt = 0;
-		for (int i = 0; i < m; ++i) {
-			if (s[i] != t[i]) ++cnt;
-		}
-		return cnt == 1;
-	}
+    if (s.size() < t.size()) swap(s, t);
+    int m = s.size(), n = t.size(), diff = m - n;
+    if (diff >= 2) return false;
+    else if (diff == 1) {
+        for (int i = 0; i < n; ++i) {
+            if (s[i] != t[i]) {
+                return s.substr(i + 1) == t.substr(i);
+            }
+        }
+        return true;
+    } else {
+        int cnt = 0;
+        for (int i = 0; i < m; ++i) {
+            if (s[i] != t[i]) ++cnt;
+        }
+        return cnt == 1;
+    }
 }
 
 ---------------------------------------------------------------------
@@ -1517,13 +1517,13 @@ The array may contain multiple peaks, in that case return the index to any one o
 You may imagine that nums[-1] = nums[n] = -∞.
 
 Example 1:
-	Input: nums = [1,2,3,1]
-	Output: 2
+    Input: nums = [1,2,3,1]
+    Output: 2
 Explanation: 3 is a peak element and your function should return the index number 2.
 
 Example 2:
-	Input: nums = [1,2,1,3,5,6,4]
-	Output: 1 or 5 
+    Input: nums = [1,2,1,3,5,6,4]
+    Output: 1 or 5 
 Explanation: Your function can return either index number 1 where the peak element is 2, 
              or index number 5 where the peak element is 6.
 
@@ -1531,13 +1531,13 @@ Note:
 Your solution should be in logarithmic complexity.
 
 int findPeakElement(vector<int>& nums) {
-	int left = 0, right = nums.size() - 1;
-	while (left < right) {
-		int mid = left + (right - left) / 2;
-		if (nums[mid] < nums[mid + 1]) left = mid + 1;
-		else right = mid;
-	}
-	return right;
+    int left = 0, right = nums.size() - 1;
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        if (nums[mid] < nums[mid + 1]) left = mid + 1;
+        else right = mid;
+    }
+    return right;
 }
 
 ---------------------------------------------------------------------
@@ -1547,17 +1547,17 @@ Given a sorted integer array where the range of elements are [0, 99] inclusive, 
 For example, given [0, 1, 3, 50, 75], return [“2”, “4->49”, “51->74”, “76->99”]
 
 vector<string> findMissingRanges(vector<int>& nums, int lower, int upper) {
-	vector<string> res;
-	int l = lower;
-	for (int i = 0; i <= nums.size(); ++i) {
-		int r = (i < nums.size() && nums[i] <= upper) ? nums[i] : upper + 1;
-		if (l == r) ++l;
-		else if (r > l) {
-			res.push_back(r - l == 1 ? to_string(l) : to_string(l) + "->" + to_string(r - 1));
-			l = r + 1;
-		}
-	}
-	return res;
+    vector<string> res;
+    int l = lower;
+    for (int i = 0; i <= nums.size(); ++i) {
+        int r = (i < nums.size() && nums[i] <= upper) ? nums[i] : upper + 1;
+        if (l == r) ++l;
+        else if (r > l) {
+            res.push_back(r - l == 1 ? to_string(l) : to_string(l) + "->" + to_string(r - 1));
+            l = r + 1;
+        }
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -1575,47 +1575,47 @@ For instance, 2.5 is not "two and a half" or "half way to version three", it is 
 You may assume the default revision number for each level of a version number to be 0. For example, version number 3.4 has a revision number of 3 and 4 for its first and second level revision number. Its third and fourth level revision number are both 0.
 
 Example 1:
-	Input: version1 = "0.1", version2 = "1.1"
-	Output: -1
+    Input: version1 = "0.1", version2 = "1.1"
+    Output: -1
 
 Example 2:
-	Input: version1 = "1.0.1", version2 = "1"
-	Output: 1
+    Input: version1 = "1.0.1", version2 = "1"
+    Output: 1
 
 Example 3:
-	Input: version1 = "7.5.2.4", version2 = "7.5.3"
-	Output: -1
+    Input: version1 = "7.5.2.4", version2 = "7.5.3"
+    Output: -1
 
 Example 4:
-	Input: version1 = "1.01", version2 = "1.001"
-	Output: 0
+    Input: version1 = "1.01", version2 = "1.001"
+    Output: 0
 Explanation: Ignoring leading zeroes, both “01” and “001" represent the same number “1”
 
 Example 5:
-	Input: version1 = "1.0", version2 = "1.0.0"
-	Output: 0
+    Input: version1 = "1.0", version2 = "1.0.0"
+    Output: 0
 Explanation: The first version number does not have a third level revision number, which means its third level revision number is default to "0"
 
 Note:
-	Version strings are composed of numeric strings separated by dots . and this numeric strings may have leading zeroes.
-	Version strings do not start or end with dots, and they will not be two consecutive dots.
+    Version strings are composed of numeric strings separated by dots . and this numeric strings may have leading zeroes.
+    Version strings do not start or end with dots, and they will not be two consecutive dots.
 
 int compareVersion(string version1, string version2) {
-	int n1 = version1.size(), n2 = version2.size();
-	int i = 0, j = 0, d1 = 0, d2 = 0;
-	while (i < n1 || j < n2) {
-		while (i < n1 && version1[i] != '.') {
-			d1 = d1 * 10 + version1[i++] - '0';
-		}
-		while (j < n2 && version2[j] != '.') {
-			d2 = d2 * 10 + version2[j++] - '0';
-		}
-		if (d1 > d2) return 1;
-		else if (d1 < d2) return -1;
-		d1 = d2 = 0;
-		++i; ++j;
-	}
-	return 0;
+    int n1 = version1.size(), n2 = version2.size();
+    int i = 0, j = 0, d1 = 0, d2 = 0;
+    while (i < n1 || j < n2) {
+        while (i < n1 && version1[i] != '.') {
+            d1 = d1 * 10 + version1[i++] - '0';
+        }
+        while (j < n2 && version2[j] != '.') {
+            d2 = d2 * 10 + version2[j++] - '0';
+        }
+        if (d1 > d2) return 1;
+        else if (d1 < d2) return -1;
+        d1 = d2 = 0;
+        ++i; ++j;
+    }
+    return 0;
 }
 
 ---------------------------------------------------------------------
@@ -1626,43 +1626,43 @@ Given two integers representing the numerator and denominator of a fraction, ret
 If the fractional part is repeating, enclose the repeating part in parentheses.
 
 Example 1:
-	Input: numerator = 1, denominator = 2
-	Output: "0.5"
+    Input: numerator = 1, denominator = 2
+    Output: "0.5"
 
 Example 2:
-	Input: numerator = 2, denominator = 1
-	Output: "2"
+    Input: numerator = 2, denominator = 1
+    Output: "2"
 
 Example 3:
-	Input: numerator = 2, denominator = 3
-	Output: "0.(6)"
+    Input: numerator = 2, denominator = 3
+    Output: "0.(6)"
 
 string fractionToDecimal(int numerator, int denominator) {
-	int s1 = numerator >= 0 ? 1 : -1;
-	int s2 = denominator >= 0 ? 1 : -1;
-	long long num = abs( (long long)numerator );
-	long long den = abs( (long long)denominator );
-	long long out = num / den;
-	long long rem = num % den;
-	unordered_map<long long, int> m;
-	string res = to_string(out);
-	if (s1 * s2 == -1 && (out > 0 || rem > 0)) res = "-" + res;
-	if (rem == 0) return res;
-	res += ".";
-	string s = "";
-	int pos = 0;
-	while (rem != 0) {
-		if (m.find(rem) != m.end()) {
-			s.insert(m[rem], "(");
-			s += ")";
-			return res + s;
-		}
-		m[rem] = pos;
-		s += to_string((rem * 10) / den);
-		rem = (rem * 10) % den;
-		++pos;
-	}
-	return res + s;
+    int s1 = numerator >= 0 ? 1 : -1;
+    int s2 = denominator >= 0 ? 1 : -1;
+    long long num = abs( (long long)numerator );
+    long long den = abs( (long long)denominator );
+    long long out = num / den;
+    long long rem = num % den;
+    unordered_map<long long, int> m;
+    string res = to_string(out);
+    if (s1 * s2 == -1 && (out > 0 || rem > 0)) res = "-" + res;
+    if (rem == 0) return res;
+    res += ".";
+    string s = "";
+    int pos = 0;
+    while (rem != 0) {
+        if (m.find(rem) != m.end()) {
+            s.insert(m[rem], "(");
+            s += ")";
+            return res + s;
+        }
+        m[rem] = pos;
+        s += to_string((rem * 10) / den);
+        rem = (rem * 10) % den;
+        ++pos;
+    }
+    return res + s;
 }
 
 ---------------------------------------------------------------------
@@ -1673,16 +1673,16 @@ Implement an iterator over a binary search tree (BST). Your iterator will be ini
 Calling next() will return the next smallest number in the BST.
 
 Example:
-	BSTIterator iterator = new BSTIterator(root);
-	iterator.next();    // return 3
-	iterator.next();    // return 7
-	iterator.hasNext(); // return true
-	iterator.next();    // return 9
-	iterator.hasNext(); // return true
-	iterator.next();    // return 15
-	iterator.hasNext(); // return true
-	iterator.next();    // return 20
-	iterator.hasNext(); // return false 
+    BSTIterator iterator = new BSTIterator(root);
+    iterator.next();    // return 3
+    iterator.next();    // return 7
+    iterator.hasNext(); // return true
+    iterator.next();    // return 9
+    iterator.hasNext(); // return true
+    iterator.next();    // return 15
+    iterator.hasNext(); // return true
+    iterator.next();    // return 20
+    iterator.hasNext(); // return false 
 
 Note:
 next() and hasNext() should run in average O(1) time and uses O(h) memory, where h is the height of the tree.
@@ -1724,25 +1724,25 @@ private:
 Given a list of non negative integers, arrange them such that they form the largest number.
 
 Example 1:
-	Input: [10,2]
-	Output: "210"
+    Input: [10,2]
+    Output: "210"
 
 Example 2:
-	Input: [3,30,34,5,9]
-	Output: "9534330"
+    Input: [3,30,34,5,9]
+    Output: "9534330"
 
 降序
 bool compare(int a, int b) {
-	return to_string(a) + to_string(b) > to_string(b) + to_string(a); 
+    return to_string(a) + to_string(b) > to_string(b) + to_string(a); 
 }
 
 string largestNumber(vector<int>& nums) {
-	string res;
-	sort(nums.begin(), nums.end(), compare);
-	for (int i = 0; i < nums.size(); ++i) {
-		res += to_string(nums[i]);
-	}
-	return res[0] == '0' ? "0" : res;
+    string res;
+    sort(nums.begin(), nums.end(), compare);
+    for (int i = 0; i < nums.size(); ++i) {
+        res += to_string(nums[i]);
+    }
+    return res[0] == '0' ? "0" : res;
 }
 
 ---------------------------------------------------------------------
@@ -1751,34 +1751,34 @@ string largestNumber(vector<int>& nums) {
 Given an input string , reverse the string word by word.
 
 Example:
-	Input:  ["t","h","e"," ","s","k","y"," ","i","s"," ","b","l","u","e"]
-	Output: ["b","l","u","e"," ","i","s"," ","s","k","y"," ","t","h","e"]
+    Input:  ["t","h","e"," ","s","k","y"," ","i","s"," ","b","l","u","e"]
+    Output: ["b","l","u","e"," ","i","s"," ","s","k","y"," ","t","h","e"]
 
 Note: 
-	A word is defined as a sequence of non-space characters.
-	The input string does not contain leading or trailing spaces.
-	The words are always separated by a single space.
+    A word is defined as a sequence of non-space characters.
+    The input string does not contain leading or trailing spaces.
+    The words are always separated by a single space.
 
 Follow up: Could you do it in-place without allocating extra space?
 
 void reverseWords(vector<char>& str) {
-	int left = 0, n = str.size();
-	for (int i = 0; i <= n; ++i) {
-		if (i == n || str[i] == ' ') {
-			reverse(str, left, i - 1);
-			left = i + 1;
-		}
-	}
-	reverse(str, 0, n - 1);
+    int left = 0, n = str.size();
+    for (int i = 0; i <= n; ++i) {
+        if (i == n || str[i] == ' ') {
+            reverse(str, left, i - 1);
+            left = i + 1;
+        }
+    }
+    reverse(str, 0, n - 1);
 }
 
 void reverse(vector<char>& str, int left, int right) {
-	while (left < right) {
-		char t = str[left];
-		str[left] = str[right];
-		str[right] = t;
-		++left; --right;
-	}
+    while (left < right) {
+        char t = str[left];
+        str[left] = str[right];
+        str[right] = t;
+        ++left; --right;
+    }
 }
 
 ---------------------------------------------------------------------
@@ -1789,71 +1789,71 @@ All DNA is composed of a series of nucleotides abbreviated as A, C, G, and T, fo
 Write a function to find all the 10-letter-long sequences (substrings) that occur more than once in a DNA molecule.
 
 Example:
-	Input: s = "AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"
-	Output: ["AAAAACCCCC", "CCCCCAAAAA"]
+    Input: s = "AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"
+    Output: ["AAAAACCCCC", "CCCCCAAAAA"]
 
 vector<string> findRepeatedDnaSequences(string s) {
-	unordered_set<string> res, st;
-	for (int i = 0; i + 9 < s.size(); ++i) {
-		string t = s.substr(i, 10);
-		if (st.count(t)) res.insert(t);
-		else st.insert(t);
-	}
-	return vector<string>{res.begin(), res.end()};
+    unordered_set<string> res, st;
+    for (int i = 0; i + 9 < s.size(); ++i) {
+        string t = s.substr(i, 10);
+        if (st.count(t)) res.insert(t);
+        else st.insert(t);
+    }
+    return vector<string>{res.begin(), res.end()};
 }
 
 为了节省空间，将string缩小为int，因为2位bit就能区分A C G T四个字符，十个字母也就20位，所以可以用int代替
 vector<string> findRepeatedDnaSequences(string s) {
-	vector<string> res;
-	unordered_map<int, int> st;  //存储出现过的十个字符
-	unordered_map<int, int> m{{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
-	int cur = 0;
-	for (int i = 0; i < 9; ++i) cur = cur << 2 | m[s[i]];
-	for (int i = 9; i < s.size(); ++i) {
-		cur = ((cur & 0x3ffff) << 2) | (m[s[i]]);
-		if (st.count(cur)) {
-			if (st[cur] == 1) {
-				res.push_back(s.substr(i - 9, 10));
-			}
-			++st[cur];
-		}
-		else st[cur] = 1;
-	}
-	return res;
+    vector<string> res;
+    unordered_map<int, int> st;  //存储出现过的十个字符
+    unordered_map<int, int> m{{'A', 0}, {'C', 1}, {'G', 2}, {'T', 3}};
+    int cur = 0;
+    for (int i = 0; i < 9; ++i) cur = cur << 2 | m[s[i]];
+    for (int i = 9; i < s.size(); ++i) {
+        cur = ((cur & 0x3ffff) << 2) | (m[s[i]]);
+        if (st.count(cur)) {
+            if (st[cur] == 1) {
+                res.push_back(s.substr(i - 9, 10));
+            }
+            ++st[cur];
+        }
+        else st[cur] = 1;
+    }
+    return res;
 }
-	
+    
 ---------------------------------------------------------------------
 
 //199 Binary Tree Right Side View 二叉树的右侧视图
 Given a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.
 
 Example:
-	Input: [1,2,3,null,5,null,4]
-	Output: [1, 3, 4]
-	
+    Input: [1,2,3,null,5,null,4]
+    Output: [1, 3, 4]
+    
 Explanation:
-	   1            <---
-	 /   \
-	2     3         <---
-	 \     \
-	  5     4       <---
+       1            <---
+     /   \
+    2     3         <---
+     \     \
+      5     4       <---
 
 vector<int> rightSideView(TreeNode *root) {
-	vector<int> res;
-	if (!root) return res;
-	queue<TreeNode*> q;
-	q.push(root);
-	while (!q.empty()) {
-		res.push_back(q.back()->val);
-		int size = q.size();
-		for (int i = 0; i < size; ++i) {
-			TreeNode *node = q.front();
-			q.pop();
-			if (node->left) q.push(node->left);
-			if (node->right) q.push(node->right);
-		}
-	}
-	return res;
+    vector<int> res;
+    if (!root) return res;
+    queue<TreeNode*> q;
+    q.push(root);
+    while (!q.empty()) {
+        res.push_back(q.back()->val);
+        int size = q.size();
+        for (int i = 0; i < size; ++i) {
+            TreeNode *node = q.front();
+            q.pop();
+            if (node->left) q.push(node->left);
+            if (node->right) q.push(node->right);
+        }
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
@@ -1862,68 +1862,68 @@ vector<int> rightSideView(TreeNode *root) {
 Given a 2d grid map of '1's (land) and '0's (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
 
 Example 1:
-	Input:
-		11110
-		11010
-		11000
-		00000
-	Output: 1
+    Input:
+        11110
+        11010
+        11000
+        00000
+    Output: 1
 
 Example 2:
-	Input:
-		11000
-		11000
-		00100
-		00011
-	Output: 3
+    Input:
+        11000
+        11000
+        00100
+        00011
+    Output: 3
 
 DFS
 int numIslands(vector<vector<char>>& grid) {
-	if (grid.empty() || grid[0].empty()) return 0;
-	int m = grid.size(), n = grid[0].size(), res = 0;
-	vector<vector<bool>> visited(m, vector<bool>(n));
-	for (int i = 0; i < m; ++i) {
-		for (int j = 0; j < n; ++j) {
-			if (grid[i][j] == '0' || visited[i][j]) continue;
-			helper(grid, visited, i, j);
-			++res;
-		}
-	}
-	return res;
+    if (grid.empty() || grid[0].empty()) return 0;
+    int m = grid.size(), n = grid[0].size(), res = 0;
+    vector<vector<bool>> visited(m, vector<bool>(n));
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (grid[i][j] == '0' || visited[i][j]) continue;
+            helper(grid, visited, i, j);
+            ++res;
+        }
+    }
+    return res;
 }
 
 void helper(vector<vector<char>>& grid, vector<vector<bool>>& visited, int x, int y) {
-	if (x < 0 || x >= grid.size() || y < 0 || y >= grid[0].size() || grid[x][y] == '0' || visited[x][y]) return;
-	visited[x][y] = true;
-	helper(grid, visited, x - 1, y);
-	helper(grid, visited, x + 1, y);
-	helper(grid, visited, x, y - 1);
-	helper(grid, visited, x, y + 1);
+    if (x < 0 || x >= grid.size() || y < 0 || y >= grid[0].size() || grid[x][y] == '0' || visited[x][y]) return;
+    visited[x][y] = true;
+    helper(grid, visited, x - 1, y);
+    helper(grid, visited, x + 1, y);
+    helper(grid, visited, x, y - 1);
+    helper(grid, visited, x, y + 1);
 }
 
 递归也可以用队列来替代
 int numIslands(vector<vector<char>>& grid) {
-	if (grid.empty() || grid[0].empty()) return 0;
-	int m = grid.size(), n = grid[0].size(), res = 0;
-	vector<vector<bool>> visited(m, vector<bool>(n));
-	vector<int> dirX{-1, 0, 1, 0}, dirY{0, 1, 0, -1};
-	for (int i = 0; i < m; ++i) {
-		for (int j = 0; j < n; ++j) {
-			if (grid[i][j] == '0' || visited[i][j]) continue;
-			++res;
-			queue<int> q{{i * n + j}};
-			while (!q.empty()) {
-				int t = q.front(); q.pop();
-				for (int k = 0; k < 4; ++k) {
-					int x = t / n + dirX[k], y = t % n + dirY[k];
-					if (x < 0 || x >= m || y < 0 || y >= n || grid[x][y] == '0' || visited[x][y]) continue;
-					visited[x][y] = true;
-					q.push(x * n + y);
-				}
-			}
-		}
-	}
-	return res;
+    if (grid.empty() || grid[0].empty()) return 0;
+    int m = grid.size(), n = grid[0].size(), res = 0;
+    vector<vector<bool>> visited(m, vector<bool>(n));
+    vector<int> dirX{-1, 0, 1, 0}, dirY{0, 1, 0, -1};
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (grid[i][j] == '0' || visited[i][j]) continue;
+            ++res;
+            queue<int> q{{i * n + j}};
+            while (!q.empty()) {
+                int t = q.front(); q.pop();
+                for (int k = 0; k < 4; ++k) {
+                    int x = t / n + dirX[k], y = t % n + dirY[k];
+                    if (x < 0 || x >= m || y < 0 || y >= n || grid[x][y] == '0' || visited[x][y]) continue;
+                    visited[x][y] = true;
+                    q.push(x * n + y);
+                }
+            }
+        }
+    }
+    return res;
 }
 
 ---------------------------------------------------------------------
