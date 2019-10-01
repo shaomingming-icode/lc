@@ -735,12 +735,211 @@ Example 2:
 Follow up:
 What if the BST is modified (insert/delete operations) often and you need to find the kth smallest frequently? How would you optimize the kthSmallest routine?
 
-中序遍历得到一个有序数组
+中序遍历得到一个有序数组，中序遍历最先遍历到的是最小的结点，只要用一个计数器，每遍历一个结点，计数器自增1，当计数器到达k时，返回当前结点值
+
+int kthSmallest(TreeNode* root, int k) {
+	int cnt = 0;
+	stack<TreeNode*> s;
+	TreeNode *p = root;
+	while (p || !s.empty()) {
+		while (p) {
+			s.push(p);
+			p = p->left;
+		}
+		p = s.top(); s.pop();
+		++cnt;
+		if (cnt == k) return p->val;
+		p = p->right;
+	}
+	return 0;
+}
+
+int kthSmallest(TreeNode* root, int k) {
+	return kthSmallestDFS(root, k);
+}
+int kthSmallestDFS(TreeNode* root, int &k) {
+	if (!root) return -1;
+	int val = kthSmallestDFS(root->left, k);
+	if (k == 0) return val;
+	if (--k == 0) return root->val;
+	return kthSmallestDFS(root->right, k);
+}
+
+
+这道题的 Follow up 中说假设该 BST 被修改的很频繁，而且查找第k小元素的操作也很频繁，问我们如何优化。其实最好的方法还是像上面的解法那样利用分治法来快速定位目标所在的位置，但是每个递归都遍历左子树所有结点来计算个数的操作并不高效，所以应该修改原树结点的结构，使其保存包括当前结点和其左右子树所有结点的个数，这样就可以快速得到任何左子树结点总数来快速定位目标值了
+class Solution {
+public:
+    struct MyTreeNode {
+        int val;
+        int count;
+        MyTreeNode *left;
+        MyTreeNode *right;
+        MyTreeNode(int x) : val(x), count(1), left(NULL), right(NULL) {}
+    };
+    
+    MyTreeNode* build(TreeNode* root) {
+        if (!root) return NULL;
+        MyTreeNode *node = new MyTreeNode(root->val);
+        node->left = build(root->left);
+        node->right = build(root->right);
+        if (node->left) node->count += node->left->count;
+        if (node->right) node->count += node->right->count;
+        return node;
+    }
+    
+    int kthSmallest(TreeNode* root, int k) {
+        MyTreeNode *node = build(root);
+        return helper(node, k);
+    }
+    
+    int helper(MyTreeNode* node, int k) {
+        if (node->left) {
+            int cnt = node->left->count;
+            if (k <= cnt) {
+                return helper(node->left, k);
+            } else if (k > cnt + 1) {
+                return helper(node->right, k - 1 - cnt);
+            }
+            return node->val;
+        } else {
+            if (k == 1) return node->val;
+            return helper(node->right, k - 1);
+        }
+    }
+};
 
 ---------------------------------------------------------------------
+
+//236 Lowest Common Ancestor of a Binary Tree 二叉树的最小共同父节点
+Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.
+
+According to the definition of LCA on Wikipedia: “The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself).”
+
+Given the following binary tree:  root = [3,5,1,6,2,0,8,null,null,7,4]
+
+Example 1:
+Input: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+Output: 3
+Explanation: The LCA of nodes 5 and 1 is 3.
+
+Example 2:
+Input: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4
+Output: 5
+Explanation: The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself according to the LCA definition.
+ 
+
+Note:
+All of the nodes' values will be unique.
+p and q are different and both values will exist in the binary tree.
+
+TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+   if (!root || p == root || q == root) return root;
+   TreeNode *left = lowestCommonAncestor(root->left, p, q);
+   TreeNode *right = lowestCommonAncestor(root->right, p , q);
+   if (left && right) return root;
+   return left ? left : right;
+}
+
 ---------------------------------------------------------------------
+
+//238 Product of Array Except Self 除本身之外的数组之积
+Given an array nums of n integers where n > 1,  return an array output such that output[i] is equal to the product of all the elements of numsexcept nums[i].
+
+Example:
+	Input:  [1,2,3,4]
+	Output: [24,12,8,6]
+Note: Please solve it without division and in O(n).
+
+Follow up:
+Could you solve it with constant space complexity? (The output array does not count as extra space for the purpose of space complexity analysis.)
+
+前边乘以后边
+vector<int> productExceptSelf(vector<int>& nums) {
+	int n = nums.size();
+	vector<int> fwd(n, 1), bwd(n, 1), res(n);
+	for (int i = 0; i < n - 1; ++i) {
+		fwd[i + 1] = fwd[i] * nums[i];
+	}
+	for (int i = n - 1; i > 0; --i) {
+		bwd[i - 1] = bwd[i] * nums[i];
+	}
+	for (int i = 0; i < n; ++i) {
+		res[i] = fwd[i] * bwd[i];
+	}
+	return res;
+}
+
+优化空间
+vector<int> productExceptSelf(vector<int>& nums) {
+	vector<int> res(nums.size(), 1);
+	for (int i = 1; i < nums.size(); ++i) {
+		res[i] = res[i - 1] * nums[i - 1];
+	}
+	int right = 1;
+	for (int i = nums.size() - 1; i >= 0; --i) {
+		res[i] *= right;
+		right *= nums[i];
+	}
+	return res;
+}
+
 ---------------------------------------------------------------------
+
+//240 Search a 2D Matrix II 搜索一个二维矩阵之二
+Write an efficient algorithm that searches for a value in an m x n matrix. This matrix has the following properties:
+
+Integers in each row are sorted in ascending from left to right.
+Integers in each column are sorted in ascending from top to bottom.
+For example,
+
+Consider the following matrix:
+
+[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]
+Given target = 5, return true.
+Given target = 20, return false.
+
+bool searchMatrix(vector<vector<int> > &matrix, int target) {
+	if (matrix.empty() || matrix[0].empty()) return false;
+	if (target < matrix[0][0] || target > matrix.back().back()) return false;
+	int x = matrix.size() - 1, y = 0;
+	while (true) {
+		if (matrix[x][y] > target) --x;
+		else if (matrix[x][y] < target) ++y;
+		else return true;
+		if (x < 0 || y >= matrix[0].size()) break;
+	}
+	return false;
+}
+
 ---------------------------------------------------------------------
+
+//241 Different Ways to Add Parentheses 添加括号的不同方式
+Given a string of numbers and operators, return all possible results from computing all the different possible ways to group numbers and operators. The valid operators are +, - and *.
+
+Example 1:
+
+Input: "2-1-1"
+Output: [0, 2]
+Explanation: 
+((2-1)-1) = 0 
+(2-(1-1)) = 2
+Example 2:
+
+Input: "2*3-4*5"
+Output: [-34, -14, -10, -10, 10]
+Explanation: 
+(2*(3-(4*5))) = -34 
+((2*3)-(4*5)) = -14 
+((2*(3-4))*5) = -10 
+(2*((3-4)*5)) = -10 
+(((2*3)-4)*5) = 10
+
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
