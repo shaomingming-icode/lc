@@ -134,7 +134,84 @@ void wiggleSort(vector<int>& nums) {
 }
 
 ---------------------------------------------------------------------
+325. Maximum Size Subarray Sum Equals k
+Given an array nums and a target value k, find the maximum length of a subarray that sums to k.If there isn't one, return 0 instead.
+
+Note:
+The sum of the entire nums array is guaranteed to fit within the 32 - bit signed integer range.
+
+Example 1 :
+    Input : nums = [1, -1, 5, -2, 3], k = 3
+    Output : 4
+    Explanation : The subarray[1, -1, 5, -2] sums to 3 and is the longest.
+Example 2 :
+    Input : nums = [-2, -1, 2, 1], k = 1
+    Output : 2
+    Explanation : The subarray[-1, 2] sums to 1 and is the longest.
+Follow Up :
+Can you do it in O(n) time ?
+
+int maxSubArrayLen(vector<int>& nums, int k) {
+    if (nums.empty()) {
+        return 0;
+    }
+    int res = 0;
+    map<int, vector<int>> m;
+    m[nums[0]].push_back(0);
+    vector<int> sum = nums;
+    for (int i = 1; i < nums.size(); ++i) {
+        sum[i] += sum[i - 1];
+        m[sum[i]].push_back(i);
+    }
+    for (auto it : m) {
+        if (it.first == k) {
+            res = max(res, it.second.back() + 1);
+        }
+        else if (m.find(it.first - k) != m.end()) {
+            res = max(res, it.second.back() - m[it.first - k][0]);
+        }
+    }
+    return res;
+}
+
 ---------------------------------------------------------------------
+328. Odd Even Linked List
+Given a singly linked list, group all odd nodes together followed by the even nodes.Please note here we are talking about the node number and not the value in the nodes.
+You should try to do it in place.The program should run in O(1) space complexityand O(nodes) time complexity.
+
+Example 1:
+    Input: 1->2->3->4->5->NULL
+    Output : 1->3->5->2->4->NULL
+Example 2 :
+    Input : 2->1->3->5->6->4->7->NULL
+    Output : 2->3->6->7->1->5->4->NULL
+Note :
+    The relative order inside both the even and odd groups should remain as it was in the input.
+    The first node is considered odd, the second node even and so on ...
+
+ListNode* oddEvenList(ListNode* head) {
+    if (!head || !(head->next)) {
+        return head;
+    }
+    ListNode* a = head, * b = head->next, * enda, * frontb = b;
+    while (a && b) {
+        a->next = b->next;
+        if (a->next) {
+            b->next = a->next->next;
+            b = b->next;
+        }
+        enda = a;
+        a = a->next;
+    }
+    if (enda->next) {
+        enda->next->next = frontb;
+    }
+    else {
+        enda->next = frontb;
+    }
+    return head;
+}
+
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
 ---------------------------------------------------------------------
