@@ -1,5 +1,51 @@
 ------------------------------------------------------------------------------------
 
+311. 稀疏矩阵的乘法
+给定两个 稀疏矩阵 A 和 B，请你返回 AB。你可以默认 A 的列数等于 B 的行数。
+
+请仔细阅读下面的示例。
+示例：
+
+输入:
+A = [
+  [ 1, 0, 0],
+  [-1, 0, 3]
+]
+B = [
+  [ 7, 0, 0 ],
+  [ 0, 0, 0 ],
+  [ 0, 0, 1 ]
+]
+
+输出:
+     |  1 0 0 |   | 7 0 0 |   |  7 0 0 |
+AB = | -1 0 3 | x | 0 0 0 | = | -7 0 3 |
+                  | 0 0 1 |
+
+int** multiply(int** A, int ASize, int* AColSize, int** B, int BSize, int* BColSize, int* returnSize, int** returnColumnSizes){
+    *returnSize = ASize;
+    *returnColumnSizes = (int*)malloc(sizeof(int) * *returnSize);
+    for (int i = 0; i < *returnSize; i++) {
+        (*returnColumnSizes)[i] = BColSize[0];
+    }
+    int **res = (int**)malloc(sizeof(int*) * *returnSize);
+    for (int i = 0; i < *returnSize; i++) {
+        res[i] = malloc(sizeof(int) * (*returnColumnSizes)[i]);
+    }
+    for (int i = 0; i < *returnSize; i++) {
+        for (int j = 0; j < (*returnColumnSizes)[0]; j++) {
+            int sum = 0;
+            for (int k = 0; k < AColSize[0]; k++) {
+                sum += A[i][k] * B[k][j];
+            }
+            res[i][j] = sum;
+        }
+    }
+    return res;
+}
+
+------------------------------------------------------------------------------------
+
 314	二叉树的垂直遍历
 给定一个二叉树，返回其结点 垂直方向（从上到下，逐列）遍历的值。
 
@@ -1346,7 +1392,6 @@ hello---
 world---
 
 字符 '-' 表示屏幕上的一个空白位置。
- 
 
 示例 2：
 
@@ -1362,7 +1407,6 @@ e-a---
 bcd-e-
 
 字符 '-' 表示屏幕上的一个空白位置。
- 
 
 示例 3：
 
@@ -1380,9 +1424,682 @@ had--
 
 字符 '-' 表示屏幕上的一个空白位置。
 
+int wordsTyping(char ** sentence, int sentenceSize, int rows, int cols){
+    int res = 0;
+    int wordIndex = 0;
+    int sentenceLen = 0;
+    for (int i = 0; i < sentenceSize; i++) {
+        sentenceLen += strlen(sentence[i]) + 1;
+    }
+    for (int i = 0; i < rows; i++) {
+        int rowPos = 0;
+        while (cols - rowPos >= (int)strlen(sentence[wordIndex])) {  // 能放下
+            int multiAll = (cols - rowPos) / sentenceLen;
+            if (multiAll > 0) {
+                res += multiAll;
+                rowPos += multiAll * sentenceLen;
+            }
+            if (cols - rowPos >= (int)strlen(sentence[wordIndex])) {
+                rowPos += strlen(sentence[wordIndex]) + 1;
+                wordIndex++;
+                if (wordIndex == sentenceSize) {
+                    res++;
+                    wordIndex = 0;
+                }
+            }
+        }
+    }
+    return res;
+}
+
+------------------------------------------------------------------------------------
+
+426. 将二叉搜索树转化为排序的双向链表
+将一个二叉搜索树就地转化为一个已排序的双向循环链表。可以将左右孩子指针作为双向循环链表的前驱和后继指针。
+
+为了让您更好地理解问题，以下面的二叉搜索树为例：
+ 
+我们希望将这个二叉搜索树转化为双向循环链表。链表中的每个节点都有一个前驱和后继指针。对于双向循环链表，第一个节点的前驱是最后一个节点，最后一个节点的后继是第一个节点。
+
+下图展示了上面的二叉搜索树转化成的链表。“head” 表示指向链表中有最小元素的节点。
+
+特别地，我们希望可以就地完成转换操作。当转化完成以后，树中节点的左指针需要指向前驱，树中节点的右指针需要指向后继。还需要返回链表中的第一个节点的指针。
+
+下图显示了转化后的二叉搜索树，实线表示后继关系，虚线表示前驱关系。
+
+Node* treeToDoublyList(Node* root) {
+    if (root == NULL) {
+        return NULL;
+    }
+    pair<Node*, Node*> res = help(root);
+    res.first->left = res.second;
+    res.second->right = res.first;
+    return res.first;
+}
+
+pair<Node*, Node*> help(Node* root) {
+    if (root->left == NULL && root->right == NULL) {
+        return {root, root};
+    }
+    if (root->right == NULL) {
+        pair<Node*, Node*> l = help(root->left);
+        root->left = l.second;
+        l.second->right = root;
+        return {l.first, root};
+    }
+    if (root->left == NULL) {
+        pair<Node*, Node*> r = help(root->right);
+        root->right = r.first;
+        r.first->left = root;
+        return {root, r.second};
+    }
+    pair<Node*, Node*> l = help(root->left);
+    root->left = l.second;
+    l.second->right = root; 
+    pair<Node*, Node*> r = help(root->right);        
+    root->right = r.first;
+    r.first->left = root;
+    return {l.first,r.second};
+}
+
+------------------------------------------------------------------------------------
+
+439. 三元表达式解析器
+给定一个以字符串表示的任意嵌套的三元表达式，计算表达式的值。你可以假定给定的表达式始终都是有效的并且只包含数字 0-9, ?, :, T 和 F (T 和 F 分别表示真和假）。
+
+注意：
+
+给定的字符串长度 ≤ 10000。
+所包含的数字都只有一位数。
+条件表达式从右至左结合（和大多数程序设计语言类似）。
+条件是 T 和 F其一，即条件永远不会是数字。
+表达式的结果是数字 0-9, T 或者 F。
+ 
+
+示例 1：
+
+输入： "T?2:3"
+
+输出： "2"
+
+解释： 如果条件为真，结果为 2；否则，结果为 3。
+ 
+示例 2：
+
+输入： "F?1:T?4:5"
+
+输出： "4"
+
+解释： 条件表达式自右向左结合。使用括号的话，相当于：
+
+             "(F ? 1 : (T ? 4 : 5))"                   "(F ? 1 : (T ? 4 : 5))"
+          -> "(F ? 1 : 4)"                 或者     -> "(T ? 4 : 5)"
+          -> "4"                                    -> "4"
+
+示例 3：
+
+输入： "T?T?F:5:3"
+
+输出： "F"
+
+解释： 条件表达式自右向左结合。使用括号的话，相当于：
+
+             "(T ? (T ? F : 5) : 3)"                   "(T ? (T ? F : 5) : 3)"
+          -> "(T ? F : 3)"                 或者       -> "(T ? F : 5)"
+          -> "F"                                     -> "F"
+
+typedef struct stack {
+    char data[10000];
+    int top;
+} Stack;
+
+int push(Stack *s, char value) {
+    if (s->top == 10000 - 1) {
+        return -1;
+    }
+    s->top++;
+    s->data[s->top] = value;
+    return 0;
+}
+
+int pop(Stack *s, char *value) {
+    if (s->top == -1) {
+        return -1;
+    }
+    *value = s->data[s->top];
+    s->top--;
+    return 0;
+}
+
+int top(Stack *s) {
+    if (s->top == -1) {
+        return 0;
+    }
+    return s->data[s->top];
+}
+
+char * parseTernary(char * expression) {
+    if (expression == NULL) {
+        return NULL;
+    }
+    char *res = (char*)malloc(sizeof(char) * 2);
+    memset(res, 0, sizeof(char) * 2); 
+    Stack *stk = (Stack*)malloc(sizeof(Stack));
+    stk->top = -1;
+    
+    char a, b, c;
+    for (int i = strlen(expression) - 1; i >= 0; i--) {
+        if (top(stk) == '?') {
+            a = expression[i];
+            pop(stk, &b);
+            pop(stk, &b);
+            pop(stk, &c);
+            pop(stk, &c);
+            push(stk, a == 'T' ? b : c);
+        }
+        else {
+            push(stk, expression[i]);
+        }
+    }
+    pop(stk, res);
+    free(stk);
+    return res;
+}
+
+------------------------------------------------------------------------------------
+
+444. 序列重建
+验证原始的序列 org 是否可以从序列集 seqs 中唯一地重建。序列 org 是 1 到 n 整数的排列，其中 1 ≤ n ≤ 104。重建是指在序列集 seqs 中构建最短的公共超序列。（即使得所有  seqs 中的序列都是该最短序列的子序列）。确定是否只可以从 seqs 重建唯一的序列，且该序列就是 org 。
+
+示例 1：
+
+输入：
+org: [1,2,3], seqs: [[1,2],[1,3]]
+
+输出：
+false
+
+解释：
+[1,2,3] 不是可以被重建的唯一的序列，因为 [1,3,2] 也是一个合法的序列。
+ 
+
+示例 2：
+
+输入：
+org: [1,2,3], seqs: [[1,2]]
+
+输出：
+false
+
+解释：
+可以重建的序列只有 [1,2]。
+ 
+
+示例 3：
+
+输入：
+org: [1,2,3], seqs: [[1,2],[1,3],[2,3]]
+
+输出：
+true
+
+解释：
+序列 [1,2], [1,3] 和 [2,3] 可以被唯一地重建为原始的序列 [1,2,3]。
+ 
+
+示例 4：
+
+输入：
+org: [4,1,5,2,6,3], seqs: [[5,2,6,3],[4,1,5,2]]
+
+输出：
+true
+
+bool sequenceReconstruction(int* org, int orgSize, int** seqs, int seqsSize, int* seqsColSize){
+    // 双方元素相对位置一致：  遍历seqs，每个元素在org中的位置都比后边的要小
+    // 双方元素一致：         遍历某一方的元素时，不能超过另一方的范围；并且能够让对方消耗完
+    // 唯一：                seq中的每个元素与后一个元素，在org中也是挨着时，才算是有效
+    if (org == NULL || orgSize <= 0 || seqsSize <= 0 || seqsColSize == NULL) {
+        return false;
+    }
+    int *pos = (int*)malloc(sizeof(int) * (orgSize + 1));
+    char *flag = (char*)malloc(sizeof(char) * (orgSize + 1));
+    memset(pos, 0, sizeof(int) * (orgSize + 1));
+    memset(flag, 0, sizeof(char) * (orgSize + 1));
+    int solveFlag = 0;
+    for (int i = 0; i < orgSize; i++) {
+        if (org[i] < 1 || org[i] > orgSize) {
+            return false;
+        }
+        pos[org[i]] = i;
+    }
+    
+    int orgRemainCnt = orgSize - 1;
+    for (int i = 0; i < seqsSize; i++) {
+        for (int j = 0; j < seqsColSize[i]; j++) {
+            if(seqs[i][j] < 1 || seqs[i][j] > orgSize || (j < seqsColSize[i] - 1 && 
+              (seqs[i][j + 1] < 1 || seqs[i][j + 1] > orgSize || pos[seqs[i][j]] > pos[seqs[i][j + 1]]
+               || seqs[i][j] == seqs[i][j + 1]))) {
+                return false;
+            }
+            if (seqs[i][j] >= 1 && seqs[i][j] <= orgSize) {
+                solveFlag = 1;
+            }
+            if (flag[seqs[i][j]] == 0 && j < seqsColSize[i] - 1 && pos[seqs[i][j]] + 1 == pos[seqs[i][j + 1]]) {
+                flag[seqs[i][j]] = 1;
+                orgRemainCnt--;
+                solveFlag = 1;
+            }
+        }
+    }
+    return orgRemainCnt == 0 && solveFlag == 1;
+}
+
+------------------------------------------------------------------------------------
+
+469. 凸多边形
+给定一个按顺序连接的多边形的顶点，判断该多边形是否为凸多边形。（凸多边形的定义）
+
+注：
+
+顶点个数至少为 3 个且不超过 10,000。
+坐标范围为 -10,000 到 10,000。
+你可以假定给定的点形成的多边形均为简单多边形（简单多边形的定义）。换句话说，保证每个顶点处恰好是两条边的汇合点，并且这些边 互不相交 。
+ 
+
+示例 1：
+
+[[0,0],[0,1],[1,1],[1,0]]
+
+输出： True
+
+示例 2：
+
+[[0,0],[0,10],[10,10],[10,0],[5,5]]
+
+输出： False
+
+bool isConvex(int** points, int pointsSize, int* pointsColSize){
+    long long cur = 0, pre = 0;
+    for (int i = 0; i < pointsSize; i++) {
+        int xf = points[(i + 1) % pointsSize][0] - points[i][0];
+        int yf = points[(i + 1) % pointsSize][1] - points[i][1];
+        int xb = points[(i + 2) % pointsSize][0] - points[i][0];
+        int yb = points[(i + 2) % pointsSize][1] - points[i][1];
+        cur = xf * yb - yf * xb;
+        if (cur != 0) {
+            if (cur * pre < 0) {
+                return false;
+            }
+            pre = cur;
+        }
+    }
+    return true;
+}
+
+------------------------------------------------------------------------------------
+
+484. 寻找排列
+现在给定一个只由字符 'D' 和 'I' 组成的 秘密签名。'D' 表示两个数字间的递减关系，'I' 表示两个数字间的递增关系。并且 秘密签名 是由一个特定的整数数组生成的，该数组唯一地包含 1 到 n 中所有不同的数字（秘密签名的长度加 1 等于 n）。例如，秘密签名 "DI" 可以由数组 [2,1,3] 或 [3,1,2] 生成，但是不能由数组 [3,2,4] 或 [2,1,3,4] 生成，因为它们都不是合法的能代表 "DI" 秘密签名 的特定串。
+
+现在你的任务是找到具有最小字典序的 [1, 2, ... n] 的排列，使其能代表输入的 秘密签名。
+
+示例 1：
+
+输入： "I"
+输出： [1,2]
+解释： [1,2] 是唯一合法的可以生成秘密签名 "I" 的特定串，数字 1 和 2 构成递增关系。
+ 
+示例 2：
+
+输入： "DI"
+输出： [2,1,3]
+解释： [2,1,3] 和 [3,1,2] 可以生成秘密签名 "DI"，
+但是由于我们要找字典序最小的排列，因此你需要输出 [2,1,3]。
+ 
+注：
+
+输出字符串只会包含字符 'D' 和 'I'。
+输入字符串的长度是一个正整数且不会超过 10,000。
+
+int* findPermutation(char * s, int* returnSize) {
+    *returnSize = strlen(s) + 1;
+    int *res = (int*)malloc(sizeof(int) * *returnSize);    
+    for (int i = 0; i < *returnSize; i++) {
+        res[i] = i + 1;
+    }
+    for (int i = 0; i < strlen(s); i++) {
+        if (s[i] == 'I') {
+            continue;
+        }
+        int firstD = i;
+        while (s[i] == 'D' && i < strlen(s)) {
+            i++;
+        }
+        reversePermutation(res, firstD, i);
+    }
+    return res;
+}
+
+void reversePermutation(int *res, int first, int end) {
+    if (res == NULL) {
+        return;
+    }
+    while (first < end) {
+        int temp = res[first];
+        res[first] = res[end];
+        res[end] = temp;
+        first++;
+        end--;
+    }
+}
+
+------------------------------------------------------------------------------------
+
+487. 最大连续1的个数 II
+给定一个二进制数组，你可以最多将 1 个 0 翻转为 1，找出其中最大连续 1 的个数。
+
+示例 1：
+
+输入：[1,0,1,1,0]
+输出：4
+解释：翻转第一个 0 可以得到最长的连续 1。
+     当翻转以后，最大连续 1 的个数为 4。
+ 
+注：
+
+输入数组只包含 0 和 1.
+输入数组的长度为正整数，且不超过 10,000
+ 
+进阶：
+如果输入的数字是作为 无限流 逐个输入如何处理？换句话说，内存不能存储下所有从流中输入的数字。您可以有效地解决吗？
+
+int findMaxConsecutiveOnes(int* nums, int numsSize){
+    int maxLen = 0, this1Len = 0, pre1Len;
+    //如果一直是0就是1，有1加1，第二个0清掉以前的pre1Len
+    for (int i = 0; i < numsSize; i++) {
+        this1Len++;
+        if (nums[i] == 0) {
+            pre1Len = this1Len;
+            this1Len = 0;
+        }
+        maxLen = this1Len + pre1Len > maxLen ? this1Len + pre1Len : maxLen;
+    }
+    return maxLen;
+}
+
+------------------------------------------------------------------------------------
+
+490. 迷宫
+由空地和墙组成的迷宫中有一个球。球可以向上下左右四个方向滚动，但在遇到墙壁前不会停止滚动。当球停下时，可以选择下一个方向。
+
+给定球的起始位置，目的地和迷宫，判断球能否在目的地停下。
+
+迷宫由一个0和1的二维数组表示。 1表示墙壁，0表示空地。你可以假定迷宫的边缘都是墙壁。起始位置和目的地的坐标通过行号和列号给出。
+
+示例 1:
+
+输入 1: 迷宫由以下二维数组表示
+
+0 0 1 0 0
+0 0 0 0 0
+0 0 0 1 0
+1 1 0 1 1
+0 0 0 0 0
+
+输入 2: 起始位置坐标 (rowStart, colStart) = (0, 4)
+输入 3: 目的地坐标 (rowDest, colDest) = (4, 4)
+
+输出: true
+
+解析: 一个可能的路径是 : 左 -> 下 -> 左 -> 下 -> 右 -> 下 -> 右。
+
+示例 2:
+
+输入 1: 迷宫由以下二维数组表示
+
+0 0 1 0 0
+0 0 0 0 0
+0 0 0 1 0
+1 1 0 1 1
+0 0 0 0 0
+
+输入 2: 起始位置坐标 (rowStart, colStart) = (0, 4)
+输入 3: 目的地坐标 (rowDest, colDest) = (3, 2)
+
+输出: false
+
+解析: 没有能够使球停在目的地的路径。
+
+注意:
+
+迷宫中只有一个球和一个目的地。
+球和目的地都在空地上，且初始时它们不在同一位置。
+给定的迷宫不包括边界 (如图中的红色矩形), 但你可以假设迷宫的边缘都是墙壁。
+迷宫至少包括2块空地，行数和列数均不超过100。
+
+bool helpPath(int** maze, int Size, int ColSize, int *dirX, int *dirY, int x, int y, int desX, int desY) {
+    if (x == desX && y == desY) {
+        return true;
+    }
+    maze[x][y] = -1;
+    bool res = false;
+    for (int i = 0; i < 4; i++) {
+        int thisX = x, thisY = y;
+        while (thisX >= 0 && thisX < Size && thisY >= 0 && thisY < ColSize && maze[thisX][thisY] != 1) {
+            thisX += dirX[i];
+            thisY += dirY[i];
+        }
+        thisX -= dirX[i];
+        thisY -= dirY[i];
+        if (maze[thisX][thisY] != -1) {
+            res = res || helpPath(maze, Size, ColSize, dirX, dirY, thisX, thisY, desX, desY);
+        }
+    }
+    return res;
+}
+
+bool hasPath(int** maze, int mazeSize, int* mazeColSize, int* start, int startSize, int* destination, int destinationSize) {
+    int dirX[4] = {0,  0, -1, 1};  // 左右上下
+    int dirY[4] = {-1, 1,  0, 0};
+    return helpPath(maze, mazeSize, mazeColSize[0], dirX, dirY, start[0], start[1], destination[0], destination[1]);
+}
+
+------------------------------------------------------------------------------------
+
+505. 迷宫 II
+由空地和墙组成的迷宫中有一个球。球可以向上下左右四个方向滚动，但在遇到墙壁前不会停止滚动。当球停下时，可以选择下一个方向。
+
+给定球的起始位置，目的地和迷宫，找出让球停在目的地的最短距离。距离的定义是球从起始位置（不包括）到目的地（包括）经过的空地个数。如果球无法停在目的地，返回 -1。
+
+迷宫由一个0和1的二维数组表示。 1表示墙壁，0表示空地。你可以假定迷宫的边缘都是墙壁。起始位置和目的地的坐标通过行号和列号给出。
+
+示例 1:
+
+输入 1: 迷宫由以下二维数组表示
+
+0 0 1 0 0
+0 0 0 0 0
+0 0 0 1 0
+1 1 0 1 1
+0 0 0 0 0
+
+输入 2: 起始位置坐标 (rowStart, colStart) = (0, 4)
+输入 3: 目的地坐标 (rowDest, colDest) = (4, 4)
+
+输出: 12
+
+解析: 一条最短路径 : left -> down -> left -> down -> right -> down -> right。
+             总距离为 1 + 1 + 3 + 1 + 2 + 2 + 2 = 12。
+
+示例 2:
+
+输入 1: 迷宫由以下二维数组表示
+
+0 0 1 0 0
+0 0 0 0 0
+0 0 0 1 0
+1 1 0 1 1
+0 0 0 0 0
+
+输入 2: 起始位置坐标 (rowStart, colStart) = (0, 4)
+输入 3: 目的地坐标 (rowDest, colDest) = (3, 2)
+
+输出: -1
+
+解析: 没有能够使球停在目的地的路径。
+
+注意:
+
+迷宫中只有一个球和一个目的地。
+球和目的地都在空地上，且初始时它们不在同一位置。
+给定的迷宫不包括边界 (如图中的红色矩形), 但你可以假设迷宫的边缘都是墙壁。
+迷宫至少包括2块空地，行数和列数均不超过100。
+
+void helpDistance(int** maze, int Size, int ColSize, int *used, int *dirX, int *dirY, int x, int y, int desX, int desY) {
+    if (x == desX && y == desY) {
+        return;
+    }
+    for (int i = 0; i < 4; i++) {
+        int thisX = x, thisY = y, thisres = used[x * ColSize + y];
+        while (thisX >= 0 && thisX < Size && thisY >= 0 && thisY < ColSize && maze[thisX][thisY] != 1) {
+            thisX += dirX[i];
+            thisY += dirY[i];
+            thisres++;
+        }
+        thisX -= dirX[i];
+        thisY -= dirY[i];
+        thisres--;
+        if (thisres < used[thisX * ColSize + thisY]) {
+            used[thisX * ColSize + thisY] = thisres;
+            helpDistance(maze, Size, ColSize, used, dirX, dirY, thisX, thisY, desX, desY);
+        }
+    }
+}
+
+int shortestDistance(int** maze, int mazeSize, int* mazeColSize, int* start, int startSize, int* destination, int destinationSize) {
+    int dirX[4] = { 0,  0, -1, 1 };  // 左右上下
+    int dirY[4] = { -1, 1,  0, 0 };
+    int *used = (int*)malloc(sizeof(int) * mazeSize * mazeColSize[0]);
+    for (int i = 0; i < mazeSize * mazeColSize[0]; i++) {
+        used[i] = INT_MAX;
+    }
+    used[mazeColSize[0] * start[0] + start[1]] = 0;    
+    helpDistance(maze, mazeSize, mazeColSize[0], used, dirX, dirY, start[0], start[1], destination[0], destination[1]);
+    int res = used[mazeColSize[0] * destination[0] + destination[1]];
+    free(used);
+    return res == INT_MAX ? -1 : res;
+}
+
+------------------------------------------------------------------------------------
+
+510. 二叉搜索树中的中序后继 II
+给定一棵二叉搜索树和其中的一个节点，找到该节点在树中的中序后继。
+
+一个结点 p 的中序后继是键值比 p.val大所有的结点中键值最小的那个。
+
+你可以直接访问结点，但无法直接访问树。每个节点都会有其父节点的引用。
+
+示例 1:
+输入: 
+root = {"$id":"1","left":{"$id":"2","left":null,"parent":{"$ref":"1"},"right":null,"val":1},"parent":null,"right":{"$id":"3","left":null,"parent":{"$ref":"1"},"right":null,"val":3},"val":2}
+p = 1
+输出: 2
+解析: 1的中序后继结点是2。注意p和返回值都是Node类型的。
+
+示例 2:
+输入: 
+root = {"$id":"1","left":{"$id":"2","left":{"$id":"3","left":{"$id":"4","left":null,"parent":{"$ref":"3"},"right":null,"val":1},"parent":{"$ref":"2"},"right":null,"val":2},"parent":{"$ref":"1"},"right":{"$id":"5","left":null,"parent":{"$ref":"2"},"right":null,"val":4},"val":3},"parent":null,"right":{"$id":"6","left":null,"parent":{"$ref":"1"},"right":null,"val":6},"val":5}
+p = 6
+输出: null
+解析: 该结点没有中序后继，因此返回null。
+
+示例 3:
+输入: 
+root = {"$id":"1","left":{"$id":"2","left":{"$id":"3","left":{"$id":"4","left":null,"parent":{"$ref":"3"},"right":null,"val":2},"parent":{"$ref":"2"},"right":{"$id":"5","left":null,"parent":{"$ref":"3"},"right":null,"val":4},"val":3},"parent":{"$ref":"1"},"right":{"$id":"6","left":null,"parent":{"$ref":"2"},"right":{"$id":"7","left":{"$id":"8","left":null,"parent":{"$ref":"7"},"right":null,"val":9},"parent":{"$ref":"6"},"right":null,"val":13},"val":7},"val":6},"parent":null,"right":{"$id":"9","left":{"$id":"10","left":null,"parent":{"$ref":"9"},"right":null,"val":17},"parent":{"$ref":"1"},"right":{"$id":"11","left":null,"parent":{"$ref":"9"},"right":null,"val":20},"val":18},"val":15}
+p = 15
+输出: 17
+
+示例 4:
+输入: 
+root = {"$id":"1","left":{"$id":"2","left":{"$id":"3","left":{"$id":"4","left":null,"parent":{"$ref":"3"},"right":null,"val":2},"parent":{"$ref":"2"},"right":{"$id":"5","left":null,"parent":{"$ref":"3"},"right":null,"val":4},"val":3},"parent":{"$ref":"1"},"right":{"$id":"6","left":null,"parent":{"$ref":"2"},"right":{"$id":"7","left":{"$id":"8","left":null,"parent":{"$ref":"7"},"right":null,"val":9},"parent":{"$ref":"6"},"right":null,"val":13},"val":7},"val":6},"parent":null,"right":{"$id":"9","left":{"$id":"10","left":null,"parent":{"$ref":"9"},"right":null,"val":17},"parent":{"$ref":"1"},"right":{"$id":"11","left":null,"parent":{"$ref":"9"},"right":null,"val":20},"val":18},"val":15}
+p = 13
+输出: 15
+
+Node* inorderSuccessor(Node* node) {
+    if (!node) {
+        return NULL;
+    }
+    if (node->right) {
+        node = node->right;
+        while (node->left) {
+            node = node->left;
+        }
+        return node;
+    }
+    if (node->parent && node->parent->left == node) {
+        return node->parent;
+    }
+    else {
+        while (node->parent && node->parent->right == node) {
+            node = node->parent;            
+        }
+        return node->parent;
+    }
+    return node;
+}
+    
+------------------------------------------------------------------------------------
+
+531. 孤独像素 I
+给定一幅黑白像素组成的图像, 计算黑色孤独像素的数量。
+
+图像由一个由‘B’和‘W’组成二维字符数组表示, ‘B’和‘W’分别代表黑色像素和白色像素。
+
+黑色孤独像素指的是在同一行和同一列不存在其他黑色像素的黑色像素。
+
+示例:
+
+输入: 
+[['W', 'W', 'B'],
+ ['W', 'B', 'W'],
+ ['B', 'W', 'W']]
+
+输出: 3
+解析: 全部三个'B'都是黑色孤独像素。
+ 
+注意:
+
+输入二维数组行和列的范围是 [1,500]。
+
+int findLonelyPixel(char** picture, int pictureSize, int* pictureColSize){
+    int* row = (int*)malloc(sizeof(int) * pictureSize);
+    int* col = (int*)malloc(sizeof(int) * pictureColSize[0]);
+    
+    int cnt = 0, rowCnt = 0, colCnt = 0;
+    for (int i = 0; i < pictureSize; i++) {
+        cnt = 0;
+        for (int j = 0; j < pictureColSize[0]; j++) {
+            cnt = picture[i][j] == 'B' ? cnt + 1 : cnt;
+        }
+        row[i] = cnt == 1 ? 1 : 0;
+        rowCnt = row[i] == 1 ? rowCnt + 1 : rowCnt;
+    }
+    for (int j = 0; j < pictureColSize[0]; j++) {
+        cnt = 0;
+        for (int i = 0; i < pictureSize; i++) {
+            cnt = picture[i][j] == 'B' ? cnt + 1 : cnt;
+        }
+        col[j] = cnt == 1 ? 1 : 0;
+        colCnt = col[j] == 1 ? colCnt + 1 : colCnt;
+    }
+    free(row);
+    free(col);
+    return rowCnt < colCnt ? rowCnt : colCnt;
+}
 
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
+
+
