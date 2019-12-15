@@ -1,3 +1,519 @@
+------------------------------------------------------------------------------------
+
+314	二叉树的垂直遍历
+给定一个二叉树，返回其结点 垂直方向（从上到下，逐列）遍历的值。
+
+如果两个结点在同一行和列，那么顺序则为 从左到右。
+
+示例 1：
+
+输入: [3,9,20,null,null,15,7]
+
+   3
+  /\
+ /  \
+9   20
+    /\
+   /  \
+  15   7 
+
+输出:
+
+[
+  [9],
+  [3,15],
+  [20],
+  [7]
+]
+示例 2:
+
+输入: [3,9,8,4,0,1,7]
+
+     3
+    /\
+   /  \
+  9    8
+  /\   /\
+ /  \ /  \
+4   0 1   7 
+
+输出:
+
+[
+  [4],
+  [9],
+  [3,0,1],
+  [8],
+  [7]
+]
+示例 3:
+
+输入: [3,9,8,4,0,1,7,null,null,null,2,5]（注意：0 的右侧子节点为 2，1 的左侧子节点为 5）
+
+     3
+    /\
+   /  \
+   9   8
+  /\  /\
+ /  \/  \
+ 4  01   7
+    /\
+   /  \
+   5   2
+
+输出:
+
+[
+  [4],
+  [9,5],
+  [3,0,1],
+  [8,2],
+  [7]
+]
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    vector<vector<int>> verticalOrder(TreeNode* root) {
+        vector<vector<int>> res;
+        map<int, vector<int>> hOrder;
+        queue<pair<int, TreeNode*>> nodes;
+        nodes.push(make_pair(0, root));
+
+        while (nodes.size() != 0) {
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.front().second == NULL) {
+                    nodes.pop();
+                    continue;
+                }
+                hOrder[nodes.front().first].push_back(nodes.front().second->val);
+                nodes.push(make_pair(nodes.front().first - 1, nodes.front().second->left));
+                nodes.push(make_pair(nodes.front().first + 1, nodes.front().second->right));
+                nodes.pop();
+            }
+        }
+        for (auto it = hOrder.begin(); it != hOrder.end(); it++) {
+            res.push_back(it->second);
+        }
+        return res;
+    }
+};
+
+------------------------------------------------------------------------------------
+
+320	列举单词的全部缩写
+请你写出一个能够举单词全部缩写的函数。
+
+注意：输出的顺序并不重要。
+
+示例：
+
+输入: "word"
+输出:
+["word", "1ord", "w1rd", "wo1d", "wor1", "2rd", "w2d", "wo2", "1o1d", "1or1", "w1r1", "1o2", "2r1", "3d", "w3", "4"]
+
+class Solution {
+public:
+    vector<string> generateAbbreviations(string word) {
+        vector<string> res{ word };
+        helper(word, 0, res);
+        return res;
+    }
+    void helper(string word, int pos, vector<string>& res) {
+        for (int i = pos; i < word.size(); ++i) {  //从pos开始
+            for (int j = 1; i + j <= word.size(); ++j) {  //数字
+                string t = word.substr(0, i);
+                t += to_string(j) + word.substr(i + j);
+                res.push_back(t);
+                helper(t, i + 1 + to_string(j).size(), res);
+            }
+        }
+    }
+};
+
+------------------------------------------------------------------------------------
+
+323	无向图中连通分量的数目
+给定编号从 0 到 n-1 的 n 个节点和一个无向边列表（每条边都是一对节点），请编写一个函数来计算无向图中连通分量的数目。
+
+示例 1:
+
+输入: n = 5 和 edges = [[0, 1], [1, 2], [3, 4]]
+
+     0          3
+     |          |
+     1 --- 2    4 
+
+输出: 2
+示例 2:
+
+输入: n = 5 和 edges = [[0, 1], [1, 2], [2, 3], [3, 4]]
+
+     0           4
+     |           |
+     1 --- 2 --- 3
+
+输出:  1
+注意:
+你可以假设在 edges 中不会出现重复的边。而且由于所以的边都是无向边，[0, 1] 与 [1, 0]  相同，所以它们不会同时在 edges 中出现。
+
+class Solution {
+public:
+    int countComponents(int n, vector<vector<int>>& edges) {
+        vector<vector<int>> graph(n);
+        for (int i = 0; i < edges.size(); i++) {
+            graph[edges[i][0]].push_back(edges[i][1]);
+            graph[edges[i][1]].push_back(edges[i][0]);
+        }
+
+        vector<int> color(n, 0);
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            if (color[i] != 0) {
+                continue;
+            }
+            res++;
+            color[i] = 1;
+            queue<int> neighbor;
+            neighbor.push(i);
+            while (neighbor.size() != 0) {
+                int node = neighbor.front();
+                for (int j = 0; j < graph[node].size(); j++) {
+                    if (color[graph[node][j]] == 0) {
+                        color[graph[node][j]] = 1;
+                        neighbor.push(graph[node][j]);
+                    }
+                }
+                neighbor.pop();
+            }
+        }
+        return res;
+    }
+};
+
+------------------------------------------------------------------------------------
+
+325	和等于 k 的最长子数组长度
+给定一个数组 nums 和一个目标值 k，找到和等于 k 的最长子数组长度。如果不存在任意一个符合要求的子数组，则返回 0。
+
+注意:
+ nums 数组的总和是一定在 32 位有符号整数范围之内的。
+
+示例 1:
+
+输入: nums = [1, -1, 5, -2, 3], k = 3
+输出: 4 
+解释: 子数组 [1, -1, 5, -2] 和等于 3，且长度最长。
+示例 2:
+
+输入: nums = [-2, -1, 2, 1], k = 1
+输出: 2 
+解释: 子数组 [-1, 2] 和等于 1，且长度最长。
+进阶:
+你能使时间复杂度在 O(n) 内完成此题吗?
+
+class Solution {
+public:
+    int maxSubArrayLen(vector<int>& nums, int k) {
+        if (nums.empty()) {
+            return 0;
+        }
+        int res = 0;
+        map<int, vector<int>> m;
+        m[nums[0]].push_back(0);
+        vector<int> sum = nums;
+        for (int i = 1; i < nums.size(); ++i) {
+            sum[i] += sum[i - 1];
+            m[sum[i]].push_back(i);
+        }
+        for (auto it : m) {
+            if (it.first == k) {
+                res = max(res, it.second.back() + 1);
+            }
+            else if (m.find(it.first - k) != m.end()) {
+                res = max(res, it.second.back() - m[it.first - k][0]);
+            }
+        }
+        return res;
+    }
+};
+
+------------------------------------------------------------------------------------
+
+333 最大 BST 子树
+给定一个二叉树，找到其中最大的二叉搜索树（BST）子树，其中最大指的是子树节点数最多的。
+
+注意:
+子树必须包含其所有后代。
+
+示例:
+
+输入: [10,5,15,1,8,null,7]
+
+   10 
+   / \ 
+  5  15 
+ / \   \ 
+1   8   7
+
+输出: 3
+解释: 高亮部分为最大的 BST 子树。
+     返回值 3 在这个样例中为子树大小。
+进阶:
+你能想出用 O(n) 的时间复杂度解决这个问题吗？
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+int largestBSTSubtreeHelper(struct TreeNode* root, int *minValue, int *maxValue)
+{
+    if (!root) {
+        *minValue = INT_MAX;
+        *maxValue = INT_MIN;
+        return 0;
+    }
+    int minLeftValue, maxLeftValue, minRightValue, maxRightValue;
+    int left = largestBSTSubtreeHelper(root->left, &minLeftValue, &maxLeftValue);
+    int right = largestBSTSubtreeHelper(root->right, &minRightValue, &maxRightValue);
+    if (root->val > maxLeftValue && root->val < minRightValue) {
+        *minValue = root->val < minLeftValue ? root->val : minLeftValue;
+        *maxValue = root->val > maxRightValue ? root->val : maxRightValue;
+        return left + right + 1;
+    }
+    else {
+        *minValue = INT_MIN;
+        *maxValue = INT_MAX;
+        return left > right ? left : right;
+    }
+}
+
+int largestBSTSubtree(struct TreeNode* root) {
+    int minValue = 0, maxValue = 0;
+    return largestBSTSubtreeHelper(root, &minValue, &maxValue);
+}
+
+------------------------------------------------------------------------------------
+
+348	判定井字棋胜负
+请在 n × n 的棋盘上，实现一个判定井字棋（Tic-Tac-Toe）胜负的神器，判断每一次玩家落子后，是否有胜出的玩家。
+
+在这个井字棋游戏中，会有 2 名玩家，他们将轮流在棋盘上放置自己的棋子。
+
+在实现这个判定器的过程中，你可以假设以下这些规则一定成立：
+
+      1. 每一步棋都是在棋盘内的，并且只能被放置在一个空的格子里；
+
+      2. 一旦游戏中有一名玩家胜出的话，游戏将不能再继续；
+
+      3. 一个玩家如果在同一行、同一列或者同一斜对角线上都放置了自己的棋子，那么他便获得胜利。
+
+示例:
+
+给定棋盘边长 n = 3, 玩家 1 的棋子符号是 "X"，玩家 2 的棋子符号是 "O"。
+
+TicTacToe toe = new TicTacToe(3);
+
+toe.move(0, 0, 1); -> 函数返回 0 (此时，暂时没有玩家赢得这场对决)
+|X| | |
+| | | |    // 玩家 1 在 (0, 0) 落子。
+| | | |
+
+toe.move(0, 2, 2); -> 函数返回 0 (暂时没有玩家赢得本场比赛)
+|X| |O|
+| | | |    // 玩家 2 在 (0, 2) 落子。
+| | | |
+
+toe.move(2, 2, 1); -> 函数返回 0 (暂时没有玩家赢得比赛)
+|X| |O|
+| | | |    // 玩家 1 在 (2, 2) 落子。
+| | |X|
+
+toe.move(1, 1, 2); -> 函数返回 0 (暂没有玩家赢得比赛)
+|X| |O|
+| |O| |    // 玩家 2 在 (1, 1) 落子。
+| | |X|
+
+toe.move(2, 0, 1); -> 函数返回 0 (暂无玩家赢得比赛)
+|X| |O|
+| |O| |    // 玩家 1 在 (2, 0) 落子。
+|X| |X|
+
+toe.move(1, 0, 2); -> 函数返回 0 (没有玩家赢得比赛)
+|X| |O|
+|O|O| |    // 玩家 2 在 (1, 0) 落子.
+|X| |X|
+
+toe.move(2, 1, 1); -> 函数返回 1 (此时，玩家 1 赢得了该场比赛)
+|X| |O|
+|O|O| |    // 玩家 1 在 (2, 1) 落子。
+|X|X|X|
+ 
+
+进阶:
+您有没有可能将每一步的 move() 操作优化到比 O(n2) 更快吗?
+
+typedef struct {
+    int* row[2];
+    int* col[2];
+    int diagonalLeft[2];
+    int diagonalRight[2];
+    int n;
+} TicTacToe;
+
+/** Initialize your data structure here. */
+
+TicTacToe* ticTacToeCreate(int n) {
+    TicTacToe *res = (TicTacToe*)malloc(sizeof(TicTacToe));
+    res->row[0] = (int*)malloc(sizeof(int) * n);
+    memset(res->row[0], 0, sizeof(int) * n);
+    res->row[1] = (int*)malloc(sizeof(int) * n);
+    memset(res->row[1], 0, sizeof(int) * n);
+    res->col[0] = (int*)malloc(sizeof(int) * n);
+    memset(res->col[0], 0, sizeof(int) * n);
+    res->col[1] = (int*)malloc(sizeof(int) * n);
+    memset(res->col[1], 0, sizeof(int) * n);
+    res->n = n;
+    res->diagonalLeft[0] = res->diagonalLeft[1] = 0;
+    res->diagonalRight[0] = res->diagonalRight[1] = 0;
+    return res;
+}
+
+/** Player {player} makes a move at ({row}, {col}).
+        @param row The row of the board.
+        @param col The column of the board.
+        @param player The player, can be either 1 or 2.
+        @return The current winning condition, can be either:
+                0: No one wins.
+                1: Player 1 wins.
+                2: Player 2 wins. */
+int ticTacToeMove(TicTacToe* obj, int row, int col, int player) {
+    if (!obj) {
+        return;
+    }
+    obj->col[player - 1][col]++;
+    obj->row[player - 1][row]++;
+
+    if (row == col) {
+        obj->diagonalLeft[player - 1]++;
+    }
+    if ((row + col) == (obj->n - 1)) {
+        obj->diagonalRight[player - 1]++;
+    }
+    
+    if (obj->col[player - 1][col] == obj->n || obj->row[player - 1][row] == obj->n ||
+        obj->diagonalLeft[player - 1] == obj->n || obj->diagonalRight[player - 1] == obj->n) {
+        return player;
+    }
+    return 0;
+}
+
+void ticTacToeFree(TicTacToe* obj) {
+    if (obj) {
+        free(obj->col[0]);
+        free(obj->col[1]);
+        free(obj->row[0]);
+        free(obj->row[1]);
+    }
+}
+
+/**
+ * Your TicTacToe struct will be instantiated and called as such:
+ * TicTacToe* obj = ticTacToeCreate(n);
+ * int param_1 = ticTacToeMove(obj, row, col, player);
+
+ * ticTacToeFree(obj);
+*/
+
+------------------------------------------------------------------------------------
+
+351	安卓系统手势解锁
+我们都知道安卓有个手势解锁的界面，是一个 3 x 3 的点所绘制出来的网格。
+
+给你两个整数，分别为 ​​m 和 n，其中 1 ≤ m ≤ n ≤ 9，那么请你统计一下有多少种解锁手势，是至少需要经过 m 个点，但是最多经过不超过 n 个点的。
+
+先来了解下什么是一个有效的安卓解锁手势:
+
+每一个解锁手势必须至少经过 m 个点、最多经过 n 个点。
+解锁手势里不能设置经过重复的点。
+假如手势中有两个点是顺序经过的，那么这两个点的手势轨迹之间是绝对不能跨过任何未被经过的点。
+经过点的顺序不同则表示为不同的解锁手势。
+
+解释:
+
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+| 7 | 8 | 9 |
+无效手势：4 - 1 - 3 - 6 
+连接点 1 和点 3 时经过了未被连接过的 2 号点。
+
+无效手势：4 - 1 - 9 - 2
+连接点 1 和点 9 时经过了未被连接过的 5 号点。
+
+有效手势：2 - 4 - 1 - 3 - 6
+连接点 1 和点 3 是有效的，因为虽然它经过了点 2 ，但是点 2 在该手势中之前已经被连过了。
+
+有效手势：6 - 5 - 4 - 1 - 9 - 2
+连接点 1 和点 9 是有效的，因为虽然它经过了按键 5 ，但是点 5 在该手势中之前已经被连过了。
+
+示例:
+
+输入: m = 1，n = 1
+输出: 9
+
+class Solution {
+public:
+    int numberOfPatterns(int m, int n) {
+        int res = 0;
+        vector<bool> used(10, false);
+        vector<vector<int>> neighbor(10, vector<int>(10, 0));
+        neighbor[1][3] = neighbor[3][1] = 2;
+        neighbor[4][6] = neighbor[6][4] = 5;
+        neighbor[7][9] = neighbor[9][7] = 8;
+        neighbor[1][7] = neighbor[7][1] = 4;
+        neighbor[2][8] = neighbor[8][2] = 5;
+        neighbor[3][9] = neighbor[9][3] = 6;
+        neighbor[1][9] = neighbor[9][1] = neighbor[3][7] = neighbor[7][3] = 5;
+        res += helper(1, 1, 0, m, n, neighbor, used) * 4;
+        res += helper(2, 1, 0, m, n, neighbor, used) * 4;
+        res += helper(5, 1, 0, m, n, neighbor, used);
+        return res;
+    }
+    int helper(int num, int len, int res, int m, int n, vector<vector<int>>& neighbor, vector<bool>& used)
+    {
+        if (len >= m) {
+            ++res;
+        }
+        ++len;
+        if (len > n) {
+            return res;
+        }
+        used[num] = true;
+        for (int next = 1; next <= 9; ++next) {
+            int jump = neighbor[num][next];
+            if (!used[next] && (jump == 0 || used[jump])) {
+                res = helper(next, len, res, m, n, neighbor, used);
+            }
+        }
+        used[num] = false;
+        return res;
+    }
+};
+
+------------------------------------------------------------------------------------
 
 353. 贪吃蛇
 请你设计一个 贪吃蛇游戏，该游戏将会在一个 屏幕尺寸 = 宽度 x 高度 的屏幕上运行。如果你不熟悉这个游戏，可以 点击这里 在线试玩。
@@ -152,7 +668,6 @@ void snakeGameFree(SnakeGame* obj) {
 
  * snakeGameFree(obj);
 */
-
 
 ------------------------------------------------------------------------------------
 
@@ -712,6 +1227,100 @@ int* getModifiedArray(int length, int** updates, int updatesSize, int* updatesCo
 
 ------------------------------------------------------------------------------------
 
+379. 电话目录管理系统
+设计一个电话目录管理系统，让它支持以下功能：
+
+get: 分配给用户一个未被使用的电话号码，获取失败请返回 -1
+check: 检查指定的电话号码是否被使用
+release: 释放掉一个电话号码，使其能够重新被分配
+示例:
+
+// 初始化电话目录，包括 3 个电话号码：0，1 和 2。
+PhoneDirectory directory = new PhoneDirectory(3);
+
+// 可以返回任意未分配的号码，这里我们假设它返回 0。
+directory.get();
+
+// 假设，函数返回 1。
+directory.get();
+
+// 号码 2 未分配，所以返回为 true。
+directory.check(2);
+
+// 返回 2，分配后，只剩一个号码未被分配。
+directory.get();
+
+// 此时，号码 2 已经被分配，所以返回 false。
+directory.check(2);
+
+// 释放号码 2，将该号码变回未分配状态。
+directory.release(2);
+
+// 号码 2 现在是未分配状态，所以返回 true。
+directory.check(2);
+
+typedef struct {
+    int* used;
+    int maxNum;
+} PhoneDirectory;
+
+/** Initialize your data structure here
+        @param maxNumbers - The maximum numbers that can be stored in the phone directory. */
+
+PhoneDirectory* phoneDirectoryCreate(int maxNumbers) {
+    PhoneDirectory* res = (PhoneDirectory*)malloc(sizeof(PhoneDirectory));
+    res->used = (int*)malloc(sizeof(int) * maxNumbers);
+    memset(res->used, 0, sizeof(int) * maxNumbers);
+    res->maxNum = maxNumbers;
+    return res;
+}
+
+/** Provide a number which is not assigned to anyone.
+        @return - Return an available number. Return -1 if none is available. */
+int phoneDirectoryGet(PhoneDirectory* obj) {
+    for (int i = 0; i < obj->maxNum; i++) {
+        if (obj->used[i] == 0) {
+            obj->used[i] = 1;
+            return i;
+        }
+    }
+    return -1;
+}
+
+/** Check if a number is available or not. */
+bool phoneDirectoryCheck(PhoneDirectory* obj, int number) {
+    if (number >= 0 && number < obj->maxNum && obj->used[number] == 0) {
+        return true;
+    }
+    return false;
+}
+
+/** Recycle or release a number. */
+void phoneDirectoryRelease(PhoneDirectory* obj, int number) {
+    if (number >= 0 && number < obj->maxNum) {
+        obj->used[number] = 0;
+    }
+}
+
+void phoneDirectoryFree(PhoneDirectory* obj) {
+    free(obj->used);
+    free(obj);
+}
+
+/**
+ * Your PhoneDirectory struct will be instantiated and called as such:
+ * PhoneDirectory* obj = phoneDirectoryCreate(maxNumbers);
+ * int param_1 = phoneDirectoryGet(obj);
+ 
+ * bool param_2 = phoneDirectoryCheck(obj, number);
+ 
+ * phoneDirectoryRelease(obj, number);
+ 
+ * phoneDirectoryFree(obj);
+*/
+
+------------------------------------------------------------------------------------
+
 418. 屏幕可显示句子的数量
 给你一个 rows x cols 的屏幕和一个用 非空 的单词列表组成的句子，请你计算出给定句子可以在屏幕上完整显示的次数。
 
@@ -723,7 +1332,6 @@ int* getModifiedArray(int length, int** updates, int updatesSize, int* updatesCo
 句子中的单词总量不会超过 100。
 每个单词的长度大于 0 且不会超过 10。
 1 ≤ rows, cols ≤ 20,000.
- 
 
 示例 1：
 
