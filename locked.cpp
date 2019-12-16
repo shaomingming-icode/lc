@@ -1,11 +1,369 @@
+156. 上下翻转二叉树
+给定一个二叉树，其中所有的右节点要么是具有兄弟节点（拥有相同父节点的左节点）的叶节点，要么为空，将此二叉树上下翻转并将它变成一棵树， 原来的右节点将转换成左叶节点。返回新的根。
+
+例子:
+
+输入: [1,2,3,4,5]
+
+    1
+   / \
+  2   3
+ / \
+4   5
+
+输出: 返回二叉树的根 [4,5,2,#,#,3,1]
+
+   4
+  / \
+ 5   2
+    / \
+   3   1  
+说明:
+
+对 [4,5,2,#,#,3,1] 感到困惑? 下面详细介绍请查看 二叉树是如何被序列化的。
+
+二叉树的序列化遵循层次遍历规则，当没有节点存在时，'#' 表示路径终止符。
+
+这里有一个例子:
+
+   1
+  / \
+ 2   3
+    /
+   4
+    \
+     5
+上面的二叉树则被序列化为 [1,2,3,#,#,4,#,#,5].
+
+TreeNode* upsideDownBinaryTree(TreeNode* root) {        
+    if (root == NULL || root->left == NULL) {
+        return root;
+    }
+    TreeNode *res = upsideDownBinaryTree(root->left);
+    root->left->left = root->right;
+    root->left->right = root;
+    root->left = NULL;
+    root->right = NULL;
+    return res;    
+}
+
 ------------------------------------------------------------------------------------
+
+159. 至多包含两个不同字符的最长子串
+给定一个字符串 s ，找出 至多 包含两个不同字符的最长子串 t 。
+
+示例 1:
+
+输入: "eceba"
+输出: 3
+解释: t 是 "ece"，长度为3。
+示例 2:
+
+输入: "ccaabbb"
+输出: 5
+解释: t 是 "aabbb"，长度为5。
+
+int lengthOfLongestSubstringTwoDistinct(char * s){
+    char twoLetter[2] = { 0, 0 };
+    int maxLen = 0, prei = 0, second = 0;
+    for (int i = 0; i < strlen(s); i++) {
+        prei = i;
+        twoLetter[0] = s[i++];
+        while (i < strlen(s) && s[i] == twoLetter[0]) {
+            i++;
+        }
+        if (i < strlen(s)) {
+            twoLetter[1] = s[i];
+            second = i++;
+        }
+        while (i < strlen(s) && (s[i] == twoLetter[0] || s[i] == twoLetter[1])) {
+            i++;
+        }
+        maxLen = maxLen > i - prei ? maxLen : i - prei;
+        if (i < strlen(s)) {
+            i = second - 1;
+        }
+    }
+    return maxLen;
+}
+
 ------------------------------------------------------------------------------------
+
+161. 相隔为 1 的编辑距离
+给定两个字符串 s 和 t，判断他们的编辑距离是否为 1。
+
+注意：
+
+满足编辑距离等于 1 有三种可能的情形：
+
+往 s 中插入一个字符得到 t
+从 s 中删除一个字符得到 t
+在 s 中替换一个字符得到 t
+示例 1：
+
+输入: s = "ab", t = "acb"
+输出: true
+解释: 可以将 'c' 插入字符串 s 来得到 t。
+示例 2:
+
+输入: s = "cab", t = "ad"
+输出: false
+解释: 无法通过 1 步操作使 s 变为 t。
+示例 3:
+
+输入: s = "1203", t = "1213"
+输出: true
+解释: 可以将字符串 s 中的 '0' 替换为 '1' 来得到 t。
+
+bool isInsertDistance(char *first, char *second) {
+    for (int i = 0; i < strlen(second); i++) {
+        if (first[i] != second[i]) {
+            return !strcmp(first + i + 1, second + i);
+        }
+    }
+    return true;
+}
+
+bool isReplaceDistance(char *first, char *second) {
+    for (int i = 0; i < strlen(second); i++) {
+        if (first[i] != second[i]) {
+            return !strcmp(first + i + 1, second + i + 1);
+        }
+    }
+    return false;
+}
+
+bool isOneEditDistance(char * s, char * t) {
+    int lens = strlen(s), lent = strlen(t);
+    if ((lens > lent && lens - lent > 1) || (lent > lens && lent - lens > 1)) {
+        return false;
+    }
+    else if (lens > lent && lens - lent == 1) {
+        return isInsertDistance(s, t);
+    }
+    else if (lent > lens && lent - lens == 1) {
+        return isInsertDistance(t, s);
+    }
+    else {
+        return isReplaceDistance(s, t);
+    }
+    return false;
+}
+
 ------------------------------------------------------------------------------------
+
+163. 缺失的区间
+给定一个排序的整数数组 nums ，其中元素的范围在 闭区间 [lower, upper] 当中，返回不包含在数组中的缺失区间。
+
+示例：
+
+输入: nums = [0, 1, 3, 50, 75], lower = 0 和 upper = 99,
+输出: ["2", "4->49", "51->74", "76->99"]
+
+vector<string> findMissingRanges(vector<int>& nums, int lower, int upper) {
+    vector<string> res;
+    int l = lower;
+    for (int i = 0; i <= nums.size(); ++i) {
+        int r = (i < nums.size() && nums[i] <= upper) ? nums[i] : upper + 1;
+        if (l == r) ++l;
+        else if (r > l) {
+            res.push_back(r - l == 1 ? to_string(l) : to_string(l) + "->" + to_string(r - 1));
+            l = r + 1;
+        }
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+186. 翻转字符串里的单词 II
+给定一个字符串，逐个翻转字符串中的每个单词。
+
+示例：
+
+输入: ["t","h","e"," ","s","k","y"," ","i","s"," ","b","l","u","e"]
+输出: ["b","l","u","e"," ","i","s"," ","s","k","y"," ","t","h","e"]
+注意：
+
+单词的定义是不包含空格的一系列字符
+输入字符串中不会包含前置或尾随的空格
+单词与单词之间永远是以单个空格隔开的
+进阶：使用 O(1) 额外空间复杂度的原地解法。
+
+void reverseHelp(char* s, int begin, int end) {
+    char temp;
+    while (begin < end) {
+        temp = s[begin];
+        s[begin] = s[end];
+        s[end] = temp;
+        begin++;
+        end--;
+    }
+}
+
+void reverseWords(char* s, int sSize) {
+    if (!s || sSize <= 0) {
+        return;
+    }
+    reverseHelp(s, 0, sSize - 1);
+    for (int i = 0; i < sSize; i++) {
+        int prebegin = i;
+        while (i < sSize && s[i] != ' ') {
+            i++;
+        }
+        reverseHelp(s, prebegin, i - 1);
+    }
+}
+
 ------------------------------------------------------------------------------------
+
+244. 最短单词距离 II
+请设计一个类，使该类的构造函数能够接收一个单词列表。然后再实现一个方法，该方法能够分别接收两个单词 word1 和 word2，并返回列表中这两个单词之间的最短距离。您的方法将被以不同的参数调用 多次。
+
+示例:
+假设 words = ["practice", "makes", "perfect", "coding", "makes"]
+
+输入: word1 = “coding”, word2 = “practice”
+输出: 3
+输入: word1 = "makes", word2 = "coding"
+输出: 1
+注意:
+你可以假设 word1 不等于 word2, 并且 word1 和 word2 都在列表里。
+
+class WordDistance {
+public:
+    WordDistance(vector<string>& words) {
+        for (int i = 0; i < words.size(); ++i) {
+            m[words[i]].push_back(i);
+        }
+    }
+
+    int shortest(string word1, string word2) {
+        int i = 0, j = 0, res = INT_MAX;
+        while (i < m[word1].size() && j < m[word2].size()) {
+            res = min(res, abs(m[word1][i] - m[word2][j]));
+            m[word1][i] < m[word2][j] ? ++i : ++j;
+        }
+        return res;
+    }
+    
+private:
+    unordered_map<string, vector<int> > m;
+};
+
 ------------------------------------------------------------------------------------
+
+245. 最短单词距离 III
+给定一个单词列表和两个单词 word1 和 word2，返回列表中这两个单词之间的最短距离。
+
+word1 和 word2 是有可能相同的，并且它们将分别表示为列表中两个独立的单词。
+
+示例:
+假设 words = ["practice", "makes", "perfect", "coding", "makes"].
+
+输入: word1 = “makes”, word2 = “coding”
+输出: 1
+输入: word1 = "makes", word2 = "makes"
+输出: 3
+注意:
+你可以假设 word1 和 word2 都在列表里。
+
+int shortestWordDistance(vector<string>& words, string word1, string word2) {
+    int p1 = words.size(), p2 = -words.size(), res = INT_MAX;
+    for (int i = 0; i < words.size(); ++i) {
+        if (words[i] == word1) p1 = word1 == word2 ? p2 : i;
+        if (words[i] == word2) p2 = i;
+        res = min(res, abs(p1 - p2));
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+247. 中心对称数 II
+
 ------------------------------------------------------------------------------------
+
+249. 移位字符串分组
+给定一个字符串，对该字符串可以进行 “移位” 的操作，也就是将字符串中每个字母都变为其在字母表中后续的字母，比如："abc" -> "bcd"。这样，我们可以持续进行 “移位” 操作，从而生成如下移位序列：
+
+"abc" -> "bcd" -> ... -> "xyz"
+给定一个包含仅小写字母字符串的列表，将该列表中所有满足 “移位” 操作规律的组合进行分组并返回。
+
+示例：
+
+输入: ["abc", "bcd", "acef", "xyz", "az", "ba", "a", "z"]
+输出: 
+[
+  ["abc","bcd","xyz"],
+  ["az","ba"],
+  ["acef"],
+  ["a","z"]
+]
+
+bool isSameWord(char *a, char *b) {
+    if (strlen(a) != strlen(b)) {
+        return false;
+    }
+    if (!a || !b) {
+        return true;
+    }
+    while (*(a + 1) != 0 && *(b + 1) != 0) {
+        if ((*a + 26 - *(a + 1)) % 26 != (*b + 26 - *(b + 1)) % 26) {
+            return false;
+        }
+        a++;
+        b++;
+    }
+    return true;
+}
+
+char *** groupStrings(char ** strings, int stringsSize, int* returnSize, int** returnColumnSizes) {
+    int *used = (int*)malloc(sizeof(int) * stringsSize);
+    memset(used, 0, sizeof(int) * stringsSize);    
+    int *sameWord = (int*)malloc(sizeof(int) * stringsSize * stringsSize);
+    memset(sameWord, 0, sizeof(int) * stringsSize * stringsSize);
+
+    int tempcnt = 0;
+    for (int i = 0; i < stringsSize; i++) {
+        sameWord[i * stringsSize + i] = used[i] == 0 ? 1 : 0;
+        for (int j = i + 1; j < stringsSize; j++) {
+            if (used[j] == 0 && isSameWord(strings[i], strings[j])) {
+                sameWord[i * stringsSize + j] = 1;
+                used[j] = 1;
+                tempcnt++;
+            }
+        }
+    }
+
+    *returnSize = stringsSize - tempcnt;
+    char ***res = (char ***)malloc(sizeof(char**) * *returnSize);
+    
+    *returnColumnSizes = (int*)malloc(sizeof(int) * *returnSize);
+    int colIndex = 0;
+    for (int i = 0; i < stringsSize; i++) {
+        int temp = 0;
+        for (int j = 0; j < stringsSize; j++) {
+            temp += sameWord[i * stringsSize + j];
+        }
+        if (temp != 0) {
+            (*returnColumnSizes)[colIndex] = temp;
+            res[colIndex] = (char **)malloc(sizeof(char*) * temp);
+            int coltempIndex = 0;
+            for (int j = 0; j < stringsSize; j++) {
+                if (sameWord[i * stringsSize + j] == 1) {
+                    res[colIndex][coltempIndex] = strings[j];
+                    coltempIndex++;
+                }
+            }
+            colIndex++;
+        }
+    }
+    free(used);
+    free(sameWord);
+    return res;
+}
+
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
@@ -3255,9 +3613,384 @@ bool areSentencesSimilarTwo(vector<string>& words1, vector<string>& words2, vect
 }
 
 ------------------------------------------------------------------------------------
+
+742. 二叉树最近的叶节点
+给定一个 每个结点的值互不相同 的二叉树，和一个目标值 k，找出树中与目标值 k 最近的叶结点。 
+
+这里，与叶结点 最近 表示在二叉树中到达该叶节点需要行进的边数与到达其它叶结点相比最少。而且，当一个结点没有孩子结点时称其为叶结点。
+
+在下面的例子中，输入的树以逐行的平铺形式表示。实际上的有根树 root 将以TreeNode对象的形式给出。
+
+示例 1：
+
+输入：
+root = [1, 3, 2], k = 1
+二叉树图示：
+          1
+         / \
+        3   2
+
+输出： 2 (或 3)
+
+解释： 2 和 3 都是距离目标 1 最近的叶节点。
+ 
+示例 2：
+
+输入：
+root = [1], k = 1
+输出：1
+
+解释： 最近的叶节点是根结点自身。
+ 
+示例 3：
+
+输入：
+root = [1,2,3,4,null,null,null,5,null,6], k = 2
+二叉树图示：
+             1
+            / \
+           2   3
+          /
+         4
+        /
+       5
+      /
+     6
+
+输出：3
+解释： 值为 3（而不是值为 6）的叶节点是距离结点 2 的最近结点。
+ 
+注：
+
+root 表示的二叉树最少有 1 个结点且最多有 1000 个结点。
+每个结点都有一个唯一的 node.val ，范围为 [1, 1000]。
+给定的二叉树中有某个结点使得 node.val == k。
+ 
+int findClosestLeaf(TreeNode* root, int k) {
+    unordered_map<TreeNode*, TreeNode*> back;
+    TreeNode *kNode = find(root, k, back);
+    queue<TreeNode*> q{{kNode}};
+    unordered_set<TreeNode*> visited{{kNode}};
+    while (!q.empty()) {
+        TreeNode *t = q.front(); q.pop();
+        if (!t->left && !t->right) return t->val;
+        if (t->left && !visited.count(t->left)) {
+            visited.insert(t->left);
+            q.push(t->left);
+        }
+        if (t->right && !visited.count(t->right)) {
+            visited.insert(t->right);
+            q.push(t->right);
+        }
+        if (back.count(t) && !visited.count(back[t])) {
+            visited.insert(back[t]);
+            q.push(back[t]);
+        }
+    }
+    return -1;
+}
+TreeNode* find(TreeNode* node, int k, unordered_map<TreeNode*, TreeNode*>& back) {
+    if (node->val == k) return node;
+    if (node->left) {
+        back[node->left] = node;
+        TreeNode *left = find(node->left, k, back);
+        if (left) return left;
+    }
+    if (node->right) {
+        back[node->right] = node;
+        TreeNode *right = find(node->right, k, back);
+        if (right) return right;
+    }
+    return NULL;
+}
+
 ------------------------------------------------------------------------------------
+
+750. 角矩形的数量
+给定一个只包含 0 和 1 的网格，找出其中角矩形的数量。
+
+一个 角矩形 是由四个不同的在网格上的 1 形成的轴对称的矩形。注意只有角的位置才需要为 1。并且，4 个 1 需要是不同的。
+
+示例 1：
+
+输入：grid = 
+[[1, 0, 0, 1, 0],
+ [0, 0, 1, 0, 1],
+ [0, 0, 0, 1, 0],
+ [1, 0, 1, 0, 1]]
+输出：1
+解释：只有一个角矩形，角的位置为 grid[1][2], grid[1][4], grid[3][2], grid[3][4]。
+ 
+示例 2：
+
+输入：grid = 
+[[1, 1, 1],
+ [1, 1, 1],
+ [1, 1, 1]]
+输出：9
+解释：这里有 4 个 2x2 的矩形，4 个 2x3 和 3x2 的矩形和 1 个 3x3 的矩形。
+ 
+示例 3：
+
+输入：grid = 
+[[1, 1, 1, 1]]
+输出：0
+解释：矩形必须有 4 个不同的角。
+ 
+注：
+
+网格 grid 中行和列的数目范围为 [1, 200]。
+Each grid[i][j] will be either 0 or 1.
+网格中 1 的个数不会超过 6000。
+
+int countCornerRectangles(int** grid, int gridSize, int* gridColSize){
+	int res = 0;
+	for (int i = 0; i < gridSize; i++) {
+		for (int j = 0; j < gridColSize[0]; j++) {
+			if (grid[i][j] == 0) {
+				continue;
+			}
+			for (int k = j + 1; k < gridColSize[0]; k++) {
+                if (grid[i][k] == 0) {
+                    continue;
+                }
+                for (int l = i + 1; l < gridSize; l++) {
+                    if (grid[l][j] == 1 && grid[l][k] == 1) {
+                        res++;
+                    }
+                }
+			}
+		}
+	}
+	return res;
+}
+
 ------------------------------------------------------------------------------------
+
+755. 倒水
+给出一个地形高度图， heights[i] 表示该索引处的高度。每个索引的宽度为 1。在 V 个单位的水落在索引 K 处以后，每个索引位置有多少水？
+
+水最先会在索引 K 处下降并且落在该索引位置的最高地形或水面之上。然后按如下方式流动：
+
+如果液滴最终可以通过向左流动而下降，则向左流动。
+否则，如果液滴最终可以通过向右流动而下降，则向右流动。
+否则，在当前的位置上升。
+这里，“最终下降” 的意思是液滴如果按此方向移动的话，最终可以下降到一个较低的水平。而且，“水平”的意思是当前列的地形的高度加上水的高度。
+
+我们可以假定在数组两侧的边界外有无限高的地形。而且，不能有部分水在多于 1 个的网格块上均匀分布 - 每个单位的水必须要位于一个块中。
+
+示例 1：
+
+输入：heights = [2,1,1,2,1,2,2], V = 4, K = 3
+输出：[2,2,2,3,2,2,2]
+解释：
+#       #
+#       #
+##  # ###
+#########
+ 0123456    <- 索引
+
+第一个水滴降落在索引 K = 3 上：
+
+#       #
+#   w   #
+##  # ###
+#########
+ 0123456    
+
+当向左或向右移动时，水可以移动到相同或更低的高度。When moving left or right, the water can only move to the same level or a lower level.
+（从水平上看，意思是该列的地形高度加上水的高度）
+由于向左移动可以最终下落，因此向左移动。
+（一个水滴 “下落” 的意思是可以相比之前可以进入更低的高度）
+
+#       #
+#       #
+## w# ###
+#########
+ 0123456    
+
+由于向左移动不会使其降落，所以停在该位置上。下一个水滴下落：
+
+#       #
+#   w   #
+## w# ###
+#########
+ 0123456  
+
+
+由于新水滴向左移动可以最终下落，因此向左移动。
+注意水滴仍然是优先选择向左移动，
+尽管可以向右移动（而且向右移动可以下落更快）
+
+
+#       #
+#  w    #
+## w# ###
+#########
+ 0123456  
+
+#       #
+#       #
+##ww# ###
+#########
+ 0123456  
+
+经过刚才的阶段后，第三个水滴下落。
+由于向左移动不会最终下落，因此尝试向右移动。
+由于向右移动可以最终下落，因此向右移动。
+
+
+#       #
+#   w   #
+##ww# ###
+#########
+ 0123456  
+
+#       #
+#       #
+##ww#w###
+#########
+ 0123456  
+
+最终，第四个水滴下落。
+由于向左移动不会最终下落，因此尝试向右移动。
+由于向右移动不会最终下落，因此停在当前位置：
+
+#       #
+#   w   #
+##ww#w###
+#########
+ 0123456  
+
+最终的答案为 [2,2,2,3,2,2,2]:
+
+    #    
+ ####### 
+ ####### 
+ 0123456 
+ 
+示例 2：
+
+输入：heights = [1,2,3,4], V = 2, K = 2
+输出：[2,3,3,4]
+解释：
+最后的水滴落在索引 1 位置，因为继续向左移动不会使其下降到更低的高度。
+ 
+示例 3：
+
+输入：heights = [3,1,3], V = 5, K = 1
+输出：[4,4,4]
+ 
+
+注：
+heights 的长度为 [1, 100] ，并且每个数的范围为[0, 99]。
+V 的范围 [0, 2000]。
+K 的范围 [0, heights.length - 1]。
+
+vector<int> pourWater(vector<int>& heights, int V, int K) {
+    for (int i = 0; i < V; ++i) {
+        int l = K, r = K, n = heights.size();
+        while (l > 0 && heights[l] >= heights[l - 1]) --l;
+        while (l < K && heights[l] == heights[l + 1]) ++l;
+        if (l != K) {
+            heights[l]++;
+            continue;
+        }
+        while (r < n - 1 && heights[r] >= heights[r + 1]) ++r;
+        while (r > K && heights[r] == heights[r - 1]) --r;
+        heights[r]++;
+    }
+    return heights;
+}
+
 ------------------------------------------------------------------------------------
+
+776. 拆分二叉搜索树
+给你一棵二叉搜索树（BST）、它的根结点 root 以及目标值 V。
+
+请将该树按要求拆分为两个子树：其中一个子树结点的值都必须小于等于给定的目标值 V；另一个子树结点的值都必须大于目标值 V；树中并非一定要存在值为 V 的结点。
+
+除此之外，树中大部分结构都需要保留，也就是说原始树中父节点 P 的任意子节点 C，假如拆分后它们仍在同一个子树中，那么结点 P 应仍为 C 的子结点。
+
+你需要返回拆分后两个子树的根结点 TreeNode，顺序随意。
+
+示例 1：
+
+输入：root = [4,2,6,1,3,5,7], V = 2
+输出：[[2,1],[4,3,6,null,null,5,7]]
+解释：
+注意根结点 output[0] 和 output[1] 都是 TreeNode 对象，不是数组。
+
+给定的树 [4,2,6,1,3,5,7] 可化为如下示意图：
+
+          4
+        /   \
+      2      6
+     / \    / \
+    1   3  5   7
+
+输出的示意图如下：
+
+          4
+        /   \
+      3      6       和    2
+            / \           /
+           5   7         1
+注意：
+
+二叉搜索树节点个数不得超过 50 个
+二叉搜索树始终是有效的，并且每个节点的值dku bu xiang t
+
+给你一棵二叉搜索树（BST）、它的根结点 root 以及目标值 V。
+
+请将该树按要求拆分为两个子树：其中一个子树结点的值都必须小于等于给定的目标值 V；另一个子树结点的值都必须大于目标值 V；树中并非一定要存在值为 V 的结点。
+
+除此之外，树中大部分结构都需要保留，也就是说原始树中父节点 P 的任意子节点 C，假如拆分后它们仍在同一个子树中，那么结点 P 应仍为 C 的子结点。
+
+你需要返回拆分后两个子树的根结点 TreeNode，顺序随意。
+
+示例 1：
+
+输入：root = [4,2,6,1,3,5,7], V = 2
+输出：[[2,1],[4,3,6,null,null,5,7]]
+解释：
+注意根结点 output[0] 和 output[1] 都是 TreeNode 对象，不是数组。
+
+给定的树 [4,2,6,1,3,5,7] 可化为如下示意图：
+
+          4
+        /   \
+      2      6
+     / \    / \
+    1   3  5   7
+
+输出的示意图如下：
+
+          4
+        /   \
+      3      6       和    2
+            / \           /
+           5   7         1
+注意：
+
+二叉搜索树节点个数不得超过 50 个
+二叉搜索树始终是有效的，并且每个节点的值dku bu xiang t
+
+vector<TreeNode*> splitBST(TreeNode* root, int V) {
+    vector<TreeNode*> res{NULL, NULL};
+    if (!root) return res;
+    if (root->val <= V) {
+        res = splitBST(root->right, V);
+        root->right = res[0];
+        res[0] = root;
+    } else {
+        res = splitBST(root->left, V);
+        root->left = res[1];
+        res[1] = root;
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
