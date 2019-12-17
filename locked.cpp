@@ -408,15 +408,339 @@ char *** groupStrings(char ** strings, int stringsSize, int* returnSize, int** r
 
 输出: 4
 
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+
+bool helpSubtrees(struct TreeNode* root, int val, int* res) {
+    if (!root) {
+        return true;
+    }
+    bool left = helpSubtrees(root->left, root->val, res);
+    bool right = helpSubtrees(root->right, root->val, res);
+    if (!left || !right) {
+        return false;
+    }
+    (*res)++;
+    return root->val == val;
+}
+
+int countUnivalSubtrees(struct TreeNode* root){
+    int res = 0;
+    helpSubtrees(root, -1, &res);
+    return res;
+}
+
+------------------------------------------------------------------------------------
+
+251. 展开二维向量
+请设计并实现一个能够展开二维向量的迭代器。该迭代器需要支持 next 和 hasNext 两种操作。、
+
+示例：
+
+Vector2D iterator = new Vector2D([[1,2],[3],[4]]);
+
+iterator.next(); // 返回 1
+iterator.next(); // 返回 2
+iterator.next(); // 返回 3
+iterator.hasNext(); // 返回 true
+iterator.hasNext(); // 返回 true
+iterator.next(); // 返回 4
+iterator.hasNext(); // 返回 false
+ 
+
+注意：
+
+请记得 重置 在 Vector2D 中声明的类变量（静态变量），因为类变量会 在多个测试用例中保持不变，影响判题准确。请 查阅 这里。
+你可以假定 next() 的调用总是合法的，即当 next() 被调用时，二维向量总是存在至少一个后续元素。
+ 
+
+进阶：
+
+尝试在代码中仅使用 C++ 提供的迭代器 或 Java 提供的迭代器。
+
+typedef struct {
+    int *oneLine;
+    int index;
+    int size;
+} Vector2D;
 
 
+Vector2D* vector2DCreate(int** v, int vSize, int* vColSize) {
+    int len = 0;
+    for(int i = 0; i < vSize; i++) {
+        len += vColSize[i];
+    }
+    Vector2D *res = (Vector2D*)malloc(sizeof(Vector2D));
+    res->oneLine = (int*)malloc(sizeof(int) * len);
+    res->index = 0;
+    res->size = len;
+    for(int i = 0; i < vSize; i++) {
+        for(int j = 0; j < vColSize[i]; j++) {
+            res->oneLine[res->index++] = v[i][j];
+        }
+    }
+    res->index = 0;
+    return res;
+}
+
+int vector2DNext(Vector2D* obj) {
+    return obj->oneLine[obj->index++];
+}
+
+bool vector2DHasNext(Vector2D* obj) {
+    return obj->index < obj->size;
+}
+
+void vector2DFree(Vector2D* obj) {
+    free(obj->oneLine);
+    free(obj);
+}
+
+/**
+ * Your Vector2D struct will be instantiated and called as such:
+ * Vector2D* obj = vector2DCreate(v, vSize, vColSize);
+ * int param_1 = vector2DNext(obj);
+ 
+ * bool param_2 = vector2DHasNext(obj);
+ 
+ * vector2DFree(obj);
+*/
+
 ------------------------------------------------------------------------------------
+
+253. 会议室 II
+给定一个会议时间安排的数组，每个会议时间都会包括开始和结束的时间 [[s1,e1],[s2,e2],...] (si < ei)，为避免会议冲突，同时要考虑充分利用会议室资源，请你计算至少需要多少间会议室，才能满足这些会议安排。
+
+示例 1:
+
+输入: [[0, 30],[5, 10],[15, 20]]
+输出: 2
+示例 2:
+
+输入: [[7,10],[2,4]]
+输出: 1
+
+int compare(const void *a, const void *b) {
+    return *((int*)a) - *((int*)b);
+}
+
+int minMeetingRooms(int** intervals, int intervalsSize, int* intervalsColSize) {
+	int *begin = (int*)malloc(sizeof(int) * intervalsSize);
+    int *end = (int*)malloc(sizeof(int) * intervalsSize);
+
+	for(int i = 0; i < intervalsSize; i++) {
+        begin[i] = intervals[i][0];
+        end[i] = intervals[i][1];
+    }
+
+    qsort(begin, intervalsSize, sizeof(int), compare);
+    qsort(end, intervalsSize, sizeof(int), compare);
+    
+    int res = 0, roomNum = 0, beginIndex = 0, endIndex = 0;
+    while(beginIndex < intervalsSize && endIndex < intervalsSize) {
+        if(begin[beginIndex] < end[endIndex]) {
+            roomNum++;
+            beginIndex++;
+        }
+        else {
+            roomNum--;
+            endIndex++;
+        }
+        res = res > roomNum ? res : roomNum;
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+254. 因子的组合
+整数可以被看作是其因子的乘积。
+
+例如：
+
+8 = 2 x 2 x 2;
+  = 2 x 4.
+请实现一个函数，该函数接收一个整数 n 并返回该整数所有的因子组合。
+
+注意：
+
+你可以假定 n 为永远为正数。
+因子必须大于 1 并且小于 n。
+示例 1：
+
+输入: 1
+输出: []
+示例 2：
+
+输入: 37
+输出: []
+示例 3：
+
+输入: 12
+输出:
+[
+  [2, 6],
+  [2, 2, 3],
+  [3, 4]
+]
+示例 4:
+
+输入: 32
+输出:
+[
+  [2, 16],
+  [2, 2, 8],
+  [2, 2, 2, 4],
+  [2, 2, 2, 2, 2],
+  [2, 4, 4],
+  [4, 8]
+]
+
+vector<vector<int>> getFactors(int n) {
+        vector<vector<int>> res;
+        helper(n, 2, {}, res);
+        return res;
+    }
+    void helper(int n, int start, vector<int> out, vector<vector<int>> &res) {
+        for (int i = start; i <= sqrt(n); i++) {
+            if (n % i == 0) {
+                vector<int> new_out = out;
+                new_out.push_back(i);
+                helper(n / i, i, new_out, res);
+                new_out.push_back(n / i);
+                res.push_back(new_out);
+            }
+        }
+    }
+
 ------------------------------------------------------------------------------------
+
+255. 验证前序遍历序列二叉搜索树
+给定一个整数数组，你需要验证它是否是一个二叉搜索树正确的先序遍历序列。
+
+你可以假定该序列中的数都是不相同的。
+
+参考以下这颗二叉搜索树：
+
+     5
+    / \
+   2   6
+  / \
+ 1   3
+示例 1：
+
+输入: [5,2,6,1,3]
+输出: false
+示例 2：
+
+输入: [5,2,1,3,6]
+输出: true
+进阶挑战：
+
+您能否使用恒定的空间复杂度来完成此题？
+
+bool verifyPreorder(vector<int>& preorder) {
+    return helper(preorder, 0, preorder.size() - 1, INT_MIN, INT_MAX);
+}
+bool helper(vector<int>& preorder, int start, int end, int lower, int upper) {
+    if (start > end) return true;
+    int val = preorder[start], i = 0;
+    if (val <= lower || val >= upper) return false;
+    for (i = start + 1; i <= end; ++i) {
+        if (preorder[i] >= val) break;
+    }
+    return helper(preorder, start + 1, i - 1, lower, val) && helper(preorder, i, end, val, upper);
+}
+
 ------------------------------------------------------------------------------------
+
+259. 较小的三数之和
+给定一个长度为 n 的整数数组和一个目标值 target，寻找能够使条件 nums[i] + nums[j] + nums[k] < target 成立的三元组  i, j, k 个数（0 <= i < j < k < n）。
+
+示例：
+
+输入: nums = [-2,0,1,3], target = 2
+输出: 2 
+解释: 因为一共有两个三元组满足累加和小于 2:
+     [-2,0,1]
+     [-2,0,3]
+进阶：是否能在 O(n2) 的时间复杂度内解决？
+
+int threeSumSmaller(vector<int>& nums, int target) {
+    if (nums.size() < 3) return 0;
+    int res = 0, n = nums.size();
+    sort(nums.begin(), nums.end());
+    for (int i = 0; i < n - 2; ++i) {
+        int left = i + 1, right = n - 1;
+        while (left < right) {
+            if (nums[i] + nums[left] + nums[right] < target) {
+                res += right - left;
+                ++left;
+            } else {
+                --right;
+            }
+        }
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+261. 以图判树
+给定从 0 到 n-1 标号的 n 个结点，和一个无向边列表（每条边以结点对来表示），请编写一个函数用来判断这些边是否能够形成一个合法有效的树结构。
+
+示例 1：
+输入: n = 5, 边列表 edges = [[0,1], [0,2], [0,3], [1,4]]
+输出: true
+
+示例 2:
+输入: n = 5, 边列表 edges = [[0,1], [1,2], [2,3], [1,3], [1,4]]
+输出: false
+注意：你可以假定边列表 edges 中不会出现重复的边。由于所有的边是无向边，边 [0,1] 和边 [1,0] 是相同的，因此不会同时出现在边列表 edges 中。
+
+bool validTree(int n, vector<vector<int>>& edges) {
+    vector<vector<int>> graph(n, vector<int>());
+    vector<bool> flag(n, false);
+    for (auto a : edges) {
+        graph[a[0]].push_back(a[1]);
+        graph[a[1]].push_back(a[0]);
+    }
+    if (!dfs(graph, flag, 0, -1)) {  // 环
+        return false;
+    }
+    for (auto a : flag) {  // 连通
+        if (!a) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool dfs(vector<vector<int>> &graph, vector<bool> &flag, int cur, int pre) {
+    if (flag[cur]) {
+        return false;
+    }
+    flag[cur] = true;
+    for (auto a : graph[cur]) {
+        if (a != pre) {
+            if (!dfs(graph, flag, a, cur)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 ------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
+
+
+
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
