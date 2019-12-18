@@ -739,14 +739,405 @@ bool dfs(vector<vector<int>> &graph, vector<bool> &flag, int cur, int pre) {
 
 ------------------------------------------------------------------------------------
 
+267. 回文排列 II
+给定一个字符串 s ，返回其通过重新排列组合后所有可能的回文字符串，并去除重复的组合。
+
+如不能形成任何回文排列时，则返回一个空列表。
+
+示例 1：
+
+输入: "aabb"
+输出: ["abba", "baab"]
+示例 2：
+
+输入: "abc"
+输出: []
+
+vector<string> generatePalindromes(string s) {
+    unordered_set<string> res;
+    unordered_map<char, int> m;
+    string half = "", mid = "";
+    for (auto a : s) {
+        m[a]++;
+    }
+    for (auto it : m) {
+        if (it.second % 2 == 1) {
+            mid += it.first;
+        }
+        half += string(it.second / 2, it.first);
+        if (mid.size() > 1) {
+            return {};
+        }
+    }
+    permute(half, 0, mid, res);
+    return vector<string>(res.begin(), res.end());
+}
+
+void permute(string &half, int start, string mid, unordered_set<string> &res) {
+    if (start == half.size()) {
+        res.insert(half + mid + string(half.rbegin(), half.rend()));
+    }
+    for (int i = start; i < half.size(); ++i) {
+        if (i != start && half[i] == half[start]) {
+            continue;
+        }
+        swap(half[i], half[start]);
+        permute(half, start + 1, mid, res);
+        swap(half[i], half[start]);
+    }
+}
+
+------------------------------------------------------------------------------------
+
+271. 字符串的编码与解码
+请你设计一个算法，可以将一个 字符串列表 编码成为一个 字符串。这个编码后的字符串是可以通过网络进行高效传送的，并且可以在接收端被解码回原来的字符串列表。
+
+1 号机（发送方）有如下函数：
+
+string encode(vector<string> strs) {
+  // ... your code
+  return encoded_string;
+}
+2 号机（接收方）有如下函数：
+
+vector<string> decode(string s) {
+  //... your code
+  return strs;
+}
+1 号机（发送方）执行：
+
+string encoded_string = encode(strs);
+2 号机（接收方）执行：
+
+vector<string> strs2 = decode(encoded_string);
+此时，2 号机（接收方）的 strs2 需要和 1 号机（发送方）的 strs 相同。
+
+请你来实现这个 encode 和 decode 方法。
+
+注意：
+
+因为字符串可能会包含 256 个合法 ascii 字符中的任何字符，所以您的算法必须要能够处理任何可能会出现的字符。
+请勿使用 “类成员”、“全局变量” 或 “静态变量” 来存储这些状态，您的编码和解码算法应该是非状态依赖的。
+请不要依赖任何方法库，例如 eval 又或者是 serialize 之类的方法。本题的宗旨是需要您自己实现 “编码” 和 “解码” 算法。
+
+/** Encodes a list of strings to a single string */
+char* encode(char** strs, int strsSize) {
+    int len = 0;
+    for (int i = 0; i < strsSize; i++) {
+        len += strlen(strs[i]) + sizeof(int);
+    }
+    char* res = (char*)malloc(sizeof(char) * (len + 1));
+    int resIndex = 0;
+    for (int i = 0; i < strsSize; i++) {
+        int len = strlen(strs[i]);
+        res[resIndex++] = *((char*)(&len) + 3) + '0';
+        res[resIndex++] = *((char*)(&len) + 2) + '0';
+        res[resIndex++] = *((char*)(&len) + 1) + '0';
+        res[resIndex++] = *((char*)(&len)) + '0';
+        strcpy(res + resIndex, strs[i]);
+        resIndex += strlen(strs[i]);
+    }
+    res[len] = 0;
+    return res;
+}
+
+/**
+ * Decodes a single string to a list of strings.
+ *
+ * Return an array of size *returnSize.
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+char** decode(char* s, int* returnSize) {
+    *returnSize = 0;
+    int len = 0;
+    int temps = 0;
+    while (temps < strlen(s)) {
+        len = 0;
+        len += (*(s + temps) - '0') << 24;
+        len += (*(s + temps + 1) - '0') << 16;
+        len += (*(s + temps + 2) - '0') << 8;
+        len += *(s + temps + 3) - '0';
+        temps += 4 + len;
+        (*returnSize)++;
+    }
+    char** res = (char**)malloc(sizeof(char*) * *returnSize);
+    len = 0;
+    temps = 0;
+    for (int i = 0; i < *returnSize; i++) {
+        len = 0;
+        len += (*(s + temps) - '0') << 24;
+        len += (*(s + temps + 1) - '0') << 16;
+        len += (*(s + temps + 2) - '0') << 8;
+        len += *(s + temps + 3) - '0';
+        res[i] = (char*)malloc(sizeof(char) * (len + 1));
+        strncpy(res[i], (s + temps + 4), len);
+        res[i][len] = 0;
+        temps += 4 + len;
+    }
+    return res;
+}
+
+------------------------------------------------------------------------------------
+
+277. 搜寻名人
+假设你是一个专业的狗仔，参加了一个 n 人派对，其中每个人被从 0 到 n - 1 标号。在这个派对人群当中可能存在一位 “名人”。所谓 “名人” 的定义是：其他所有 n - 1 个人都认识他/她，而他/她并不认识其他任何人。
+
+现在你想要确认这个 “名人” 是谁，或者确定这里没有 “名人”。而你唯一能做的就是问诸如 “A 你好呀，请问你认不认识 B呀？” 的问题，以确定 A 是否认识 B。你需要在（渐近意义上）尽可能少的问题内来确定这位 “名人” 是谁（或者确定这里没有 “名人”）。
+
+在本题中，你可以使用辅助函数 bool knows(a, b) 获取到 A 是否认识 B。请你来实现一个函数 int findCelebrity(n)。
+
+派对最多只会有一个 “名人” 参加。若 “名人” 存在，请返回他/她的编号；若 “名人” 不存在，请返回 -1。
+
+示例 1:
+
+输入: graph = [
+  [1,1,0],
+  [0,1,0],
+  [1,1,1]
+]
+输出: 1
+解析: 有编号分别为 0、1 和 2 的三个人。graph[i][j] = 1 代表编号为 i 的人认识编号为 j 的人，而 graph[i][j] = 0 则代表编号为 i 的人不认识编号为 j 的人。“名人” 是编号 1 的人，因为 0 和 2 均认识他/她，但 1 不认识任何人。
+示例 2:
+
+输入: graph = [
+  [1,0,1],
+  [1,1,0],
+  [0,1,1]
+]
+输出: -1
+解析: 没有 “名人”
+ 
+注意:
+
+该有向图是以邻接矩阵的形式给出的，是一个 n × n 的矩阵， a[i][j] = 1 代表 i 与 j 认识，a[i][j] = 0 则代表 i 与 j 不认识。
+请记住，您是无法直接访问邻接矩阵的。
+
+int findCelebrity(int n) {
+    int* celebrity = (int*)malloc(sizeof(int) * n);
+    memset(celebrity, 0, sizeof(int) * n);
+    int i, j;
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            if (i != j && knows(i, j) == 1) {
+                break;
+            }
+        }
+        if (j == n) {
+            celebrity[i] = 1;
+        }
+    }
+    for (i = 0; i < n; i++) {
+        if (celebrity[i] == 1) {
+            for (j = 0; j < n; j++) {
+                if (i != j && knows(j, i) == 0) {
+                    break;
+                }
+            }
+            if (j == n) {
+                free(celebrity);
+                return i;
+            }
+        }
+    }
+    free(celebrity);
+    return -1;
+}
+
+------------------------------------------------------------------------------------
+
+280. 摆动排序
+给你一个无序的数组 nums, 将该数字 原地 重排后使得 nums[0] <= nums[1] >= nums[2] <= nums[3]...。
+
+示例:
+
+输入: nums = [3,5,2,1,6,4]
+输出: 一个可能的解答是 [3,5,1,6,2,4]
+
+void swapInt(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void wiggleSort(int* nums, int numsSize) {
+    if (!nums || numsSize <= 0) {
+        return;
+    }
+    for (int i = 1; i < numsSize; i++) {
+        if ((i % 2 == 0 && nums[i] > nums[i - 1]) ||
+            (i % 2 == 1 && nums[i] < nums[i - 1])) {
+            swapInt(&nums[i], &nums[i - 1]);
+        }
+    }
+}
+
+------------------------------------------------------------------------------------
+
+281. 锯齿迭代器
+给出两个一维的向量，请你实现一个迭代器，交替返回它们中间的元素。
+
+示例:
+
+输入:
+v1 = [1,2]
+v2 = [3,4,5,6] 
+
+输出: [1,3,2,4,5,6]
+
+解析: 通过连续调用 next 函数直到 hasNext 函数返回 false，
+     next 函数返回值的次序应依次为: [1,3,2,4,5,6]。
+拓展：假如给你 k 个一维向量呢？你的代码在这种情况下的扩展性又会如何呢?
+
+拓展声明：
+ “锯齿” 顺序对于 k > 2 的情况定义可能会有些歧义。所以，假如你觉得 “锯齿” 这个表述不妥，也可以认为这是一种 “循环”。例如：
+
+输入:
+[1,2,3]
+[4,5,6,7]
+[8,9]
+
+输出: [1,4,8,2,5,9,3,6,7].
+
+struct ZigzagIterator {
+    int *v1;
+    int v1Size;
+    int v1Index;
+    int *v2;
+    int v2Size;
+    int v2Index;
+};
+
+struct ZigzagIterator *zigzagIteratorCreate(int* v1, int v1Size, int* v2, int v2Size) {
+    struct ZigzagIterator *res = (struct ZigzagIterator*)malloc(sizeof(struct ZigzagIterator));
+    res->v1 = v1;
+    res->v1Size = v1Size;
+    res->v1Index = 0;
+    res->v2 = v2;
+    res->v2Size = v2Size;
+    res->v2Index = 0;
+    return res;
+}
+
+bool zigzagIteratorHasNext(struct ZigzagIterator *iter) {
+    return iter->v1Index < iter->v1Size || iter->v2Index < iter->v2Size;
+}
+
+int zigzagIteratorNext(struct ZigzagIterator *iter) {
+    if (iter->v1Index == iter->v1Size) {
+        return iter->v2[iter->v2Index++];
+    }
+    else if (iter->v2Index == iter->v2Size) {
+        return iter->v1[iter->v1Index++];
+    }
+    else if (iter->v1Index < iter->v1Size && iter->v1Index <= iter->v2Index) {
+        return iter->v1[iter->v1Index++];
+    }
+    else if (iter->v2Index < iter->v2Size && iter->v1Index > iter->v2Index) {
+        return iter->v2[iter->v2Index++];
+    }
+    return 0;
+}
+
+/** Deallocates memory previously allocated for the iterator */
+void zigzagIteratorFree(struct ZigzagIterator *iter) {
+    free(iter);
+}
+
+/**
+ * Your ZigzagIterator will be called like this:
+ * struct ZigzagIterator *i = zigzagIteratorCreate(v1, v1Size, v2, v2Size);
+ * while (zigzagIteratorHasNext(i)) printf("%d\n", zigzagIteratorNext(i));
+ * zigzagIteratorFree(i);
+ */
+ 
+------------------------------------------------------------------------------------
+
+285. 二叉搜索树中的顺序后继
+给你一个二叉搜索树和其中的某一个结点，请你找出该结点在树中顺序后继的节点。
+
+结点 p 的后继是值比 p.val 大的结点中键值最小的结点。
+
+ 
+
+示例 1:
 
 
+
+输入: root = [2,1,3], p = 1
+输出: 2
+解析: 这里 1 的顺序后继是 2。请注意 p 和返回值都应是 TreeNode 类型。
+示例 2:
+
+
+
+输入: root = [5,3,6,2,4,null,null,1], p = 6
+输出: null
+解析: 因为给出的结点没有顺序后继，所以答案就返回 null 了。
+ 
+
+注意:
+
+假如给出的结点在该树中没有顺序后继的话，请返回 null
+我们保证树中每个结点的值是唯一的
+
+struct TreeNode* inorderSuccessor(struct TreeNode* root, struct TreeNode* p) {
+    if (!root) {
+        return NULL;
+    }
+    if (root->val <= p->val) {
+        return inorderSuccessor(root->right, p);
+    } else {
+        struct TreeNode *left = inorderSuccessor(root->left, p);
+        return left ? left : root;
+    }   
+}
+
 ------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
+
+286. 墙与门
+你被给定一个 m × n 的二维网格，网格中有以下三种可能的初始化值：
+
+-1 表示墙或是障碍物
+0 表示一扇门
+INF 无限表示一个空的房间。然后，我们用 231 - 1 = 2147483647 代表 INF。你可以认为通往门的距离总是小于 2147483647 的。
+你要给每个空房间位上填上该房间到 最近 门的距离，如果无法到达门，则填 INF 即可。
+
+示例：
+
+给定二维网格：
+
+INF  -1  0  INF
+INF INF INF  -1
+INF  -1 INF  -1
+  0  -1 INF INF
+运行完你的函数后，该网格应该变成：
+
+  3  -1   0   1
+  2   2   1  -1
+  1  -1   2  -1
+  0  -1   3   4
+
+void wallsAndGates(int** rooms, int roomsSize, int* roomsColSize){
+    for (int i = 0; i < roomsSize; i++) {
+        for (int j = 0; j < roomsColSize[0]; j++) {
+            if (rooms[i][j] == 0) {
+                dfs(rooms, roomsSize, roomsColSize[0], i, j, 0);
+            }
+        }
+    }
+}
+
+void dfs(int **rooms, int size, int colSize, int i, int j, int val) {
+    if (i < 0 || i >= size || j < 0 || j >= colSize || rooms[i][j] < val) {
+        return;
+    }
+    rooms[i][j] = val;
+    dfs(rooms, size, colSize, i + 1, j, val + 1);
+    dfs(rooms, size, colSize, i - 1, j, val + 1);
+    dfs(rooms, size, colSize, i, j + 1, val + 1);
+    dfs(rooms, size, colSize, i, j - 1, val + 1);
+}
+
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
