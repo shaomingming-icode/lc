@@ -4217,12 +4217,13 @@ A, A, A, Ctrl A, Ctrl C, Ctrl V, Ctrl V
 1 <= N <= 50
 结果不会超过 32 位有符号整数范围。
  
-int maxA(int N) {
-    vector<int> dp(N + 1, 0);
-    for (int i = 0; i <= N; ++i) {  // 打i次
+int maxA(int N){
+    int *dp = (int*)malloc(sizeof(int) * (N + 1));
+    for (int i = 1; i <= N; ++i) {  // 打i次
         dp[i] = i;
         for (int j = 1; j <= i - 3; ++j) {  // 假设已经算过的个数是j，剩下全粘贴
-            dp[i] = max(dp[i], dp[j] * (i - 2 - j + 1));
+            int temp = dp[j] * (i - 2 - j + 1);
+            dp[i] = dp[i] > temp ? dp[i] : temp;
         }
     }
     return dp[N];
