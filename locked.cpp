@@ -1139,11 +1139,143 @@ void dfs(int **rooms, int size, int colSize, int i, int j, int val) {
 }
 
 ------------------------------------------------------------------------------------
+
+288. 单词的唯一缩写
+一个单词的缩写需要遵循 <起始字母><中间字母数><结尾字母> 这样的格式。
+
+以下是一些单词缩写的范例：
+
+a) it                      --> it    (没有缩写)
+
+     1
+     ↓
+b) d|o|g                   --> d1g
+
+              1    1  1
+     1---5----0----5--8
+     ↓   ↓    ↓    ↓  ↓    
+c) i|nternationalizatio|n  --> i18n
+
+              1
+     1---5----0
+     ↓   ↓    ↓
+d) l|ocalizatio|n          --> l10n
+假设你有一个字典和一个单词，请你判断该单词的缩写在这本字典中是否唯一。若单词的缩写在字典中没有任何 其他 单词与其缩写相同，则被称为单词的唯一缩写。
+
+示例：
+
+给定 dictionary = [ "deer", "door", "cake", "card" ]
+
+isUnique("dear") -> false
+isUnique("cart") -> true
+isUnique("cane") -> false
+isUnique("make") -> true
+
+typedef struct {
+    char **words;
+    char **dictionary;
+    int size;
+} ValidWordAbbr;
+int getStrLen(int n) {
+    int len = 0;
+    while (n) {
+        len++;
+        n /= 10;
+    }
+    return len;
+}
+void addNewSize(char *str, int n, int size) {
+    while (n) {
+        *(str + size - 1) = n % 10;
+        size--;
+        n /= 10;
+    }
+}
+ValidWordAbbr* validWordAbbrCreate(char ** dictionary, int dictionarySize) {
+    ValidWordAbbr *res = (ValidWordAbbr*)malloc(sizeof(ValidWordAbbr));
+    res->words = (char**)malloc(sizeof(char*) * dictionarySize);
+    res->size = dictionarySize;
+    res->dictionary = dictionary;
+    for (int i = 0; i < dictionarySize; i++) {
+        if (strlen(dictionary[i]) > 2) {
+            int dirLen = strlen(dictionary[i]);
+            int newSize = getStrLen(dirLen - 2) + 2;
+            res->words[i] = (char*)malloc(sizeof(char) * (newSize + 1));
+            res->words[i][0] = dictionary[i][0];
+            addNewSize(res->words[i] + 1, dirLen - 2, newSize);
+            res->words[i][newSize - 1] = dictionary[i][dirLen - 1];
+            res->words[i][newSize] = 0;
+        }
+        else {
+            res->words[i] = NULL;
+        }
+    }
+    return res;
+}
+bool validWordAbbrIsUnique(ValidWordAbbr* obj, char * word) {
+    if (!word || strlen(word) <= 2) {
+        return true;
+    }
+    int wordLen = strlen(word);
+    int newSize = getStrLen(wordLen - 2) + 2;
+    char *temp = (char*)malloc(sizeof(char) * (newSize + 1));
+    temp[0] = word[0];
+    addNewSize(temp + 1, wordLen - 2, newSize);
+    temp[newSize - 1] = word[wordLen - 1];
+    temp[newSize] = 0;
+    for (int i = 0; i < obj->size; i++) {
+        if (obj->words[i] != NULL && strcmp(temp, obj->words[i]) == 0 && strcmp(word, obj->dictionary[i]) != 0) {
+            return false;
+        }
+    }
+    free(temp);
+    return true;
+}
+
+void validWordAbbrFree(ValidWordAbbr* obj) {
+    for (int i = 0; i < obj->size; i++) {
+        free(obj->words[i]);
+    }
+    free(obj);
+}
+
+/**
+ * Your ValidWordAbbr struct will be instantiated and called as such:
+ * ValidWordAbbr* obj = validWordAbbrCreate(dictionary, dictionarySize);
+ * bool param_1 = validWordAbbrIsUnique(obj, word);
+ 
+ * validWordAbbrFree(obj);
+*/
+
 ------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
+
+294. 翻转游戏 II
+你和朋友玩一个叫做「翻转游戏」的游戏，游戏规则：给定一个只有 + 和 - 的字符串。你和朋友轮流将 连续 的两个 "++" 反转成 "--"。 当一方无法进行有效的翻转时便意味着游戏结束，则另一方获胜。
+
+请你写出一个函数来判定起始玩家是否存在必胜的方案。
+
+示例：
+
+输入: s = "++++"
+输出: true 
+解析: 起始玩家可将中间的 "++" 翻转变为 "+--+" 从而得胜。
+延伸：
+请推导你算法的时间复杂度。
+
+bool canWin(char * s){
+    for (int i = 1; i < strlen(s); i++) {
+        if (s[i] == '+' && s[i - 1] == '+') {
+            s[i] = s[i - 1] = '-';
+            if (!canWin(s)) {
+                s[i] = s[i - 1] = '+';
+                return true;
+            }
+            s[i] = s[i - 1] = '+';
+        }
+    }
+    return false;
+}
+
 ------------------------------------------------------------------------------------
 
 298. 二叉树最长连续序列
@@ -3372,7 +3504,78 @@ N = 3
 输入字符串中只包含 '(', ')', '-' 和 '0' ~ '9' 
 空树由 "" 而非"()"表示。
 
-todo
+typedef struct stack {
+    struct TreeNode *node[10000];
+    int top;
+} Stack;
+int push(Stack *s, struct TreeNode *value) {
+    if (s->top == 10000 - 1) {
+        return -1;
+    }
+    s->top++;
+    s->node[s->top] = value;
+    return 0;
+}
+int pop(Stack *s, struct TreeNode **value) {
+    if (s->top == -1) {
+        return -1;
+    }
+    *value = s->node[s->top];
+    s->top--;
+    return 0;
+}
+struct TreeNode* top(Stack *s) {
+    if (s->top == -1) {
+        return 0;
+    }
+    return s->node[s->top];
+}
+int getNum(char *s, int *index) {
+    int negtive = 0;
+    if (s[(*index)] == '-') {
+        (*index)++;
+        negtive = 1;
+    }
+    int res = 0;    
+    while (s[(*index)] >= '0' && s[(*index)] <= '9') {
+        res = s[(*index)] - '0' + res * 10;
+        (*index)++;
+    }
+    return negtive == 0 ? res : 0 - res;
+}
+struct TreeNode* str2tree(char * s) {
+    if (strlen(s) == 0) {
+        return NULL;
+    }
+    int sIndex = 0; 
+    struct TreeNode *res = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    res->val = getNum(s, &sIndex);
+    res->left = res->right = NULL;    
+    Stack *stack = (Stack*)malloc(sizeof(Stack));
+    struct TreeNode *father = res;
+    while (s[sIndex] != 0) {
+        if (s[sIndex] == '(') {
+            sIndex++;
+            push(stack, father);
+            struct TreeNode *temp = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+            temp->val = getNum(s, &sIndex);
+            temp->left = temp->right = NULL;
+            if (father->left == NULL) {
+                father->left = temp;
+                father = father->left;
+            }
+            else {
+                father->right = temp;
+                father = father->right;
+            }
+        }
+        else if (s[sIndex] == ')') {
+            pop(stack, &father);
+            sIndex++;
+        }
+    }
+    return res;
+}
 
 ------------------------------------------------------------------------------------
 
@@ -3408,7 +3611,19 @@ n 支队伍按从 1 到 n 的正整数格式给出，分别代表它们的初始
 第三轮 (((1,8),(4,5)),((2,7),(3,6)))
 由于第三轮会决出最终胜者，故输出答案为(((1,8),(4,5)),((2,7),(3,6)))。
 
-todo
+string findContestMatch(int n) {
+    vector<string> str(n);
+    for (int i = 0; i < n; i++) {
+        str[i] = to_string(i + 1);
+    }
+    while (n > 1) {
+        for (int i = 0; i < n / 2; i++) {
+            str[i] = '(' + str[i] + ',' + str[n - i - 1] + ')';
+        }
+        n /= 2;
+    }
+    return str[0];
+}
 
 ------------------------------------------------------------------------------------
 545. 二叉树的边界
@@ -3459,7 +3674,54 @@ todo
 右边界是结点1,3,6,10。(10是最右侧结点)
 以逆时针顺序无重复地排列边界，得到答案 [1,2,4,7,8,9,10,6,3]。
 
-todo
+vector<int> boundaryOfBinaryTree(TreeNode* root) {
+    if (!root) {
+        return {};
+    }
+    vector<int> res, right;
+    TreeNode *l = root->left, *r = root->right, *p = root;
+    
+    if (root->left || root->right) {
+        res.push_back(root->val);
+    }
+    while (l && (l->left || l->right)) {  // 左边节点
+        res.push_back(l->val);
+        if (l->left) {
+            l = l->left;
+        }
+        else {
+            l = l->right;
+        }
+    }
+
+    stack<TreeNode*> st;
+    while (p || !st.empty()) {  // 叶子节点
+        if (p) {
+            st.push(p);
+            if (!p->left && !p->right) {
+                res.push_back(p->val);
+            }
+            p = p->left;
+        }
+        else {
+            p = st.top();
+            st.pop();
+            p = p->right;
+        }
+    }
+
+    while (r && (r->left || r->right)) {  // 右边节点
+        right.push_back(r->val);
+        if (r->right) {
+            r = r->right;
+        }
+        else {
+            r = r->left;
+        }
+    }
+    res.insert(res.end(), right.rbegin(), right.rend());
+    return res;
+}
 
 ------------------------------------------------------------------------------------
 
@@ -3487,7 +3749,38 @@ sum(k + 1, n - 1) = sum(6, 6) = 1
 1 <= n <= 2000。
 给定数组中的元素会在 [-1,000,000, 1,000,000] 范围内。
 
-todo
+bool splitArray(int* nums, int numsSize){
+    if (numsSize < 7) {
+        return false;
+    }
+    for (int i = 1; i < numsSize; i++) {
+        nums[i] = nums[i - 1] + nums[i];
+    }
+
+    for (int i = 1; i <= numsSize - 6; i++) {
+        int sum1 = nums[i - 1];
+        if (sum1 == 0 && nums[numsSize - 1] != 0) {
+            continue;
+        }
+        for (int j = i + 2; j <= numsSize - 4; j++) {
+            int sum2 = nums[j - 1] - nums[i];
+            if (sum1 != sum2) {
+                continue;
+            }
+            for (int k = j + 2; k <= numsSize - 2; k++) {
+                int sum3 = nums[k - 1] - nums[j];
+                if (sum2 != sum3) {
+                    continue;
+                }
+                int sum4 = nums[numsSize - 1] - nums[k];
+                if (sum3 == sum4) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
 
 ------------------------------------------------------------------------------------
 
@@ -3516,7 +3809,30 @@ todo
  
 注意: 树上所有节点的值都在 [-1e7, 1e7] 范围内。
 
-todo
+int helper(struct TreeNode* node, int diff) {
+    if (!node) {
+        return 0;
+    }
+    int left = 0, right = 0;
+    if (node->left && node->val - node->left->val == diff) {
+        left = 1 + helper(node->left, diff);
+    }
+    if (node->right && node->val - node->right->val == diff) {
+        right = 1 + helper(node->right, diff);
+    }
+    return left > right ? left : right;
+}
+
+int longestConsecutive(struct TreeNode* root) {
+    if (!root) {
+        return 0;
+    }
+    int res = helper(root, 1) + helper(root, -1) + 1;
+    int leftLen = longestConsecutive(root->left);
+    int rightLen = longestConsecutive(root->right);
+    int tempLen = leftLen > rightLen ? leftLen : rightLen;
+    return res > tempLen ? res : tempLen;
+}
 
 ------------------------------------------------------------------------------------
 
