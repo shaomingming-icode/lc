@@ -3861,7 +3861,28 @@ int longestConsecutive(struct TreeNode* root) {
 输入字符串只包含小写字母。
 所有字符串的总长度不会超过 1,000。
 
-todo
+string splitLoopedString(vector<string>& strs) {
+    string noMove = "", res = "";
+    int cur = 0;  // 移动过程中记录移动过的字符串总长度
+    for (string s : strs) {
+        string temp = string(s.rbegin(), s.rend());
+        noMove += s > temp ? s : temp;
+    }
+    for (int i = 0; i < strs.size(); ++i) {
+        string origin = strs[i], reserved = string(origin.rbegin(), origin.rend());
+        string mid = noMove.substr(cur + origin.size()) + noMove.substr(0, cur);
+        for (int j = 0; j < strs[i].size(); ++j) {
+            if (origin[j] >= res[0]) {
+                res = max(res, origin.substr(j) + mid + origin.substr(0, j));
+            }
+            if (reserved[j] >= res[0]) {
+                res = max(res, reserved.substr(j) + mid + reserved.substr(0, j));
+            }
+        }
+        cur += strs[i].size();
+    }
+    return res;
+}
 
 ------------------------------------------------------------------------------------
 
@@ -3990,7 +4011,81 @@ kill = 5
 被杀掉的进程编号一定在 PID 序列中。
 n >= 1.
 
-todo
+typedef struct queue {
+    int *ele;
+    int front;
+    int rear;
+    int size;
+} Queue;
+
+bool inqueue(Queue *q, int value) {
+    if (!q || (q->rear + 1) % q->size == q->front)
+        return false;
+    q->ele[q->rear] = value;
+    q->rear = (q->rear + 1) % q->size;
+    return true;
+}
+
+bool dequeue(Queue *q, int *value) {
+    if (!q || q->rear == q->front)
+        return false;
+    *value = q->ele[q->front];
+    q->front = (q->front + 1) % q->size;
+    return true;
+}
+
+int* killProcess(int* pid, int pidSize, int* ppid, int ppidSize, int kill, int* returnSize) {
+    if (pidSize <= 0 || ppidSize <= 0) {
+        *returnSize = 1;
+        int *res = (int*)malloc(sizeof(int));
+        *res = kill;
+        return res;
+    }
+    Queue q = {0};
+    q.ele = (int*)malloc(sizeof(int) * pidSize);
+    q.size = pidSize;
+    inqueue(&q, kill);
+
+    int *used = (int*)malloc(sizeof(int) * pidSize);
+    memset(used, 0, sizeof(int) * pidSize);
+    int *haveChild = (int*)malloc(sizeof(int) * 60000);
+    memset(haveChild, 0, sizeof(int) * 60000);
+    for (int i = 0; i < ppidSize; i++) {
+        haveChild[ppid[i]] = 1;
+    }
+
+    while (q.rear != q.front) {
+        int parent;
+        dequeue(&q, &parent);
+        for (int i = 0; i < ppidSize; i++) {
+            if (used[i] == 0 && ppid[i] == parent) {
+                if(haveChild[pid[i]] == 1) {
+                    inqueue(&q, pid[i]);
+                }
+                used[i] = 1;
+            }
+        }
+    }
+
+    *returnSize = 1;
+    for (int i = 0; i < pidSize; i++) {
+        if (used[i] == 1) {
+            (*returnSize)++;
+        }
+    }
+    int *res = (int*)malloc(sizeof(int) * *returnSize);
+    res[0] = kill;
+    int resIndex = 1;
+    for (int i = 0; i < pidSize; i++) {
+        if (used[i] == 1) {
+            res[resIndex] = pid[i];
+            resIndex++;
+        }
+    }
+    free(used);
+    free(q.ele);
+    return res;
+}
 
 ------------------------------------------------------------------------------------
 
@@ -4150,34 +4245,48 @@ Put 和 Retrieve 的指令总数不超过 300。
 年份的区间是 [2000,2017]，小时的区间是 [00,23]。
 Retrieve 的输出顺序不作要求。
 
-class LogSystem {
-public:
-    LogSystem() {
-        units = {"Year", "Month", "Day", "Hour", "Minute", "Second"};
-        indices = {4, 7, 10, 13, 16, 19}; 
-    }
-    
-    void put(int id, string timestamp) {
-        timestamps.push_back({id, timestamp});
-    }
-    
-    vector<int> retrieve(string s, string e, string gra) {
-        vector<int> res;
-        int idx = indices[find(units.begin(), units.end(), gra) - units.begin()];
-        for (auto p : timestamps) {
-            string t = p.second;
-            if (t.substr(0, idx).compare(s.substr(0, idx)) >= 0 && t.substr(0, idx).compare(e.substr(0, idx)) <= 0) {
-                res.push_back(p.first);
-            }
-        }
-        return res;
-    }
+typedef struct {
+    int idArray[300];  // 保存ID
+    char *timestampArray[300];  // 保存时间戳
+    int outLog[300];
+    int outLogIndex;
+    int size;
+} LogSystem;
 
-private:
-    vector<pair<int, string>> timestamps;
-    vector<string> units;
-    vector<int> indices;
-};
+LogSystem* logSystemCreate() {
+    LogSystem *res = (LogSystem*)malloc(sizeof(LogSystem));
+    memset(res, 0, sizeof(LogSystem));
+    return res;
+}
+
+void logSystemPut(LogSystem* obj, int id, char * timestamp) {
+    obj->idArray[obj->size] = id;
+    obj->timestampArray[obj->size] = timestamp;
+    obj->size++;
+}
+
+int* logSystemRetrieve(LogSystem* obj, char * s, char * e, char * gra, int* retSize) {
+    int len = 0;
+    if (strcmp(gra, "Year") == 0) len = 4;
+    else if (strcmp(gra, "Month") == 0) len = 7;
+    else if (strcmp(gra, "Day") == 0) len = 10;
+    else if (strcmp(gra, "Hour") == 0) len = 13;
+    else if (strcmp(gra, "Minute") == 0) len = 16;
+    else if (strcmp(gra, "Second") == 0) len = 19;
+    for (int i = 0; i < obj->size; i++) {
+        if (strncmp(obj->timestampArray[i], s, len) >= 0 && strncmp(obj->timestampArray[i], e, len) <= 0) {
+            obj->outLog[obj->outLogIndex] = obj->idArray[i];
+            obj->outLogIndex++;
+        }
+    }
+    *retSize = obj->outLogIndex;
+    obj->outLogIndex = 0;
+    return obj->outLog;
+}
+
+void logSystemFree(LogSystem* obj) {
+    free(obj);
+}
 
 ------------------------------------------------------------------------------------
 
@@ -4330,7 +4439,35 @@ bool checkEqualTree(TreeNode* root) {
 
 路径和 = (3 + 1) = 4.
 
-todo
+int pathSum(vector<int>& nums) {
+    if (nums.size() == 0) {
+        return 0;
+    }
+    int res = 0, cur = 0;
+    unordered_map<int, int> m;
+    queue<int> q{ {nums[0] / 10} };
+    for (int num : nums) {
+        m[num / 10] = num % 10;
+    }
+    while (!q.empty()) {
+        int t = q.front(); q.pop();
+        int level = t / 10, pos = t % 10;
+        int left = (level + 1) * 10 + 2 * pos - 1, right = left + 1;
+        if (!m.count(left) && !m.count(right)) {
+            res += m[t];
+        }
+        if (m.count(left)) {
+            m[left] += m[t];
+            q.push(left);
+        }
+        if (m.count(right)) {
+            m[right] += m[t];
+            q.push(right);
+        }
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
 
 681. 最近时刻
@@ -5083,63 +5220,2177 @@ vector<TreeNode*> splitBST(TreeNode* root, int V) {
 }
 
 ------------------------------------------------------------------------------------
+
+1055. 形成字符串的最短路径
+对于任何字符串，我们可以通过删除其中一些字符（也可能不删除）来构造该字符串的子序列。
+
+给定源字符串 source 和目标字符串 target，找出源字符串中能通过串联形成目标字符串的子序列的最小数量。如果无法通过串联源字符串中的子序列来构造目标字符串，则返回 -1。
+
+ 
+
+示例 1：
+
+输入：source = "abc", target = "abcbc"
+输出：2
+解释：目标字符串 "abcbc" 可以由 "abc" 和 "bc" 形成，它们都是源字符串 "abc" 的子序列。
+示例 2：
+
+输入：source = "abc", target = "acdbc"
+输出：-1
+解释：由于目标字符串中包含字符 "d"，所以无法由源字符串的子序列构建目标字符串。
+示例 3：
+
+输入：source = "xyz", target = "xzyxz"
+输出：3
+解释：目标字符串可以按如下方式构建： "xz" + "y" + "xz"。
+ 
+
+提示：
+
+source 和 target 两个字符串都只包含 "a"-"z" 的英文小写字母。
+source 和 target 两个字符串的长度介于 1 和 1000 之间。
+
+int update(char* target, int targetIndex, char* source) {
+    int sourceIndex = 0;
+    while (targetIndex < strlen(target) && sourceIndex < strlen(source)) {
+        if (target[targetIndex] == source[sourceIndex]) {
+            targetIndex++;
+            sourceIndex++;
+        }
+        else {
+            sourceIndex++;
+        }
+    }
+    return targetIndex;
+}
+
+int shortestWay(char* source, char* target) {
+    int i = 0, res = 0;
+    while (i < strlen(target)) {
+        res++;
+        int newTargetIndex = update(target, i, source);
+        if (newTargetIndex == i) {
+            return -1;
+        }
+        i = newTargetIndex;
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1057. 校园自行车分配
+在由 2D 网格表示的校园里有 n 位工人（worker）和 m 辆自行车（bike），n <= m。所有工人和自行车的位置都用网格上的 2D 坐标表示。
+
+我们需要为每位工人分配一辆自行车。在所有可用的自行车和工人中，我们选取彼此之间曼哈顿距离最短的工人自行车对  (worker, bike) ，并将其中的自行车分配給工人。如果有多个 (worker, bike) 对之间的曼哈顿距离相同，那么我们选择工人索引最小的那对。类似地，如果有多种不同的分配方法，则选择自行车索引最小的一对。不断重复这一过程，直到所有工人都分配到自行车为止。
+
+给定两点 p1 和 p2 之间的曼哈顿距离为 Manhattan(p1, p2) = |p1.x - p2.x| + |p1.y - p2.y|。
+
+返回长度为 n 的向量 ans，其中 a[i] 是第 i 位工人分配到的自行车的索引（从 0 开始）。
+
+ 
+
+示例 1：
+
+
+
+输入：workers = [[0,0],[2,1]], bikes = [[1,2],[3,3]]
+输出：[1,0]
+解释：
+工人 1 分配到自行车 0，因为他们最接近且不存在冲突，工人 0 分配到自行车 1 。所以输出是 [1,0]。
+示例 2：
+
+
+
+输入：workers = [[0,0],[1,1],[2,0]], bikes = [[1,0],[2,2],[2,1]]
+输出：[0,2,1]
+解释：
+工人 0 首先分配到自行车 0 。工人 1 和工人 2 与自行车 2 距离相同，因此工人 1 分配到自行车 2，工人 2 将分配到自行车 1 。因此输出为 [0,2,1]。
+ 
+
+提示：
+
+0 <= workers[i][j], bikes[i][j] < 1000
+所有工人和自行车的位置都不相同。
+1 <= workers.length <= bikes.length <= 1000
+
+vector<int> assignBikes(vector<vector<int>>& workers, vector<vector<int>>& bikes) {
+    vector<int> ans(workers.size());
+    map<int, vector<pair<int, int>>> distMap;  // worker到bike的距离：工人序号,自行车序号 序号自动排序
+    vector<bool> workerUsed(workers.size(), false);
+    vector<bool> bikeUsed(bikes.size(), false);
+
+    for (int wIdx = 0; wIdx < workers.size(); ++wIdx) {
+        for (int bIdx = 0; bIdx < bikes.size(); ++bIdx) {
+            int d = abs(workers[wIdx][0] - bikes[bIdx][0]) + abs(workers[wIdx][1] - bikes[bIdx][1]);
+            distMap[d].push_back({wIdx, bIdx});
+        }
+    }
+
+    for (auto it = distMap.begin(); it != distMap.end(); ++it) {
+        for (auto p : it->second) {
+            int worker = p.first;
+            int bike = p.second;
+            if (workerUsed[worker] || bikeUsed[bike]) {
+                continue;
+            }
+            ans[worker] = bike;
+            workerUsed[worker] = true;
+            bikeUsed[bike] = true;
+        }
+    }
+    return ans;
+}
+
 ------------------------------------------------------------------------------------
+
+1058. 最小化舍入误差以满足目标
+给定一系列价格 [p1,p2...,pn] 和一个目标 target，将每个价格 pi 舍入为 Roundi(pi) 以使得舍入数组 [Round1(p1),Round2(p2)...,Roundn(pn)] 之和达到给定的目标值 target。每次舍入操作 Roundi(pi) 可以是向下舍 Floor(pi) 也可以是向上入 Ceil(pi)。
+
+如果舍入数组之和无论如何都无法达到目标值 target，就返回 -1。否则，以保留到小数点后三位的字符串格式返回最小的舍入误差，其定义为 Σ |Roundi(pi) - (pi)|（ i 从 1 到 n ）。
+
+ 
+
+示例 1：
+
+输入：prices = ["0.700","2.800","4.900"], target = 8
+输出："1.000"
+解释： 
+使用 Floor，Ceil 和 Ceil 操作得到 (0.7 - 0) + (3 - 2.8) + (5 - 4.9) = 0.7 + 0.2 + 0.1 = 1.0 。
+示例 2：
+
+输入：prices = ["1.500","2.500","3.500"], target = 10
+输出："-1"
+解释：
+达到目标是不可能的。
+ 
+
+提示：
+
+1 <= prices.length <= 500
+表示价格的每个字符串 prices[i] 都代表一个介于 0 和 1000 之间的实数，并且正好有 3 个小数位。
+target 介于 0 和 1000000 之间。
+
+string minimizeError(vector<string>& prices, int target) {
+    vector<int> nums;
+    for (auto p : prices) {
+        target -= stoi(p);
+        int s = stoi(p.substr(p.size() - 3));
+        if (s != 0) {
+            nums.push_back(s);
+        }
+    }
+    if (target > nums.size() || target < 0) {
+        return "-1";
+    }
+    sort(nums.begin(), nums.end(), greater<int>());
+    int delta = 0;
+    for (int i = 0; i < nums.size(); ++i) {
+        if (target > 0) {
+            delta += 1000 - nums[i];
+            --target;
+        } else {
+            delta += nums[i];
+        }
+    }
+    char res[10];
+    sprintf(res, "%.3f", 1.0 * delta / 1000);
+    return string(res);
+}
+
 ------------------------------------------------------------------------------------
+
+1059. 从始点到终点的所有路径
+给定有向图的边 edges，以及该图的始点 source 和目标终点 destination，确定从始点 source 出发的所有路径是否最终结束于目标终点 destination，即：
+
+从始点 source 到目标终点 destination 存在至少一条路径
+如果存在从始点 source 到没有出边的节点的路径，则该节点就是路径终点。
+从始点source到目标终点 destination 可能路径数是有限数字
+当从始点 source 出发的所有路径都可以到达目标终点 destination 时返回 true，否则返回 false。
+
+ 
+
+示例 1：
+
+
+
+输入：n = 3, edges = [[0,1],[0,2]], source = 0, destination = 2
+输出：false
+说明：节点 1 和节点 2 都可以到达，但也会卡在那里。
+示例 2：
+
+
+
+输入：n = 4, edges = [[0,1],[0,3],[1,2],[2,1]], source = 0, destination = 3
+输出：false
+说明：有两种可能：在节点 3 处结束，或是在节点 1 和节点 2 之间无限循环。
+示例 3：
+
+
+
+输入：n = 4, edges = [[0,1],[0,2],[1,3],[2,3]], source = 0, destination = 3
+输出：true
+示例 4：
+
+
+
+输入：n = 3, edges = [[0,1],[1,1],[1,2]], source = 0, destination = 2
+输出：false
+说明：从始点出发的所有路径都在目标终点结束，但存在无限多的路径，如 0-1-2，0-1-1-2，0-1-1-1-2，0-1-1-1-1-2 等。
+示例 5：
+
+
+
+输入：n = 2, edges = [[0,1],[1,1]], source = 0, destination = 1
+输出：false
+说明：在目标节点上存在无限的自环。
+ 
+
+提示：
+
+给定的图中可能带有自环和平行边。
+图中的节点数 n 介于 1 和 10000 之间。
+图中的边数在 0 到 10000 之间。
+0 <= edges.length <= 10000
+edges[i].length == 2
+0 <= source <= n - 1
+0 <= destination <= n - 1
+
+bool leadsToDestination(int n, vector<vector<int>>& edges, int source, int destination) {
+    vector<vector<int>> g(n);
+    for (auto& e : edges) {
+        g[e[0]].push_back(e[1]);
+    }
+    if (g[destination].size() != 0) {
+        return false;
+    }
+    vector<bool> visited(n, false);
+    return dfs(g, visited, source, destination);
+}
+
+bool dfs(const vector<vector<int>>& g, vector<bool>& visited, int src, int dest) {
+    if (g[src].empty()) {
+        return src == dest;
+    }
+    for (auto i : g[src]) {
+        if (visited[i]) {
+            return false;
+        }
+        visited[i] = true;
+        if (!dfs(g, visited, i, dest)) {
+            return false;
+        }
+        visited[i] = false;
+    }
+    return true;
+}
+
 ------------------------------------------------------------------------------------
+
+1060. 有序数组中的缺失元素
+给出一个有序数组 A，数组中的每个数字都是 独一无二的，找出从数组最左边开始的第 K 个缺失数字。
+
+ 
+
+示例 1：
+
+输入：A = [4,7,9,10], K = 1
+输出：5
+解释：
+第一个缺失数字为 5 。
+示例 2：
+
+输入：A = [4,7,9,10], K = 3
+输出：8
+解释： 
+缺失数字有 [5,6,8,...]，因此第三个缺失数字为 8 。
+示例 3：
+
+输入：A = [1,2,4], K = 3
+输出：6
+解释：
+缺失数字有 [3,5,6,7,...]，因此第三个缺失数字为 6 。
+ 
+
+提示：
+
+1 <= A.length <= 50000
+1 <= A[i] <= 1e7
+1 <= K <= 1e8
+
+int missingElement(int* nums, int numsSize, int k){
+    for (int i = 1; i < numsSize; i++) {
+        int loss = nums[i] - nums[i - 1] - 1;
+        if (loss >= k) {  // 缺失的数在num[i]和nums[i - 1]之间
+            return nums[i - 1] + k;
+        } else {
+            k = k - loss;
+        }
+    }
+    
+    return nums[numsSize - 1] + k;
+}
+
 ------------------------------------------------------------------------------------
+
+1061. 按字典序排列最小的等效字符串
+给出长度相同的两个字符串：A 和 B，其中 A[i] 和 B[i] 是一组等价字符。举个例子，如果 A = "abc" 且 B = "cde"，那么就有 'a' == 'c', 'b' == 'd', 'c' == 'e'。
+
+等价字符遵循任何等价关系的一般规则：
+
+自反性：'a' == 'a'
+对称性：'a' == 'b' 则必定有 'b' == 'a'
+传递性：'a' == 'b' 且 'b' == 'c' 就表明 'a' == 'c'
+例如，A 和 B 的等价信息和之前的例子一样，那么 S = "eed", "acd" 或 "aab"，这三个字符串都是等价的，而 "aab" 是 S 的按字典序最小的等价字符串
+
+利用 A 和 B 的等价信息，找出并返回 S 的按字典序排列最小的等价字符串。
+
+ 
+
+示例 1：
+
+输入：A = "parker", B = "morris", S = "parser"
+输出："makkek"
+解释：根据 A 和 B 中的等价信息，我们可以将这些字符分为 [m,p], [a,o], [k,r,s], [e,i] 共 4 组。每组中的字符都是等价的，并按字典序排列。所以答案是 "makkek"。
+示例 2：
+
+输入：A = "hello", B = "world", S = "hold"
+输出："hdld"
+解释：根据 A 和 B 中的等价信息，我们可以将这些字符分为 [h,w], [d,e,o], [l,r] 共 3 组。所以只有 S 中的第二个字符 'o' 变成 'd'，最后答案为 "hdld"。
+示例 3：
+
+输入：A = "leetcode", B = "programs", S = "sourcecode"
+输出："aauaaaaada"
+解释：我们可以把 A 和 B 中的等价字符分为 [a,o,e,r,s,c], [l,p], [g,t] 和 [d,m] 共 4 组，因此 S 中除了 'u' 和 'd' 之外的所有字母都转化成了 'a'，最后答案为 "aauaaaaada"。
+ 
+
+提示：
+
+字符串 A，B 和 S 仅有从 'a' 到 'z' 的小写英文字母组成。
+字符串 A，B 和 S 的长度在 1 到 1000 之间。
+字符串 A 和 B 长度相同。
+
+string smallestEquivalentString(string A, string B, string S) {
+    vector<int> F = vector<int>(26, 0);
+    for (int i = 0; i < 26; ++i) F[i] = i;
+
+    for (int i = 0; i < A.size(); ++i) {
+        unite(F, A[i] - 'a', B[i] - 'a');
+    }
+    string res;
+    for (auto s : S) {
+        res += find(F, s - 'a') + 'a';
+    }
+    return res;
+}
+
+int find(vector<int> &F, int x) {
+    if (F[x] != x) {
+        F[x] = find(F, F[x]);
+    }
+    return F[x];
+}
+
+void unite(vector<int> &F, int x, int y) {
+    int f1 = find(F, x);
+    int f2 = find(F, y);
+    F[f1] = F[f2] = min(f1, f2);
+}
+
 ------------------------------------------------------------------------------------
+
+1062. 最长重复子串
+给定字符串 S，找出最长重复子串的长度。如果不存在重复子串就返回 0。
+
+ 
+
+示例 1：
+
+输入："abcd"
+输出：0
+解释：没有重复子串。
+示例 2：
+
+输入："abbaba"
+输出：2
+解释：最长的重复子串为 "ab" 和 "ba"，每个出现 2 次。
+示例 3：
+
+输入："aabcaabdaab"
+输出：3
+解释：最长的重复子串为 "aab"，出现 3 次。
+示例 4：
+
+输入："aaaaa"
+输出：4
+解释：最长的重复子串为 "aaaa"，出现 2 次。
+ 
+
+提示：
+
+字符串 S 仅包含从 'a' 到 'z' 的小写英文字母。
+1 <= S.length <= 1500
+
+int longestRepeatingSubstring(char *S)
+{
+    char *pos, *start;
+    int result = 0, length = 0;
+
+    if (strlen(S) == 1) {
+        return 0;
+    }
+
+    while (*S != 0) {
+        start = S;
+        pos = start + 1;
+        while (*pos != 0) {
+            if (*start == *pos) {
+                start++;
+                pos++;
+                length++;
+                result = (length > result) ? length : result;
+            } else {
+                start = S;
+                pos = pos - length + 1;
+                length = 0;
+            }
+        }
+        S++;
+        length = 0;
+    }
+    return result;
+}
+
 ------------------------------------------------------------------------------------
+
+1066. 校园自行车分配 II
+在由 2D 网格表示的校园里有 n 位工人（worker）和 m 辆自行车（bike），n <= m。所有工人和自行车的位置都用网格上的 2D 坐标表示。
+
+我们为每一位工人分配一辆专属自行车，使每个工人与其分配到的自行车之间的曼哈顿距离最小化。
+
+p1 和 p2 之间的曼哈顿距离为 Manhattan(p1, p2) = |p1.x - p2.x| + |p1.y - p2.y|。
+
+返回每个工人与分配到的自行车之间的曼哈顿距离的最小可能总和。
+
+ 
+
+示例 1：
+
+
+
+输入：workers = [[0,0],[2,1]], bikes = [[1,2],[3,3]]
+输出：6
+解释：
+自行车 0 分配给工人 0，自行车 1 分配给工人 1 。分配得到的曼哈顿距离都是 3, 所以输出为 6 。
+示例 2：
+
+
+
+输入：workers = [[0,0],[1,1],[2,0]], bikes = [[1,0],[2,2],[2,1]]
+输出：4
+解释：
+先将自行车 0 分配给工人 0，再将自行车 1 分配给工人 1（或工人 2），自行车 2 给工人 2（或工人 1）。如此分配使得曼哈顿距离的总和为 4。
+ 
+
+提示：
+
+0 <= workers[i][0], workers[i][1], bikes[i][0], bikes[i][1] < 1000
+所有工人和自行车的位置都不相同。
+1 <= workers.length <= bikes.length <= 10
+
+int assignBikes(vector<vector<int>>& workers, vector<vector<int>>& bikes) {
+    int n = workers.size();
+    unordered_map<int, int> dp;
+    dp[0] = 0;
+    for (int i = 0; i < n; i++) {
+        unordered_map<int, int> newdp;
+        for (int j = 0; j < bikes.size(); j++) {
+            for (auto p: dp) {
+                if ((p.first & (1 << j)) == 0) {
+                    int newv = p.second + abs(workers[i][0]-bikes[j][0]) + abs(workers[i][1]-bikes[j][1]);
+                    if (newdp.find(p.first | (1 << j)) == newdp.end() || newdp[p.first | (1 << j)] > newv) {
+                        newdp[p.first | (1 << j)] = newv;
+                    }
+                }
+            }
+        }
+        dp = newdp;
+    }
+
+    int res = INT_MAX;
+    for (auto p: dp) {
+        res = min(res, p.second);
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1087. 字母切换
+我们用一个特殊的字符串 S 来表示一份单词列表，之所以能展开成为一个列表，是因为这个字符串 S 中存在一个叫做「选项」的概念：
+
+单词中的每个字母可能只有一个选项或存在多个备选项。如果只有一个选项，那么该字母按原样表示。
+
+如果存在多个选项，就会以花括号包裹来表示这些选项（使它们与其他字母分隔开），例如 "{a,b,c}" 表示 ["a", "b", "c"]。
+
+例子："{a,b,c}d{e,f}" 可以表示单词列表 ["ade", "adf", "bde", "bdf", "cde", "cdf"]。
+
+请你按字典顺序，返回所有以这种方式形成的单词。
+
+ 
+
+示例 1：
+
+输入："{a,b}c{d,e}f"
+输出：["acdf","acef","bcdf","bcef"]
+示例 2：
+
+输入："abcd"
+输出：["abcd"]
+ 
+
+提示：
+
+1 <= S.length <= 50
+你可以假设题目中不存在嵌套的花括号
+在一对连续的花括号（开花括号与闭花括号）之间的所有字母都不会相同
+
+vector<string> expand(string S) {
+    vector<string> tmp;
+    vector<string> res;
+    vector<string> tmp2;
+    bool flag = 0;
+    for (char i : S) {
+        if (i == '{') {
+            flag = 1;
+            tmp.clear();
+        }
+        else if (i == '}') {
+            flag = 0;
+            if (res.empty()) {
+                res = tmp;
+                tmp.clear();
+            }
+            else {
+                for (string a : res) {
+                    for (string b : tmp) {
+                        tmp2.push_back(a + b);
+                    }
+                }
+                res = tmp2;
+                tmp2.clear();
+            }
+        }
+        else if (i != ',') {
+            if (flag) {
+                tmp.push_back(string{i});
+            }
+            else {
+                if (res.empty()) {
+                    if (!tmp.empty()) {
+                        for (string a : tmp) res.push_back(a + i);
+                        tmp.clear();
+                    }
+                    else {
+                        res.push_back(string{i});
+                    }
+                }
+                else {
+                    for (string &a : res) a += i;
+                }
+            }
+        }
+    }
+    sort(res.begin(), res.end());
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1100. 长度为 K 的无重复字符子串
+给你一个字符串 S，找出所有长度为 K 且不含重复字符的子串，请你返回全部满足要求的子串的 数目。
+
+
+示例 1：
+
+输入：S = "havefunonleetcode", K = 5
+输出：6
+解释：
+这里有 6 个满足题意的子串，分别是：'havef','avefu','vefun','efuno','etcod','tcode'。
+示例 2：
+
+输入：S = "home", K = 5
+输出：0
+解释：
+注意：K 可能会大于 S 的长度。在这种情况下，就无法找到任何长度为 K 的子串。
+ 
+
+提示：
+
+1 <= S.length <= 10^4
+S 中的所有字符均为小写英文字母
+1 <= K <= 10^4
+
+int numKLenSubstrNoRepeats(string S, int K) {
+    int n = S.size();
+    vector<int> cnt(26);
+    int res = 0;
+    for(int i = 0, j = 0; i < n; i++){
+        cnt[S[i] - 'a']++;
+        while(cnt[S[i] - 'a'] > 1) {
+            cnt[S[j++]-'a']--;
+        }
+        
+        if(i - j + 1 == K){
+            res++;
+            cnt[S[j++] - 'a']--;
+        }
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1101. 彼此熟识的最早时间
+
+在一个社交圈子当中，有 N 个人。每个人都有一个从 0 到 N-1 唯一的 id 编号。
+
+我们有一份日志列表 logs，其中每条记录都包含一个非负整数的时间戳，以及分属两个人的不同 id，logs[i] = [timestamp, id_A, id_B]。
+
+每条日志标识出两个人成为好友的时间，友谊是相互的：如果 A 和 B 是好友，那么 B 和 A 也是好友。
+
+如果 A 是 B 的好友，或者 A 是 B 的好友的好友，那么就可以认为 A 也与 B 熟识。
+
+返回圈子里所有人之间都熟识的最早时间。如果找不到最早时间，就返回 -1 。
+
+ 
+
+示例：
+
+输入：logs = [[20190101,0,1],[20190104,3,4],[20190107,2,3],[20190211,1,5],[20190224,2,4],[20190301,0,3],[20190312,1,2],[20190322,4,5]], N = 6
+输出：20190301
+解释：
+第一次结交发生在 timestamp = 20190101，0 和 1 成为好友，社交朋友圈如下 [0,1], [2], [3], [4], [5]。
+第二次结交发生在 timestamp = 20190104，3 和 4 成为好友，社交朋友圈如下 [0,1], [2], [3,4], [5].
+第三次结交发生在 timestamp = 20190107，2 和 3 成为好友，社交朋友圈如下 [0,1], [2,3,4], [5].
+第四次结交发生在 timestamp = 20190211，1 和 5 成为好友，社交朋友圈如下 [0,1,5], [2,3,4].
+第五次结交发生在 timestamp = 20190224，2 和 4 已经是好友了。
+第六次结交发生在 timestamp = 20190301，0 和 3 成为好友，大家都互相熟识了。
+ 
+
+提示：
+
+1 <= N <= 100
+1 <= logs.length <= 10^4
+0 <= logs[i][0] <= 10^9
+0 <= logs[i][1], logs[i][2] <= N - 1
+保证 logs[i][0] 中的所有时间戳都不同
+Logs 不一定按某一标准排序
+logs[i][1] != logs[i][2]
+
+class UnionFind{
+public:
+    UnionFind(int N) {
+        count = N;
+        pre.resize(count);
+        for (int i = 0; i < N; ++i) {
+            pre[i] = i;
+        }
+    }    
+    int find(int n) {
+        int son = n;
+        while(n != pre[n]) {
+            n = pre[n];
+        }
+        while(pre[son] != n) {
+            int tmp = pre[son];
+            pre[son] = n;
+            son = tmp;
+        }
+        return n;
+    }    
+    bool join(int a, int b) {
+        int x = find(a);
+        int y = find(b);
+        if (x == y) {
+            return false;
+        }
+        pre[x] = y;
+        --count;
+        return true;
+    }    
+    int count;
+    vector<int> pre;
+};
+
+class Solution {
+public:
+    int earliestAcq(vector<vector<int>>& logs, int N) {
+        sort(logs.begin(), logs.end(),[](const vector<int> &a, const vector<int> &b){ return a[0] < b[0];});
+        UnionFind uf(N);
+        for (int i = 0; i < logs.size(); ++i) {
+            uf.join(logs[i][1],logs[i][2]);
+            if (uf.count == 1) {
+                return logs[i][0];
+            }
+        }
+        return -1;
+    }
+};
+
 ------------------------------------------------------------------------------------
+
+1102. 得分最高的路径
+给你一个 R 行 C 列的整数矩阵 A。矩阵上的路径从 [0,0] 开始，在 [R-1,C-1] 结束。
+
+路径沿四个基本方向（上、下、左、右）展开，从一个已访问单元格移动到任一相邻的未访问单元格。
+
+路径的得分是该路径上的 最小 值。例如，路径 8 →  4 →  5 →  9 的值为 4 。
+
+找出所有路径中得分 最高 的那条路径，返回其 得分。
+
+ 
+
+示例 1：
+
+
+
+输入：[[5,4,5],[1,2,6],[7,4,6]]
+输出：4
+解释： 
+得分最高的路径用黄色突出显示。 
+示例 2：
+
+
+
+输入：[[2,2,1,2,2,2],[1,2,2,2,1,2]]
+输出：2
+示例 3：
+
+
+
+输入：[[3,4,6,3,4],[0,2,1,1,7],[8,8,3,2,7],[3,2,4,9,8],[4,1,2,0,0],[4,6,5,4,3]]
+输出：3
+ 
+
+提示：
+
+1 <= R, C <= 100
+0 <= A[i][j] <= 10^9
+
+struct Point {
+    int x, y, val;
+    Point(int _x, int _y, int _val) : x(_x), y(_y), val(_val) {}
+    bool operator < (const Point& other) const {
+        return this->val < other.val;
+    }
+};
+int dirs[4][2] = {{-1, 0}, {1, 0}, {0, 1}, {0, -1}};
+int maximumMinimumPath(vector<vector<int>>& A) {
+    int R = A.size();
+    int C = A[0].size();
+    vector<vector<int> > visited(R, vector<int>(C, false));
+    visited[0][0] = true;
+    priority_queue<Point> pq;
+    pq.push(Point(0, 0, A[0][0]));
+    int res = min(A[0][0], A[R - 1][C - 1]);
+    while (!pq.empty()) {
+        Point p = pq.top();
+        pq.pop();
+        for (int i = 0; i < 4; ++i) {
+            int r = p.x + dirs[i][0];
+            int c = p.y + dirs[i][1];
+            if (r >= 0 && r < R && c >= 0 && c < C && !visited[r][c]) {
+                res = min(res, p.val);
+                if (r == R - 1 && c == C - 1) return res;
+                visited[r][c] = true;
+                pq.push(Point(r, c, A[r][c]));
+            }
+        }
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1120. 子树的最大平均值
+给你一棵二叉树的根节点 root，找出这棵树的 每一棵 子树的 平均值 中的 最大 值。
+
+子树是树中的任意节点和它的所有后代构成的集合。
+
+树的平均值是树中节点值的总和除以节点数。
+
+ 
+
+示例：
+
+
+
+输入：[5,6,1]
+输出：6.00000
+解释： 
+以 value = 5 的节点作为子树的根节点，得到的平均值为 (5 + 6 + 1) / 3 = 4。
+以 value = 6 的节点作为子树的根节点，得到的平均值为 6 / 1 = 6。
+以 value = 1 的节点作为子树的根节点，得到的平均值为 1 / 1 = 1。
+所以答案取最大值 6。
+ 
+
+提示：
+
+树中的节点数介于 1 到 5000之间。
+每个节点的值介于 0 到 100000 之间。
+如果结果与标准答案的误差不超过 10^-5，那么该结果将被视为正确答案。
+
+pair<int, int> helper(TreeNode* root, double& res) {
+    if (root == NULL) {
+        return {0, 0};
+    }
+    auto pl = helper(root->left, res);
+    auto pr = helper(root->right, res);
+    int count = pl.first + pr.first + 1;
+    int sum = pl.second + pr.second + root->val;
+    res = max(res, 1.0 * sum / count);
+    return {count, sum};
+}
+double maximumAverageSubtree(TreeNode* root) {
+    double res = 0;
+    helper(root, res);
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1135. 最低成本联通所有城市
+想象一下你是个城市基建规划者，地图上有 N 座城市，它们按以 1 到 N 的次序编号。
+
+给你一些可连接的选项 conections，其中每个选项 conections[i] = [city1, city2, cost] 表示将城市 city1 和城市 city2 连接所要的成本。（连接是双向的，也就是说城市 city1 和城市 city2 相连也同样意味着城市 city2 和城市 city1 相连）。
+
+返回使得每对城市间都存在将它们连接在一起的连通路径（可能长度为 1 的）最小成本。该最小成本应该是所用全部连接代价的综合。如果根据已知条件无法完成该项任务，则请你返回 -1。
+
+ 
+
+示例 1：
+
+
+
+输入：N = 3, conections = [[1,2,5],[1,3,6],[2,3,1]]
+输出：6
+解释：
+选出任意 2 条边都可以连接所有城市，我们从中选取成本最小的 2 条。
+示例 2：
+
+
+
+输入：N = 4, conections = [[1,2,3],[3,4,4]]
+输出：-1
+解释： 
+即使连通所有的边，也无法连接所有城市。
+ 
+
+提示：
+
+1 <= N <= 10000
+1 <= conections.length <= 10000
+1 <= conections[i][0], conections[i][1] <= N
+0 <= conections[i][2] <= 10^5
+conections[i][0] != conections[i][1]
+
+// 最小生成树
+static bool cmp(vector<int> & a,vector<int> & b) {
+    return a[2] < b[2];
+}
+
+int find(vector<int> & f,int x) {
+    while(x != f[x]) {
+        x = f[x];
+    }
+    return x;
+}
+
+bool uni(vector<int> &f, int x, int y) {
+    int x1 = find(f, x);
+    int y1 = find(f, y);
+    f[x1] = y1;
+    return true;
+}
+
+int minimumCost(int N, vector<vector<int>> &conections) {
+    int ans = 0;
+    int count = 0;
+    vector<int> father(N + 1,0);
+    
+    sort(conections.begin(), conections.end(), cmp);
+    for (int i = 0; i <= N; i++) {
+        father[i] = i;
+    }        
+    for (auto conect : conections) {
+        if (find(father, conect[0]) != find(father, conect[1])) {
+            count++;
+            ans += conect[2];
+            uni(father, conect[0], conect[1]);
+            if (count == N - 1) {
+                return ans;
+            }
+        }
+    }        
+    return -1;
+}
+
+
 ------------------------------------------------------------------------------------
+
+1151. 最少交换次数来组合所有的 1
+给出一个二进制数组 data，你需要通过交换位置，将数组中 任何位置 上的 1 组合到一起，并返回所有可能中所需 最少的交换次数。
+
+ 
+
+示例 1：
+
+输入：[1,0,1,0,1]
+输出：1
+解释： 
+有三种可能的方法可以把所有的 1 组合在一起：
+[1,1,1,0,0]，交换 1 次；
+[0,1,1,1,0]，交换 2 次；
+[0,0,1,1,1]，交换 1 次。
+所以最少的交换次数为 1。
+示例 2：
+
+输入：[0,0,0,1,0]
+输出：0
+解释： 
+由于数组中只有一个 1，所以不需要交换。
+示例 3：
+
+输入：[1,0,1,0,1,0,0,1,1,0,1]
+输出：3
+解释：
+交换 3 次，一种可行的只用 3 次交换的解决方案是 [0,0,0,0,0,1,1,1,1,1,1]。
+ 
+
+提示：
+
+1 <= data.length <= 10^5
+0 <= data[i] <= 1
+
+int minSwaps(vector<int>& data) {
+    int n = data.size();
+    int ans = n;
+    int one = 0;
+    int count = 0;
+    
+    for(auto d : data) {
+        if(d == 1) {
+            count++;
+        }
+    }
+    
+    if(count <= 1) {
+        return 0;
+    }
+    
+    for(int i = 0;i < n; i++) {
+        if(data[i] == 1) {
+            one++;
+        }
+        if(i >= count - 1) {
+            ans = min(ans, count - one);
+            one = one - (data[i - count + 1] == 1 ? 1 : 0);
+        }
+    }        
+    return ans;
+}
+
 ------------------------------------------------------------------------------------
+
+1152. 用户网站访问行为分析
+为了评估某网站的用户转化率，我们需要对用户的访问行为进行分析，并建立用户行为模型。日志文件中已经记录了用户名、访问时间 以及 页面路径。
+
+为了方便分析，日志文件中的 N 条记录已经被解析成三个长度相同且长度都为 N 的数组，分别是：用户名 username，访问时间 timestamp 和 页面路径 website。第 i 条记录意味着用户名是 username[i] 的用户在 timestamp[i] 的时候访问了路径为 website[i] 的页面。
+
+我们需要找到用户访问网站时的 『共性行为路径』，也就是有最多的用户都 至少按某种次序访问过一次 的三个页面路径。需要注意的是，用户 可能不是连续访问 这三个路径的。
+
+『共性行为路径』是一个 长度为 3 的页面路径列表，列表中的路径 不必不同，并且按照访问时间的先后升序排列。
+
+如果有多个满足要求的答案，那么就请返回按字典序排列最小的那个。（页面路径列表 X 按字典序小于 Y 的前提条件是：X[0] < Y[0] 或 X[0] == Y[0] 且 (X[1] < Y[1] 或 X[1] == Y[1] 且 X[2] < Y[2])）
+
+题目保证一个用户会至少访问 3 个路径一致的页面，并且一个用户不会在同一时间访问两个路径不同的页面。
+
+ 
+
+示例：
+
+输入：username = ["joe","joe","joe","james","james","james","james","mary","mary","mary"], timestamp = [1,2,3,4,5,6,7,8,9,10], website = ["home","about","career","home","cart","maps","home","home","about","career"]
+输出：["home","about","career"]
+解释：
+由示例输入得到的记录如下：
+["joe", 1, "home"]
+["joe", 2, "about"]
+["joe", 3, "career"]
+["james", 4, "home"]
+["james", 5, "cart"]
+["james", 6, "maps"]
+["james", 7, "home"]
+["mary", 8, "home"]
+["mary", 9, "about"]
+["mary", 10, "career"]
+有 2 个用户至少访问过一次 ("home", "about", "career")。
+有 1 个用户至少访问过一次 ("home", "cart", "maps")。
+有 1 个用户至少访问过一次 ("home", "cart", "home")。
+有 1 个用户至少访问过一次 ("home", "maps", "home")。
+有 1 个用户至少访问过一次 ("cart", "maps", "home")。
+ 
+
+提示：
+
+3 <= N = username.length = timestamp.length = website.length <= 50
+1 <= username[i].length <= 10
+0 <= timestamp[i] <= 10^9
+1 <= website[i].length <= 10
+username[i] 和 website[i] 都只含小写字符
+
+vector<string> mostVisitedPattern(vector<string>& username, vector<int>& timestamp, vector<string>& website) {
+    // 第一步 排序并统计所有网站名称 建立双向映射关系
+    vector<string> cp = website;
+    sort(cp.begin(), cp.end());
+    unordered_map<string, char> nameMap;
+    unordered_map<char, string> id2Name;
+    char count = 0;
+    for (string& str : cp) {
+        if (!nameMap.count(str)) {
+            nameMap[str] = count;
+            id2Name[count] = str;
+            ++count;
+        }
+    }
+
+    // 第二步 提取每一个用户各自的 时间-网站/序号对 并按照时间排序
+    unordered_map<string, vector<pair<int, char>>> data;
+    for (int i = 0; i < username.size(); ++i)
+        data[username[i]].push_back({ timestamp[i],nameMap[website[i]] });
+    for (pair<string, vector<pair<int, char>>> p : data) {
+        sort(p.second.begin(), p.second.end(), [](pair<int, char>& a, pair<int, char>& b) {return a.first < b.first; });
+        data[p.first] = p.second;
+    }
+
+    // 第三步 统计三元素组合样式的出现频率 由于网站名已经转成索引 把三个索引串成字符串即可
+    unordered_map<string, int> countMap;
+    for (pair<string, vector<pair<int, char>>> p : data) {
+        unordered_set<string> tmpSet;
+        for (int i = 0; i < p.second.size(); ++i)
+        for (int j = i + 1; j < p.second.size(); ++j)
+            for (int k = j + 1; k < p.second.size(); ++k)
+            tmpSet.insert({ p.second[i].second,p.second[j].second,p.second[k].second });
+        for (string str : tmpSet)
+        ++countMap[str];
+    }
+
+    // 第四步 提取每一个三元素组合及其出现频率 排序找到频率最大+字典序最小
+    vector<pair<string, int>> vec;
+    for (pair<string, int> p : countMap) {
+        vec.push_back(p);
+    }
+    sort(vec.begin(), vec.end(), [](pair<string, int>& a, pair<string, int>& b) {
+        return a.second == b.second ? a.first < b.first : a.second > b.second;});
+
+    // 第五步 提取排序后最前面的三元素组合 输出成结果
+    vector<string> result;
+    string res = vec.front().first;
+    for (char& c : res) {
+        result.push_back(id2Name[c]);
+    }
+    return result;
+}
+
 ------------------------------------------------------------------------------------
+
+1166. 设计文件系统
+你需要设计一个能提供下面两个函数的文件系统：
+
+create(path, value): 创建一个新的路径，并尽可能将值 value 与路径 path 关联，然后返回 True。如果路径已经存在或者路径的父路径不存在，则返回 False。
+get(path): 返回与路径关联的值。如果路径不存在，则返回 -1。
+“路径” 是由一个或多个符合下述格式的字符串连接起来形成的：在 / 后跟着一个或多个小写英文字母。
+
+例如 /leetcode 和 /leetcode/problems 都是有效的路径，但空字符串和 / 不是有效的路径。
+
+好了，接下来就请你来实现这两个函数吧！（请参考示例以获得更多信息）
+
+ 
+
+示例 1：
+
+输入： 
+["FileSystem","create","get"]
+[[],["/a",1],["/a"]]
+输出： 
+[null,true,1]
+解释： 
+FileSystem fileSystem = new FileSystem();
+
+fileSystem.create("/a", 1); // 返回 true
+fileSystem.get("/a"); // 返回 1
+示例 2：
+
+输入： 
+["FileSystem","create","create","get","create","get"]
+[[],["/leet",1],["/leet/code",2],["/leet/code"],["/c/d",1],["/c"]]
+输出： 
+[null,true,true,2,false,-1]
+解释：
+FileSystem fileSystem = new FileSystem();
+
+fileSystem.create("/leet", 1); // 返回 true
+fileSystem.create("/leet/code", 2); // 返回 true
+fileSystem.get("/leet/code"); // 返回 2
+fileSystem.create("/c/d", 1); // 返回 false 因为父路径 "/c" 不存在。
+fileSystem.get("/c"); // 返回 -1 因为该路径不存在。
+ 
+
+提示：
+
+对两个函数的调用次数加起来小于等于 10^4
+2 <= path.length <= 100
+1 <= value <= 10^9
+
+class FileSystem {
+public:
+    FileSystem() {
+    }
+    
+    bool createPath(string path, int value) {
+        string parent;
+        if (mp.find(path) != mp.end()) {
+            return false;
+        }
+        for(int i = path.length() - 1; i >= 0; i--) {
+            if(path[i] == '/'){
+                parent = path.substr(0, i);
+                break;
+            }
+        }
+        if (parent != "" && (mp.find(parent) == mp.end())) {
+            return false;
+        }
+        mp[path] = value;
+        return true;
+    }
+    
+    int get(string path) {
+        if(path.size() == 0) {
+            return -1;
+        }
+        if(mp.find(path) != mp.end()) {
+            return mp[path];
+        }
+        return -1;
+    }
+
+private:
+    map<string,int> mp;
+};
+
+/**
+ * Your FileSystem object will be instantiated and called as such:
+ * FileSystem* obj = new FileSystem();
+ * bool param_1 = obj->createPath(path,value);
+ * int param_2 = obj->get(path);
+ */
+
 ------------------------------------------------------------------------------------
+
+1167. 连接棒材的最低费用
+为了装修新房，你需要加工一些长度为正整数的棒材 sticks。
+
+如果要将长度分别为 X 和 Y 的两根棒材连接在一起，你需要支付 X + Y 的费用。 由于施工需要，你必须将所有棒材连接成一根。
+
+返回你把所有棒材 sticks 连成一根所需要的最低费用。注意你可以任意选择棒材连接的顺序。
+
+ 
+
+示例 1：
+
+输入：sticks = [2,4,3]
+输出：14
+解释：先将 2 和 3 连接成 5，花费 5；再将 5 和 4 连接成 9；总花费为 14。
+示例 2：
+
+输入：sticks = [1,8,3,5]
+输出：30
+ 
+
+提示：
+
+1 <= sticks.length <= 10^4
+1 <= sticks[i] <= 10^4
+
+int connectSticks(vector<int>& sticks) {
+    priority_queue<int, vector<int>, greater<int> > q; // 小根堆
+    for (auto stick : sticks) {
+        q.push(stick);
+    }
+    int res = 0;
+    int cost = 0;
+    while (!q.empty()) {
+        cost = q.top();
+        q.pop();
+        if (q.empty()) {
+            break;
+        }
+        else {
+            cost += q.top();
+            q.pop();
+            q.push(cost);
+            res += cost;
+        }
+    }
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1181. 前后拼接
+给你一个「短语」列表 phrases，请你帮忙按规则生成拼接后的「新短语」列表。
+
+「短语」（phrase）是仅由小写英文字母和空格组成的字符串。「短语」的开头和结尾都不会出现空格，「短语」中的空格不会连续出现。
+
+「前后拼接」（Before and After puzzles）是合并两个「短语」形成「新短语」的方法。我们规定拼接时，第一个短语的最后一个单词 和 第二个短语的第一个单词 必须相同。
+
+返回每两个「短语」 phrases[i] 和 phrases[j]（i != j）进行「前后拼接」得到的「新短语」。
+
+注意，两个「短语」拼接时的顺序也很重要，我们需要同时考虑这两个「短语」。另外，同一个「短语」可以多次参与拼接，但「新短语」不能再参与拼接。
+
+请你按字典序排列并返回「新短语」列表，列表中的字符串应该是 不重复的 。
+
+ 
+
+示例 1：
+
+输入：phrases = ["writing code","code rocks"]
+输出：["writing code rocks"]
+示例 2：
+
+输入：phrases = ["mission statement",
+                "a quick bite to eat",
+                "a chip off the old block",
+                "chocolate bar",
+                "mission impossible",
+                "a man on a mission",
+                "block party",
+                "eat my words",
+                "bar of soap"]
+输出：["a chip off the old block party",
+      "a man on a mission impossible",
+      "a man on a mission statement",
+      "a quick bite to eat my words",
+      "chocolate bar of soap"]
+示例 3：
+
+输入：phrases = ["a","b","a"]
+输出：["a"]
+ 
+
+提示：
+
+1 <= phrases.length <= 100
+1 <= phrases[i].length <= 100
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+struct nodemap {
+    char *beg;
+    char *end;
+    char *sub;    
+};
+void GetHeadWord(char* in, char *out)
+{
+    int len = strlen(in);
+    int i = 0;
+    while (i < len && in[i] != ' ') {
+        out[i] = in[i];
+        i++;
+    }
+}
+void GetTailWord(char* in, char *out)
+{
+    char tmp[100] = {'\0'};
+    int len = strlen(in);
+    int i = len - 1;
+    int cnt = 0;
+    while (i >= 0 && in[i] != ' ') {
+        tmp[cnt] = in[i];
+        i--;
+        cnt++;
+    }
+    for (int k = 0; k < cnt; k++) {
+        out[k] = tmp[cnt - 1 - k];
+    }
+}
+void GetSubWord(char* in, char *out, int begIdx)
+{
+    int len = strlen(in);
+    int i = begIdx;
+    int cnt = 0;
+    while (i < len) {
+        out[cnt] = in[i];
+        i++;
+        cnt++;
+    }
+}
+int isExist(char **res, int cnt, char *s)
+{
+    for (int i = 0; i < cnt; i++) {
+        if ((strlen(res[i]) == strlen(s)) && (strncmp(res[i], s, strlen(s)) == 0)) {
+            return 1;
+        }
+    }
+    return 0;
+}
+int cmp(const void *arg1, const void *arg2)
+{
+    char *a = *(char**)arg1;
+    char *b = *(char**)arg2;
+    return strcmp(a, b);
+}
+char ** beforeAndAfterPuzzles(char ** phrases, int phrasesSize, int* returnSize){
+    struct nodemap *strMap = malloc(100 * sizeof(struct nodemap));
+    char *tmp = calloc(100, sizeof(char));
+    for (int i = 0; i < phrasesSize; i++) {
+        memset(tmp, 0, 100);
+        GetHeadWord(phrases[i], tmp);
+        int tmpLen = strlen(tmp);
+        int begIdx = tmpLen;
+        strMap[i].beg = (char*)calloc(tmpLen + 1, sizeof(char));
+        strncpy(strMap[i].beg, tmp, tmpLen);
+        memset(tmp, 0, 100);
+        GetTailWord(phrases[i], tmp);        
+        tmpLen = strlen(tmp);
+        strMap[i].end = (char*)calloc(tmpLen + 1, sizeof(char));
+        strncpy(strMap[i].end, tmp, tmpLen);
+        memset(tmp, 0, 100);
+        GetSubWord(phrases[i], tmp, begIdx);        
+        tmpLen = strlen(tmp);
+        strMap[i].sub = (char*)calloc(tmpLen + 1, sizeof(char));
+        strncpy(strMap[i].sub, tmp, tmpLen);
+    }
+    char **res = malloc(10000 * sizeof(char*));
+    int resCnt = 0;
+    char *s = (char*)calloc(10240, sizeof(char));
+    for(int i = 0; i < phrasesSize; i++) {
+        for(int j = 0; j < phrasesSize; j++) {
+            if ((strlen(strMap[i].end) == strlen(strMap[j].beg)) && (strncmp(strMap[i].end, strMap[j].beg, strlen(strMap[i].end)) == 0) && (i != j)) {
+                memset(s, 0, 10240);
+                strncat(s, phrases[i], strlen(phrases[i]));
+                strncat(&(s[strlen(phrases[i])]), strMap[j].sub, strlen(strMap[j].sub));
+                if (isExist(res, resCnt, s) == 0) {
+                    res[resCnt] = (char*)calloc(strlen(s) + 1, sizeof(char));
+                    strncpy(res[resCnt], s, strlen(s));
+                    resCnt++;
+                }
+            }
+        }
+    }
+    free(tmp);
+    free(s);
+    qsort(res, resCnt, sizeof(char*), cmp);
+    *returnSize = resCnt;
+    return res;
+}
+
 ------------------------------------------------------------------------------------
+
+1182. 与目标颜色间的最短距离
+给你一个数组 colors，里面有  1、2、 3 三种颜色。
+
+我们需要在 colors 上进行一些查询操作 queries，其中每个待查项都由两个整数 i 和 c 组成。
+
+现在请你帮忙设计一个算法，查找从索引 i 到具有目标颜色 c 的元素之间的最短距离。
+
+如果不存在解决方案，请返回 -1。
+
+ 
+
+示例 1：
+
+输入：colors = [1,1,2,1,3,2,2,3,3], queries = [[1,3],[2,2],[6,1]]
+输出：[3,0,3]
+解释： 
+距离索引 1 最近的颜色 3 位于索引 4（距离为 3）。
+距离索引 2 最近的颜色 2 就是它自己（距离为 0）。
+距离索引 6 最近的颜色 1 位于索引 3（距离为 3）。
+示例 2：
+
+输入：colors = [1,2], queries = [[0,3]]
+输出：[-1]
+解释：colors 中没有颜色 3。
+ 
+
+提示：
+
+1 <= colors.length <= 5*10^4
+1 <= colors[i] <= 3
+1 <= queries.length <= 5*10^4
+queries[i].length == 2
+0 <= queries[i][0] < colors.length
+1 <= queries[i][1] <= 3
+
+class Solution {
+    struct dis{
+        int val[4] = { INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX };
+    };
+    
+public:
+    vector<int> shortestDistanceColor(vector<int>& colors, vector<vector<int>>& queries) {
+        int n = colors.size();
+        vector<dis> d(n);
+        for(int i = 1; i <= 3; i++){
+            stack<int> s;
+            for(int j = n - 1; j >= 0; j--){
+                if(colors[j] == i){
+                    s.push(j);
+                }
+                if(!s.empty())
+                    d[j].val[i] = min(d[j].val[i], s.top() - j);
+            }
+            stack<int> s1;
+            for(int j = 0; j < n; j++){
+                if(colors[j] == i){
+                    s1.push(j);
+                }
+                if(!s1.empty())
+                    d[j].val[i] = min(d[j].val[i], j - s1.top());
+            }
+        }
+        vector<int> res;
+        for(auto i : queries){
+            int val = d[i[0]].val[i[1]];
+            if(val == INT32_MAX)
+                val = -1;
+            res.push_back(val);
+        }
+        return res;
+    }
+};
+
 ------------------------------------------------------------------------------------
+
+1197. 进击的骑士
+一个坐标可以从 -infinity 延伸到 +infinity 的 无限大的 棋盘上，你的 骑士 驻扎在坐标为 [0, 0] 的方格里。
+
+骑士的走法和中国象棋中的马相似，走 “日” 字：即先向左（或右）走 1 格，再向上（或下）走 2 格；或先向左（或右）走 2 格，再向上（或下）走 1 格。
+
+每次移动，他都可以按图示八个方向之一前进。
+
+
+
+现在，骑士需要前去征服坐标为 [x, y] 的部落，请你为他规划路线。
+
+最后返回所需的最小移动次数即可。本题确保答案是一定存在的。
+
+ 
+
+示例 1：
+
+输入：x = 2, y = 1
+输出：1
+解释：[0, 0] → [2, 1]
+示例 2：
+
+输入：x = 5, y = 5
+输出：4
+解释：[0, 0] → [2, 1] → [4, 2] → [3, 4] → [5, 5]
+ 
+
+提示：
+
+|x| + |y| <= 300
+
+#define MAX_SIZE1 1000
+#define MAX_SIZE 1000000
+int minKnightMoves(int x, int y){
+    int book[MAX_SIZE1][MAX_SIZE1] = {0};
+    int que[MAX_SIZE][3] = {0};
+    int head = 0;
+    int rear = 0;
+    x = abs(x);
+    y = abs(y);
+    if (x == 1 && y == 1) {
+        return 2;
+    }
+    que[rear][0] = 0;
+    que[rear][1] = 0;
+    que[rear][2] = 0;
+    int i = 0;
+    int j = 0;
+    rear++;
+    
+    int direct[] = {-2, -1, 2, 1, 2, -1, -2, 1, -2};
+    while (head < rear) {
+        i = que[head][0];
+        j = que[head][1];
+        int step = que[head][2];
+        if (i < 0 || j < 0 || book[i][j] == 1) {
+            head++;
+            continue;
+        }
+        book[i][j] = 1;
+        if (i == x && j == y) {
+            return step;
+        }
+        for (int k = 0; k < 8; k++) {
+            int m = i + direct[k];
+            int n = j + direct[k + 1];        
+            que[rear][0] = m;
+            que[rear][1] = n;
+            que[rear][2] = step + 1;
+            rear++;
+        }
+        head++;
+    }
+    return 0;
+}
+
+
 ------------------------------------------------------------------------------------
+
+1214. 查找两棵二叉搜索树之和
+给出两棵二叉搜索树，请你从两棵树中各找出一个节点，使得这两个节点的值之和等于目标值 Target。
+
+如果可以找到返回 True，否则返回 False。
+
+ 
+
+示例 1：
+
+
+
+输入：root1 = [2,1,4], root2 = [1,0,3], target = 5
+输出：true
+解释：2 加 3 和为 5 。
+示例 2：
+
+
+
+输入：root1 = [0,-10,10], root2 = [5,1,7,0,2], target = 18
+输出：false
+ 
+
+提示：
+
+每棵树上最多有 5000 个节点。
+-10^9 <= target, node.val <= 10^9
+
+class Solution {
+public:
+    bool twoSumBSTs(TreeNode* root1, TreeNode* root2, int target) {
+        if(root1 == NULL || root2 == NULL)
+            return false;
+        stack<TreeNode*> left,right;
+        getLeft(root1,left);
+        getRight(root2,right);
+        TreeNode *l = left.top();  // 左指针
+        left.pop();
+        TreeNode *r = right.top();  // 右指针
+        right.pop();
+        while(true){
+            int t = l->val + r->val;
+            if(t == target)  // 找到
+                return true;
+            if(t > target){
+                getRight(r->left, right);
+                if(right.empty())
+                    break;
+                r = right.top();//右指针左移
+                right.pop();
+            }
+            else if(t < target){
+                getLeft(l->right, left);
+                if(left.empty())
+                    break;
+                l = left.top();//左指针右移
+                left.pop();
+            }
+        }
+        return false;
+    }
+
+    void getLeft(TreeNode* root, stack<TreeNode*> &left) {  // 将左边压入栈
+        while(root) {
+            left.push(root);
+            root = root->left;
+        }
+    }
+
+    void getRight(TreeNode* root, stack<TreeNode*> &right) {  // 将右边压入栈
+        while(root) {
+            right.push(root);
+            root = root->right;
+        }
+    }
+};
+
 ------------------------------------------------------------------------------------
+
+1215. 步进数
+如果一个整数上的每一位数字与其相邻位上的数字的绝对差都是 1，那么这个数就是一个「步进数」。
+
+例如，321 是一个步进数，而 421 不是。
+
+给你两个整数，low 和 high，请你找出在 [low, high] 范围内的所有步进数，并返回 排序后 的结果。
+
+ 
+
+示例：
+
+输入：low = 0, high = 21
+输出：[0,1,2,3,4,5,6,7,8,9,10,12,21]
+ 
+
+提示：
+
+0 <= low <= high <= 2 * 10^9
+
+int* result;
+int gIndex;
+
+void sort(int* arr, int len) {
+    for (int i = 0; i < len; i++) {
+        for (int j = i; j < len; j++) {
+            if (arr[j] < arr[i]) {
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+
+void dfs(int low, int high, long value, int lastBit){
+    if (value >= low && value <= high) {
+        result[gIndex] = value;
+        gIndex++;
+    }
+    else if(value > high) { // 超出就退出，深搜到底端了
+        return;
+    }
+
+    if (lastBit == 0) {
+        dfs(low,high,value*10 + lastBit + 1,lastBit + 1);
+    }
+    else if(lastBit == 9) {
+        dfs(low,high,value*10 + lastBit - 1,lastBit - 1);
+    }
+    else {
+        dfs(low,high,value*10 + lastBit - 1,lastBit - 1);
+        dfs(low,high,value*10 + lastBit + 1,lastBit + 1);
+    }
+
+}
+
+int* countSteppingNumbers(int low, int high, int* returnSize){
+    result = (int*)malloc(sizeof(int) * 10000);
+    gIndex = 0;
+
+    //0单独处理
+    if(0 >= low && 0 <= high){
+        result[gIndex] = 0;
+        gIndex++;
+    }
+    //1 - 9 开始深搜
+    for(int i = 1; i <=9; i++){
+        dfs(low,high,i,i);
+    }
+    *returnSize = gIndex;
+    sort(result,gIndex);
+    return result;
+}
+
 ------------------------------------------------------------------------------------
+
+1229. 安排会议日程
+你是一名行政助理，手里有两位客户的空闲时间表：slots1 和 slots2，以及会议的预计持续时间 duration，请你为他们安排合适的会议时间。
+
+「会议时间」是两位客户都有空参加，并且持续时间能够满足预计时间 duration 的 最早的时间间隔。
+
+如果没有满足要求的会议时间，就请返回一个 空数组。
+
+ 
+
+「空闲时间」的格式是 [start, end]，由开始时间 start 和结束时间 end 组成，表示从 start 开始，到 end 结束。 
+
+题目保证数据有效：同一个人的空闲时间不会出现交叠的情况，也就是说，对于同一个人的两个空闲时间 [start1, end1] 和 [start2, end2]，要么 start1 > end2，要么 start2 > end1。
+
+ 
+
+示例 1：
+
+输入：slots1 = [[10,50],[60,120],[140,210]], slots2 = [[0,15],[60,70]], duration = 8
+输出：[60,68]
+示例 2：
+
+输入：slots1 = [[10,50],[60,120],[140,210]], slots2 = [[0,15],[60,70]], duration = 12
+输出：[]
+ 
+
+提示：
+
+1 <= slots1.length, slots2.length <= 10^4
+slots1[i].length, slots2[i].length == 2
+slots1[i][0] < slots1[i][1]
+slots2[i][0] < slots2[i][1]
+0 <= slots1[i][j], slots2[i][j] <= 10^9
+1 <= duration <= 10^6 
+
+struct Time {
+    int begin;
+    int end;
+};
+#define MAX_SIZE 200000
+int Comp(void *a, void *b) {
+    struct Time *x = a;
+    struct Time *y = b;
+    return (*x).begin - (*y).begin;
+}
+int* minAvailableDuration(int** slots1, int slots1Size, int* slots1ColSize, int** slots2, int slots2Size, int* slots2ColSize, int duration, int* returnSize){
+    struct Time time[MAX_SIZE] = {0};
+    for (int i = 0; i < slots1Size; i++) {
+        time[i].begin = slots1[i][0];
+        time[i].end = slots1[i][1];
+    }
+    for (int i = 0; i < slots2Size; i++) {
+        time[i + slots1Size].begin = slots2[i][0];
+        time[i + slots1Size].end = slots2[i][1];
+    }
+    int size = slots1Size + slots2Size;
+    qsort(time, size, sizeof(struct Time), Comp);
+    int l = 0;
+    int r = l + 1;
+    while (l < r && r < size) {
+        if (time[l].end - time[r].begin < duration) {
+            l = r;
+            r++;
+        } else if (time[r].end - time[r].begin < duration) {
+            r++;
+        } else {
+            break;
+        }
+    }
+    if (r == size) {
+        *returnSize = 0;
+        return NULL;
+    }
+    int *result = (int*)malloc(2 * sizeof(int));
+    if (result == NULL) {
+        return NULL;
+    }
+    memset(result, 0, 2 * sizeof(int));
+    *returnSize = 2;
+    result[0] = time[r].begin;
+    result[1] = time[r].begin + duration;
+    return result;
+}
+
 ------------------------------------------------------------------------------------
+
+1230. 抛掷硬币
+有一些不规则的硬币。在这些硬币中，prob[i] 表示第 i 枚硬币正面朝上的概率。
+
+请对每一枚硬币抛掷 一次，然后返回正面朝上的硬币数等于 target 的概率。
+
+ 
+
+示例 1：
+
+输入：prob = [0.4], target = 1
+输出：0.40000
+示例 2：
+
+输入：prob = [0.5,0.5,0.5,0.5,0.5], target = 0
+输出：0.03125
+ 
+
+提示：
+
+1 <= prob.length <= 1000
+0 <= prob[i] <= 1
+0 <= target <= prob.length
+如果答案与标准答案的误差在 10^-5 内，则被视为正确答案。
+
+class Solution {
+public:
+    double probabilityOfHeads(vector<double>& pb, int tt) {
+        int n = pb.size();
+        double dp[tt + 1] = {};
+        dp[0] = 1.0;
+        for(int j = 0; j < n; ++j)
+            for(int i = min(tt, j + 1); ~i; --i)
+                dp[i] = (i ? dp[i - 1] : 0) * pb[j] + dp[i] * (1 - pb[j]);
+        return dp[tt];
+    }
+};
+
 ------------------------------------------------------------------------------------
+
+1236. Web Crawler
+Given a url startUrl and an interface HtmlParser, implement a web crawler to crawl all links that are under the same hostname as startUrl. 
+
+Return all urls obtained by your web crawler in any order.
+
+Your crawler should:
+
+Start from the page: startUrl
+Call HtmlParser.getUrls(url) to get all urls from a webpage of given url.
+Do not crawl the same link twice.
+Explore only the links that are under the same hostname as startUrl.
+
+
+As shown in the example url above, the hostname is example.org. For simplicity sake, you may assume all urls use http protocol without any port specified. For example, the urls http://leetcode.com/problems and http://leetcode.com/contest are under the same hostname, while urls http://example.org/test and http://example.com/abc are not under the same hostname.
+
+The HtmlParser interface is defined as such: 
+
+interface HtmlParser {
+  // Return a list of all urls from a webpage of given url.
+  public List<String> getUrls(String url);
+}
+Below are two examples explaining the functionality of the problem, for custom testing purposes you'll have three variables urls, edges and startUrl. Notice that you will only have access to startUrl in your code, while urls and edges are not directly accessible to you in code.
+
+ 
+
+Example 1:
+
+
+
+Input:
+urls = [
+  "http://news.yahoo.com",
+  "http://news.yahoo.com/news",
+  "http://news.yahoo.com/news/topics/",
+  "http://news.google.com",
+  "http://news.yahoo.com/us"
+]
+edges = [[2,0],[2,1],[3,2],[3,1],[0,4]]
+startUrl = "http://news.yahoo.com/news/topics/"
+Output: [
+  "http://news.yahoo.com",
+  "http://news.yahoo.com/news",
+  "http://news.yahoo.com/news/topics/",
+  "http://news.yahoo.com/us"
+]
+Example 2:
+
+
+
+Input: 
+urls = [
+  "http://news.yahoo.com",
+  "http://news.yahoo.com/news",
+  "http://news.yahoo.com/news/topics/",
+  "http://news.google.com"
+]
+edges = [[0,2],[2,1],[3,2],[3,1],[3,0]]
+startUrl = "http://news.google.com"
+Output: ["http://news.google.com"]
+Explanation: The startUrl links to all other pages that do not share the same hostname.
+ 
+
+Constraints:
+
+1 <= urls.length <= 1000
+1 <= urls[i].length <= 300
+startUrl is one of the urls.
+Hostname label must be from 1 to 63 characters long, including the dots, may contain only the ASCII letters from 'a' to 'z', digits  from '0' to '9' and the hyphen-minus character ('-').
+The hostname may not start or end with the hyphen-minus character ('-'). 
+See:  https://en.wikipedia.org/wiki/Hostname#Restrictions_on_valid_hostnames
+You may assume there're no duplicates in url library.
+
+/**
+ * // This is the HtmlParser's API interface.
+ * // You should not implement it, or speculate about its implementation
+ * class HtmlParser {
+ *   public:
+ *     vector<string> getUrls(string url);
+ * };
+ */
+class Solution {
+public:
+    vector<string> crawl(string startUrl, HtmlParser htmlParser) {
+        vector<string> result;
+        string hostName = GetHostName(startUrl);
+        result.push_back(startUrl);
+        FindUrl(hostName, startUrl, htmlParser, result);
+        return result;
+    }
+    
+private:
+    string GetHostName(string url)
+    {
+        int len = url.size();
+        int num = 0;
+        int i = 0;
+        for (; i < len; i++) {
+            if (url[i] == '/') {
+                num++;
+                if (num == 3) {
+                    break;
+                }
+            }
+        }
+        if (i < len) {
+            return url.substr(0, i);
+        } else {
+            // "http://news.yahoo.com"这种
+            return url;
+        }
+    }
+
+    void FindUrl(string &hostname, string &startUrl, HtmlParser htmlParser, vector<string> &result)
+    {
+        vector<string> newResult = htmlParser.getUrls(startUrl);
+        for (auto &n : newResult) {
+            string newHostName = GetHostName(n);
+            if (newHostName != hostname) {
+                continue;
+            }
+
+            bool visit = false;
+            for (auto &v : result) {
+                if (n == v) {
+                    visit = true;
+                    break;
+                }
+            }
+            if (visit == true) {
+                continue;
+            }
+
+            result.push_back(n);
+            FindUrl(hostname, n, htmlParser, result);
+        }
+    }
+};
+
 ------------------------------------------------------------------------------------
+
+1256. 加密数字
+给你一个非负整数 num ，返回它的「加密字符串」。
+
+加密的过程是把一个整数用某个未知函数进行转化，你需要从下表推测出该转化函数：
+
+
+示例 1：
+
+输入：num = 23
+输出："1000"
+示例 2：
+
+输入：num = 107
+输出："101100"
+ 
+
+提示：
+
+0 <= num <= 10^9
+
+class Solution {
+public:
+    string encode(int num) {
+        string s="";
+        int n = num + 1;
+        while(n) {
+            s += to_string(n & 1);
+            n >>= 1;
+        }
+        //此时s为正确结果的倒置
+        string ans = "";
+        for(int i = s.length() - 2; i >= 0; i--)
+            ans += s[i];
+        return ans;
+    }
+};
+
 ------------------------------------------------------------------------------------
+
+1258. 近义词句子
+给你一个近义词表 synonyms 和一个句子 text ， synonyms 表中是一些近义词对 ，你可以将句子 text 中每个单词用它的近义词来替换。
+
+请你找出所有用近义词替换后的句子，按 字典序排序 后返回。
+
+ 
+
+示例 1：
+
+输入：
+synonyms = [["happy","joy"],["sad","sorrow"],["joy","cheerful"]],
+text = "I am happy today but was sad yesterday"
+输出：
+["I am cheerful today but was sad yesterday",
+"I am cheerful today but was sorrow yesterday",
+"I am happy today but was sad yesterday",
+"I am happy today but was sorrow yesterday",
+"I am joy today but was sad yesterday",
+"I am joy today but was sorrow yesterday"]
+ 
+
+提示：
+
+0 <= synonyms.length <= 10
+synonyms[i].length == 2
+synonyms[0] != synonyms[1]
+所有单词仅包含英文字母，且长度最多为 10 。
+text 最多包含 10 个单词，且单词间用单个空格分隔开。
+
+class Solution {
+public:
+    vector<string> generateSentences(vector<vector<string>>& synonyms, string text) {
+        unordered_map<string,set<string>> m;
+        for (auto vec : synonyms) {
+            m[vec[0]].insert(vec[0]);
+            m[vec[0]].insert(vec[1]);
+            for (auto entry:m[vec[0]]) {
+                m[vec[1]].insert(entry);
+                m[entry].insert(vec[1]);
+            }
+        }
+        vector<string> str;
+        string cand = "";
+        for (int i=0; i<=text.size(); ++i) {
+            if (i<text.size() && text[i] !=' '){
+                cand += text[i];
+            } else {
+                str.push_back(cand);
+                cand.clear();
+            }
+        }
+        //dfs
+        vector<vector<string>> tmps;
+        help(str,0,tmps,m);
+        //generate results
+        vector<string> results;
+        for (auto vec:tmps) {
+            cand.clear();
+            for (auto s:vec) {
+                cand += cand.empty()? "" : " ";
+                cand += s;
+            }
+            results.push_back(cand);
+        }
+        return results;
+    }
+    void help (vector<string>& str,int start, vector<vector<string>>& tmps, unordered_map<string,set<string>>& m) {
+        if (start == str.size()) {
+            tmps.push_back(str);
+            return;
+        }
+        string backup = str[start];
+        if (m.count(str[start])!=0) {
+            for (auto cand : m[str[start]]) {
+                // cout << str[start] << "->" << cand << " | ";
+                str[start] = cand;
+                help(str,start+1,tmps,m);
+            }
+            str[start] = backup;
+        } else {
+            help(str,start+1,tmps,m);
+        }        
+    }
+};
+
 ------------------------------------------------------------------------------------
+
+1272. 删除区间
+
+给你一个 有序的 不相交区间列表 intervals 和一个要删除的区间 toBeRemoved， intervals 中的每一个区间 intervals[i] = [a, b] 都表示满足 a <= x < b 的所有实数  x 的集合。
+
+我们将 intervals 中任意区间与 toBeRemoved 有交集的部分都删除。
+
+返回删除所有交集区间后， intervals 剩余部分的 有序 列表。
+
+ 
+
+示例 1：
+
+输入：intervals = [[0,2],[3,4],[5,7]], toBeRemoved = [1,6]
+输出：[[0,1],[6,7]]
+示例 2：
+
+输入：intervals = [[0,5]], toBeRemoved = [2,3]
+输出：[[0,2],[3,5]]
+ 
+
+提示：
+
+1 <= intervals.length <= 10^4
+-10^9 <= intervals[i][0] < intervals[i][1] <= 10^9
+
+vector<vector<int>> removeInterval(vector<vector<int>>& intervals, vector<int>& toBeRemoved) {
+    int toL = toBeRemoved[0], toR = toBeRemoved[1];
+    vector<vector<int>> ans;
+    for (int i = 0; i < intervals.size(); ++i) {
+        int x = intervals[i][0], y = intervals[i][1];
+        if (toL >= y || toR <= x) {
+            ans.push_back({x, y});
+        }
+        else {
+            if (toL > x) {
+                ans.push_back({x, toL});
+            }
+            if (toR < y) {
+                ans.push_back({toR, y});
+            }
+        }
+    }
+    return ans;
+}
+
 ------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
-------------------------------------------------------------------------------------
+
+1273. 删除树节点
+
+给你一棵以节点 0 为根节点的树，定义如下：
+
+节点的总数为 nodes 个；
+第 i 个节点的值为 value[i] ；
+第 i 个节点的父节点是 parent[i] 。
+请你删除节点值之和为 0 的每一棵子树。
+
+在完成所有删除之后，返回树中剩余节点的数目。
+
+ 
+
+示例：
+
+
+
+输入：nodes = 7, parent = [-1,0,0,1,2,2,2], value = [1,-2,4,0,-2,-1,-1]
+输出：2
+ 
+
+提示：
+
+1 <= nodes <= 10^4
+-10^5 <= value[i] <= 10^5
+parent.length == nodes
+parent[0] == -1 表示节点 0 是树的根。
+
+void dfs(int u, const vector<vector<int>>& edges, vector<int>& value, vector<int>& node_cnt) {
+    for (int v: edges[u]) {
+        dfs(v, edges, value, node_cnt);
+        value[u] += value[v];
+        node_cnt[u] += node_cnt[v];
+    }
+    if (value[u] == 0) {
+        node_cnt[u] = 0;
+    }
+}
+
+int deleteTreeNodes(int nodes, vector<int>& parent, vector<int>& value) {
+    vector<vector<int>> edges(nodes);
+    for (int i = 0; i < nodes; ++i) {
+        if (parent[i] != -1) {
+            edges[parent[i]].push_back(i);
+        }
+    }
+    vector<int> node_cnt(nodes, 1);
+    dfs(0, edges, value, node_cnt);
+    return node_cnt[0];
+}
