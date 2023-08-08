@@ -1,0 +1,26 @@
+name: CPPLint Check
+
+on:
+  pull_request:
+    paths:
+      - '**/*.cpp' # Adjust the file extensions as needed
+
+jobs:
+  cpplint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install CPPLint
+        run: pip install cpplint
+
+      - name: Run CPPLint on modified files
+        run: |
+          cpplint --extensions=cpp $(git diff --name-only ${{ github.event.before }}..${{ github.sha }} | grep -E '\.cpp$')
