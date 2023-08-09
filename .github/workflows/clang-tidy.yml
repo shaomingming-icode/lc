@@ -33,5 +33,6 @@ jobs:
 
           result = subprocess.run(["clang-tidy", "--warnings-as-errors=*"] + cpp_files, capture_output=True, text=True)
           print("clang_tidy errors:")
+          print(result.stdout)
           print(result.stderr)
           sys.exit(result.returncode)
