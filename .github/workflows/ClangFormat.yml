@@ -1,8 +1,8 @@
-name: clang-format Check
+name: clang-format check
 on: [push, pull_request]
 jobs:
   formatting-check:
-    name: Formatting Check
+    name: ClangFormat Check
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -10,5 +10,4 @@ jobs:
       uses: jidicula/clang-format-action@v4.11.0
       with:
         clang-format-version: '13'
-        check-path: '*'
         fallback-style: 'Google'
