@@ -33,4 +33,3 @@ jobs:
 
           print("clang_format:")
           subprocess.run(["clang-format", " -n --style=Google --fallback-style=Google"] + cpp_files, text=True)
-          
