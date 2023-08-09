@@ -1,0 +1,37 @@
+name: clang_tidy_modified_files
+on: [push, pull_request]
+jobs:
+  clang_tidy_modified_files:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1  # v1, NOT v2 or v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - shell: python
+        run: import sys ; print("Python {}.{}.{}".format(*sys.version_info))
+      - run: python -m pip install clang-format
+      - run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+      - run: git diff origin/master --name-only > git_diff.txt
+      - name: clang_tidy_modified_files
+        shell: python
+        run: |
+          import os
+          import subprocess
+          import sys
+
+          print("Python {}.{}.{}".format(*sys.version_info))
+          with open("git_diff.txt") as in_file:
+            modified_files = sorted(in_file.read().splitlines())
+          print("{} files were modified.".format(len(modified_files)))
+
+          cpp_exts = tuple(".c .c++ .cc .cpp .cu .cuh .cxx .h .h++ .hh .hpp .hxx".split())
+          cpp_files = [file for file in modified_files if file.lower().endswith(cpp_exts)]
+          print(f"{len(cpp_files)} C++ files were modified.")
+          if not cpp_files:
+            sys.exit(0)
+
+          result = subprocess.run(["clang-tidy", "--warnings-as-errors=*"] + cpp_files, capture_output=True, text=True)
+          print("clang_tidy errors:")
+          print(result.stderr)
+          sys.exit(result.returncode)
