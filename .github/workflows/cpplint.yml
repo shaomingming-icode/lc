@@ -32,4 +32,7 @@ jobs:
             sys.exit(0)
 
           print("cpplint:")
-          subprocess.run(["cpplint", "--filter=-legal/copyright"] + cpp_files, check=True, text=True)
+          result = subprocess.run(["cpplint", "--filter=-legal/copyright"] + cpp_files, capture_output=True, text=True)
+          print("clang format errors:")
+          print(result.stderr)
+          sys.exit(result.returncode)
