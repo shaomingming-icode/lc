@@ -32,4 +32,4 @@ jobs:
             sys.exit(0)
 
           print("clang_format:")
-          subprocess.run(["clang_format", "-style=Google"] + cpp_files, check=True, text=True)
+          subprocess.run(["clang-format", "-style=Google"] + cpp_files, check=True, text=True)
