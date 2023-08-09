@@ -31,6 +31,7 @@ jobs:
           if not cpp_files:
             sys.exit(0)
 
-          print("clang_format:")
-          subprocess.run(["clang-format", " --version"], check=True, text=True)
-          subprocess.run(["clang-format", " --style=Google --fallback-style=Google "] + cpp_files, check=True, text=True)
+          result = subprocess.run(["clang-format", "-n", "--Werror"] + cpp_files, capture_output=True, text=True)
+          print("clang_format errors:")
+          print(result.stderr)
+          sys.exit(result.returncode)
