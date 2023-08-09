@@ -1,0 +1,16 @@
+/share/userfile/shaomingming/test/lc/c.cpp:5:3: error: Memory allocated by 'new[]' should be deallocated by 'delete[]', not 'delete' [clang-analyzer-unix.MismatchedDeallocator,-warnings-as-errors]
+  delete ptr;
+  ^      ~~~
+/share/userfile/shaomingming/test/lc/c.cpp:4:14: note: Memory is allocated
+  int* ptr = new int[10];
+             ^~~~~~~~~~~
+/share/userfile/shaomingming/test/lc/c.cpp:5:3: note: Memory allocated by 'new[]' should be deallocated by 'delete[]', not 'delete'
+  delete ptr;
+  ^      ~~~
+/share/userfile/shaomingming/test/lc/c.cpp:5:3: error: 'delete' applied to a pointer that was allocated with 'new[]'; did you mean 'delete[]'? [clang-diagnostic-mismatched-new-delete,-warnings-as-errors]
+  delete ptr;
+  ^
+        []
+/share/userfile/shaomingming/test/lc/c.cpp:4:14: note: allocated with 'new[]' here
+  int* ptr = new int[10];
+             ^
