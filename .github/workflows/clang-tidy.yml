@@ -1,7 +1,7 @@
-name: clang tidy
+name: clang tidy check
 on: [push, pull_request]
 jobs:
-  clang_tidy:
+  clang_tidy_check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1  # v1, NOT v2 or v3
@@ -13,7 +13,7 @@ jobs:
       - run: python -m pip install clang-tidy
       - run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
       - run: git diff origin/master --name-only > git_diff.txt
-      - name: clang tidy
+      - name: clang tidy check
         shell: python
         run: |
           import os
