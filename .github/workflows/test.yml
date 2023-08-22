@@ -20,11 +20,10 @@ jobs:
       #   python-version: 3.8
       run: |
         conda install python==3.8
-    - name: Set up PyTorch
+    - name: Set up PyTorch MM
       run: |
         dpkg -l | grep libffi
         echo "MM #########################"
-        conda install pytorch torchvision torchaudio cpuonly -c pytorch
     - name: Set up MPI and mpi4py
       run: |
         conda install openmpi mpi4py
