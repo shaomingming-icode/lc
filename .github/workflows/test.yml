@@ -22,13 +22,14 @@ jobs:
         conda install python==3.8
     - name: Set up PyTorch
       run: |
+        dpkg -l | grep libffi
+        echo "MM #########################"
         conda install pytorch torchvision torchaudio cpuonly -c pytorch
     - name: Set up MPI and mpi4py
       run: |
         conda install openmpi mpi4py
     - name: Install other dependencies and HiNPS
       run: |
-        dpkg -l | grep libffi
         pip install pytest pytest-cov pytest-xdist pytest-mpi
         # networkx required by trimesh.repair
         pip install networkx
