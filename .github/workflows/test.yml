@@ -28,6 +28,7 @@ jobs:
         conda install openmpi mpi4py
     - name: Install other dependencies and HiNPS
       run: |
+        dpkg -l | grep libffi
         pip install pytest pytest-cov pytest-xdist pytest-mpi
         # networkx required by trimesh.repair
         pip install networkx
