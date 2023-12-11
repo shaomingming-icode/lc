@@ -6,3 +6,6 @@
 # https://clang.llvm.org/docs/ClangFormat.html
 BasedOnStyle: Google 
 Language: Cpp
+IndentWidth: 4
+IncludeBlocks: Preserve
+
