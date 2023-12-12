@@ -1,5 +1,11 @@
 name: cpplint check
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
 jobs:
   cpplint_check:
     runs-on: ubuntu-latest
