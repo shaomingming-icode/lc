@@ -39,6 +39,6 @@ jobs:
 
           print("cpplint:")
           result = subprocess.run(["cpplint", "--filter=-legal/copyright"] + cpp_files, capture_output=True, text=True)
-          print("clang format errors:")
+          print("cpplint errors:")
           print(result.stderr)
           sys.exit(result.returncode)
