@@ -8,7 +8,7 @@ on:
 
 jobs:
   testcase_clangtidy_check:
-    runs-on: [self-hosted, GPU]
+    runs-on: ubuntu-latest
     steps:
       - run: echo "The job was triggered by a ${{ github.event_name }} event, branch is ${{ github.ref_name }}"
 
