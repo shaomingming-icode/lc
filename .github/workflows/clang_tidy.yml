@@ -1,5 +1,11 @@
 name: clang tidy check
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
 jobs:
   clang_tidy_check:
     runs-on: ubuntu-latest
@@ -31,8 +37,9 @@ jobs:
           if not cpp_files:
             sys.exit(0)
 
-          result = subprocess.run(["clang-tidy", "--warnings-as-errors=*"] + cpp_files, capture_output=True, text=True)
+          result = subprocess.run(["clang-tidy", "-p build --warnings-as-errors=*"] + cpp_files, capture_output=True, text=True)
           print("clang tidy errors:")
           print(result.stdout)
           print(result.stderr)
           sys.exit(result.returncode)
+
