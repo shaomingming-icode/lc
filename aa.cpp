@@ -4,7 +4,7 @@ int main(int argc, char* argv[]) {  // NOLINT
     const int count = 0;
     ptr[0] = 0;
     int SSDGF = 0;
-    SSDGF = 1;
+    SSDsdGF = 1;
     delete[] ptr;
     return 0;
 }

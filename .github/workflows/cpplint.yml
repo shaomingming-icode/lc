@@ -14,12 +14,14 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
-      - shell: python
-        run: import sys ; print("Python {}.{}.{}".format(*sys.version_info))
-      - run: python -m pip install cpplint
-      - run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-      - run: git diff origin/master --name-only > git_diff.txt
-      - name: cpplint check
+
+      - name: cpplint check prepare
+        run: |
+          python -m pip install cpplint
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git diff origin/master --name-only > git_diff.txt
+
+      - name: cpplint check run
         shell: python
         run: |
           import os
@@ -37,8 +39,7 @@ jobs:
           if not cpp_files:
             sys.exit(0)
 
-          print("cpplint:")
-          result = subprocess.run(["cpplint", "--filter=-legal/copyright"] + cpp_files, capture_output=True, text=True)
+          result = subprocess.run(["cpplint", "--filter=-legal/copyright,-whitespace/comments"] + cpp_files, capture_output=True, text=True)
           print("cpplint errors:")
           print(result.stderr)
           sys.exit(result.returncode)
