@@ -19,6 +19,9 @@ jobs:
     - name: Install Setuptools
       run: python -m pip install --upgrade setuptools; python -m pip install clang-tidy
 
+    - name: git diff
+      run: git diff origin/master --name-only > git_diff.txt
+
     - name: clang tidy check
       shell: python
       run: |
@@ -26,7 +29,6 @@ jobs:
         import subprocess
         import sys
 
-        git diff origin/master --name-only > git_diff.txt
         print("Python {}.{}.{}".format(*sys.version_info))
         with open("git_diff.txt") as in_file:
           modified_files = sorted(in_file.read().splitlines())
