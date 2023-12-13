@@ -20,7 +20,6 @@ jobs:
       - name: test case check prepare
         run: |
           echo "test case check prepare"
-          mkdir test
         shell: bash
 
       - name: test case check run
