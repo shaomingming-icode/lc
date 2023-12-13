@@ -17,4 +17,5 @@ jobs:
     uses: ./.github/workflows/cpplint_check.yml
 
   clang_tidy_check:
+    needs: HiNPS-CI
     uses: ./.github/workflows/clang_tidy_check.yml

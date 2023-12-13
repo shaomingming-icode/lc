@@ -9,7 +9,6 @@ on:
 jobs:
   clang_tidy_check:
     runs-on: ubuntu-latest
-    needs: HiNPS-CI
     steps:
       - uses: actions/checkout@v1  # v1, NOT v2 or v3
       - uses: actions/setup-python@v4
