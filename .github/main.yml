@@ -1,0 +1,20 @@
+name: main workflow
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  HiNPS-CI:
+    uses: ./.github/workflows/test.yml
+
+  clang_format_check:
+    uses: ./.github/workflows/clang_format_check.yml
+
+  cpplint_check:
+    uses: ./.github/workflows/cpplint_check.yml
+
+  clang_tidy_check:
+    uses: ./.github/workflows/clang_tidy_check.yml

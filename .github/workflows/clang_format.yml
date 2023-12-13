@@ -1,11 +1,11 @@
 name: clang format check
+
 on:
   push:
-    branches:
-    - master
+    branches: [master]
   pull_request:
-    branches:
-    - master
+    branches: [master]
+
 jobs:
   clang_format_check:
     runs-on: ubuntu-latest

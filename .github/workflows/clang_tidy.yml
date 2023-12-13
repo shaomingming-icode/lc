@@ -1,11 +1,11 @@
 name: clang tidy check
+
 on:
   push:
-    branches:
-    - master
+    branches: [master]
   pull_request:
-    branches:
-    - master
+    branches: [master]
+
 jobs:
   clang_tidy_check:
     runs-on: ubuntu-latest
@@ -39,6 +39,14 @@ jobs:
           print(f"{len(cpp_files)} C++ files were modified.")
           if not cpp_files:
             sys.exit(0)
+
+          build_dir = "build"  # 检查的目录名称
+
+          if os.path.exists(build_dir) and os.path.isdir(build_dir):
+              print(f"The '{build_dir}' directory exists.")
+          else:
+              print(f"The '{build_dir}' directory does not exist. Exiting with an error.")
+              sys.exit(1)
 
           result = subprocess.run(["clang-tidy", "-p", "build", "--warnings-as-errors=*"] + cpp_files, capture_output=True, text=True)
           print("clang tidy errors:")
