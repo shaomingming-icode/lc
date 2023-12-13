@@ -20,6 +20,7 @@ jobs:
       - name: test case check prepare
         run: |
           echo "test case check prepare"
+          mkdir test
         shell: bash
 
       - name: test case check run
@@ -39,6 +40,12 @@ jobs:
           import os
           import subprocess
           import sys
+
+          build_dir = "test"
+
+          if not os.path.exists(build_dir) or not os.path.isdir(build_dir):
+              print(f"The '{build_dir}' directory does not exist or is not a directory.")
+              sys.exit(1)  # 退出并返回非零退出状态码表示失败
 
           print("Python {}.{}.{}".format(*sys.version_info))
           with open("git_diff.txt") as in_file:
