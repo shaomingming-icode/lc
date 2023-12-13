@@ -14,11 +14,16 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: 3.x
+
+      - name: Install Setuptools
+        run: python -m pip install --upgrade setuptools
+
       - shell: python
         run: import sys ; print("Python {}.{}.{}".format(*sys.version_info))
-      - run: python -m pip install --upgrade pip ; python -m pip install clang-tidy
+      - run: python -m pip install clang-tidy
       - run: git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
       - run: git diff origin/master --name-only > git_diff.txt
+
       - name: clang tidy check
         shell: python
         run: |
