@@ -19,22 +19,34 @@ jobs:
 
       - name: test case check prepare
         run: |
-          echo "test case check prepare"
-          mkdir test
-          cd test
+          echo "1"
+          pwd
+          ls -al
+          echo "2"
+          pwd
+          ls -al
         shell: bash
-
-      - name: test case check run
-        run: |
-          echo "test case check run"
 
       - name: clang-tidy check prepare
         run: |
+          echo "3"
+          pwd
+          ls -al
           python -m pip install --upgrade setuptools
           python -m pip install clang-tidy
-          cd $GITHUB_WORKSPACE
+          echo "4"
+          pwd
+          ls -al
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          echo "5"
+          pwd
+          ls -al
           git diff origin/master --name-only > git_diff.txt
+
+      - name: test case check run
+        run: |
+          echo "6"
+          pwd
 
       - name: clang-tidy check run
         shell: python
@@ -43,18 +55,12 @@ jobs:
           import subprocess
           import sys
 
-          build_dir = "test"
-
-          if not os.path.exists(build_dir) or not os.path.isdir(build_dir):
-              print(f"The '{build_dir}' directory does not exist or is not a directory.")
-              sys.exit(1)  # 退出并返回非零退出状态码表示失败
-
           print("Python {}.{}.{}".format(*sys.version_info))
           with open("git_diff.txt") as in_file:
             modified_files = sorted(in_file.read().splitlines())
           print("{} files were modified.".format(len(modified_files)))
 
-          cpp_exts = tuple(".c .c++ .cc .cpp .cu .cuh .cxx .h .h++ .hh .hpp .hxx".split())
+          cpp_exts = tuple(".c .c++ .cc .cpp .cu .cuh .cxx .h .h++ .hh .hpp .hxx .tpp".split())
           cpp_files = [file for file in modified_files if file.lower().endswith(cpp_exts)]
           print(f"{len(cpp_files)} C++ files were modified.")
           if not cpp_files:
