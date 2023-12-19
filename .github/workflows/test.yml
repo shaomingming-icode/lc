@@ -24,30 +24,18 @@ jobs:
           echo "1"
           pwd
           ls -al
-          echo "2"
-          pwd
-          ls -al
         shell: bash
 
       - name: clang-tidy check prepare
         run: |
-          echo "3"
-          pwd
-          ls -al
           python -m pip install --upgrade setuptools
           python -m pip install clang-tidy
-          echo "4"
-          pwd
-          ls -al
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
-          echo "5"
-          pwd
-          ls -al
-          git diff origin/master --name-only > git_diff.txt
+          git diff origin/master --name-only --diff-filter=ACMR > git_diff.txt
+          cat git_diff.txt
 
       - name: test case check run
         run: |
-          echo "6"
           pwd
 
       - name: clang-tidy check run
