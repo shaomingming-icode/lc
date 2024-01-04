@@ -44,7 +44,8 @@ jobs:
               "-legal/copyright",
               "-whitespace/comments",
               "-whitespace/indent",
-              "-build/include_subdir"
+              "-build/include_subdir",
+              "-build/namespaces"
           ]
           result = subprocess.run(["cpplint"] + ["--filter=" + ",".join(filter_options)] + cpp_files,
                                   capture_output=True,
